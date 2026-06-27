@@ -877,9 +877,11 @@ body.lang-en .en-o { display:block; }
       <div class="card-lbl fr-o">En cas de vol</div>
       <div class="card-lbl en-o">In case of theft</div>
       <div class="row"><span class="ri">1️⃣</span><div><div class="rf">Rendez-vous au commissariat le plus proche</div><div class="re">Go to the nearest police station</div></div></div>
-      <div class="row"><span class="ri">2️⃣</span><div><div class="rf">Demandez un procès-verbal (PV) de plainte</div><div class="re">Request an official police report</div></div></div>
-      <div class="row"><span class="ri">3️⃣</span><div><div class="rf">Indispensable pour votre assurance</div><div class="re">Required for insurance claims</div></div></div>
-      <div class="row"><span class="ri">4️⃣</span><div><div class="rf">Contactez votre ambassade si papiers volés</div><div class="re">Contact embassy if documents stolen</div></div></div>
+      <div class="row"><span class="ri">2️⃣</span><div><div class="rf">Demandez un procès-verbal (PV) de plainte — conservez-en une copie</div><div class="re">Request an official police report — keep a copy</div></div></div>
+      <div class="row"><span class="ri">3️⃣</span><div><div class="rf">Bloquez immédiatement vos cartes bancaires (numéro au dos ou via votre appli)</div><div class="re">Block your bank cards immediately (number on the back or via your app)</div></div></div>
+      <div class="row"><span class="ri">4️⃣</span><div><div class="rf">Contactez votre ambassade si passeport ou titre de séjour volé</div><div class="re">Contact your embassy if passport or ID was stolen</div></div></div>
+      <div class="row"><span class="ri">5️⃣</span><div><div class="rf">Déclarez le vol à votre assurance avec le PV — délai souvent 48h</div><div class="re">File an insurance claim with the police report — usually within 48h</div></div></div>
+      <div class="row"><span class="ri">6️⃣</span><div><div class="rf">Signalez la perte de votre passeport à la compagnie aérienne si vous avez un vol</div><div class="re">Notify your airline of passport loss if you have an upcoming flight</div></div></div>
     </div>
     <div class="card">
       <div class="card-lbl fr-o">Conseils</div>
@@ -988,35 +990,62 @@ body.lang-en .en-o { display:block; }
     </div>
   </div>
   <div class="page-body">
-    <div class="tip" style="margin-bottom:16px">💡 <span class="fr-o">Décrivez ce que vous avez constaté. Une photo est utile mais non obligatoire.</span><span class="en-o">Describe what you noticed. A photo is helpful but not required.</span></div>
+    <div class="tip" style="margin-bottom:16px">💡 <span class="fr-o">Votre signalement crée un ticket numéroté que vous pouvez suivre à tout moment.</span><span class="en-o">Your report creates a numbered ticket you can track at any time.</span></div>
     <div class="field">
       <label class="fr-t">Votre nom</label>
       <label class="en-t">Your name</label>
       <input type="text" id="inc-nom" placeholder="ex : Jean Martin">
     </div>
     <div class="field">
-      <label class="fr-t">Téléphone / WhatsApp</label>
-      <label class="en-t">Phone / WhatsApp</label>
-      <input type="tel" id="inc-tel" placeholder="ex : +221 77 123 45 67">
+      <label class="fr-t">Votre téléphone</label>
+      <label class="en-t">Your phone number</label>
+      <div style="display:flex;gap:6px">
+        <select id="inc-dialcode" style="width:110px;padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;background:var(--card);color:var(--text);outline:none">
+          <option value="+221">🇸🇳 +221</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+32">🇧🇪 +32</option>
+          <option value="+41">🇨🇭 +41</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+34">🇪🇸 +34</option>
+          <option value="+39">🇮🇹 +39</option>
+          <option value="+31">🇳🇱 +31</option>
+          <option value="+225">🇨🇮 +225</option>
+          <option value="+212">🇲🇦 +212</option>
+          <option value="+223">🇲🇱 +223</option>
+          <option value="+224">🇬🇳 +224</option>
+          <option value="+237">🇨🇲 +237</option>
+        </select>
+        <input type="tel" id="inc-tel" placeholder="77 123 45 67" style="flex:1">
+      </div>
     </div>
     <div class="field">
-      <label class="fr-t">Description du problème</label>
-      <label class="en-t">Issue description</label>
-      <textarea id="inc-desc" placeholder="ex : La climatisation ne fonctionne pas…"></textarea>
+      <label class="fr-t">Objet du problème</label>
+      <label class="en-t">Issue subject</label>
+      <input type="text" id="inc-subject" placeholder="ex : Climatisation, Fuite d'eau, Serrure…">
     </div>
-    <div class="photo-zone" onclick="document.getElementById('inc-photo').click()">
-      <div class="pz-icon">📷</div>
-      <div class="pz-text fr-t">Ajouter une photo (optionnel)</div>
-      <div class="pz-text en-t">Add a photo (optional)</div>
-      <input type="file" id="inc-photo" accept="image/*" style="display:none" onchange="photoSelected(this)">
+    <div class="field">
+      <label class="fr-t">Description</label>
+      <label class="en-t">Description</label>
+      <textarea id="inc-desc" placeholder="Décrivez le problème en détail…&#10;Describe the issue in detail…"></textarea>
     </div>
-    <div id="inc-photo-name" style="font-size:12px;color:var(--text2);margin-bottom:12px;display:none"></div>
     <button class="btn-primary" id="inc-send-btn" onclick="sendIncident()">
       <span class="fr-o">📤 Envoyer le signalement</span>
       <span class="en-o">📤 Send report</span>
     </button>
-    <div class="btn-success" id="inc-success">
-      ✅ <span class="fr-o">Signalement envoyé ! L'hôte a été notifié.</span><span class="en-o">Report sent! Host has been notified.</span>
+    <div id="inc-success" style="display:none;margin-top:16px;background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:20px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">✅</div>
+      <div style="font-weight:700;font-size:16px;color:#15803d;margin-bottom:6px" class="fr-o">Ticket créé !</div>
+      <div style="font-weight:700;font-size:16px;color:#15803d;margin-bottom:6px" class="en-o">Ticket created!</div>
+      <div style="font-size:13px;color:#166534;margin-bottom:16px">
+        <span class="fr-o">Votre numéro de ticket : </span><span class="en-o">Your ticket number: </span>
+        <strong id="inc-ticket-id" style="font-family:monospace;font-size:16px;letter-spacing:1px">#------</strong>
+      </div>
+      <a id="inc-ticket-link" href="#" style="display:block;background:#15803d;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+        <span class="fr-o">Suivre mon ticket →</span>
+        <span class="en-o">Track my ticket →</span>
+      </a>
     </div>
   </div>
 </div>
@@ -1125,38 +1154,62 @@ function photoSelected(input) {
 function resetIncident() {
   var n = document.getElementById('inc-nom');
   var t = document.getElementById('inc-tel');
+  var s = document.getElementById('inc-subject');
   var d = document.getElementById('inc-desc');
   var btn = document.getElementById('inc-send-btn');
   var suc = document.getElementById('inc-success');
   var pn = document.getElementById('inc-photo-name');
   if (n) n.value = '';
   if (t) t.value = '';
+  if (s) s.value = '';
   if (d) d.value = '';
-  if (btn) btn.style.display = 'block';
+  if (btn) { btn.style.display = 'block'; btn.disabled = false; }
   if (suc) suc.style.display = 'none';
   if (pn) { pn.style.display = 'none'; pn.textContent = ''; }
 }
-function sendIncident() {
-  var nom  = document.getElementById('inc-nom').value.trim();
-  var tel  = document.getElementById('inc-tel').value.trim();
-  var desc = document.getElementById('inc-desc').value.trim();
-  if (!nom || !desc) {
-    alert('Veuillez remplir votre nom et la description.\nPlease fill in your name and description.');
+async function sendIncident() {
+  var nom     = (document.getElementById('inc-nom') || {}).value || '';
+  var dial    = (document.getElementById('inc-dialcode') || {}).value || '+221';
+  var num     = (document.getElementById('inc-tel') || {}).value || '';
+  var subject = (document.getElementById('inc-subject') || {}).value || '';
+  var desc    = (document.getElementById('inc-desc') || {}).value || '';
+  nom     = nom.trim();
+  num     = num.trim();
+  subject = subject.trim();
+  desc    = desc.trim();
+
+  if (!subject || !desc) {
+    alert('Veuillez remplir l\'objet et la description.\nPlease fill in the subject and description.');
     return;
   }
-  if (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.whatsapp) {
-    var msg = '🚨 SIGNALEMENT\n'
-            + 'Logement : ' + CONFIG.hotel.nom + '\n'
-            + 'Client : ' + nom + (tel ? ' · ' + tel : '') + '\n'
-            + 'Problème : ' + desc;
-    var phone = CONFIG.hotel.whatsapp.replace(/[\s\+\-]/g, '');
-    var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
-    window.open(url, '_blank', 'noopener');
-  } else {
-    alert('Signalement enregistré. Contactez l\'hôte directement.');
+
+  var tel = num ? dial + num : '';
+  var btn = document.getElementById('inc-send-btn');
+  btn.disabled = true;
+
+  // Récupérer le slug depuis l'URL (/{slug}/...)
+  var _slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+
+  try {
+    var resp = await fetch('/' + _slug + '/incident', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guestName: nom, guestPhone: tel, subject: subject, message: desc }),
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      document.getElementById('inc-ticket-id').textContent = '#' + data.id;
+      document.getElementById('inc-ticket-link').href = '/' + _slug + '/ticket/' + data.id;
+      btn.style.display = 'none';
+      document.getElementById('inc-success').style.display = 'block';
+    } else {
+      alert('Erreur : ' + (data.error || 'Impossible de créer le ticket.'));
+      btn.disabled = false;
+    }
+  } catch(e) {
+    alert('Erreur de connexion. Vérifiez votre connexion internet.');
+    btn.disabled = false;
   }
-  document.getElementById('inc-send-btn').style.display = 'none';
-  document.getElementById('inc-success').style.display = 'block';
 }
 
 // ── AUTHENTIFICATION ──

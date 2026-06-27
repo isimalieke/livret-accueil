@@ -279,9 +279,55 @@ body {
         <input type="text" id="f-responsable" placeholder="ex : Isima Lieke">
       </div>
       <div class="field">
-        <label>Téléphone / WhatsApp <span class="required-mark">*</span></label>
-        <input type="tel" id="f-tel" placeholder="ex : +221 77 123 45 67">
-        <div class="hint">Nous vous contacterons sur WhatsApp pour finaliser la configuration.</div>
+        <label>Téléphone <span class="required-mark">*</span></label>
+        <div style="display:flex;gap:6px">
+          <select id="f-tel-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer">
+            <option value="+221">🇸🇳 +221</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+32">🇧🇪 +32</option>
+            <option value="+41">🇨🇭 +41</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+31">🇳🇱 +31</option>
+            <option value="+225">🇨🇮 +225</option>
+            <option value="+212">🇲🇦 +212</option>
+            <option value="+223">🇲🇱 +223</option>
+            <option value="+224">🇬🇳 +224</option>
+            <option value="+237">🇨🇲 +237</option>
+          </select>
+          <input type="tel" id="f-tel" placeholder="77 123 45 67" style="flex:1">
+        </div>
+      </div>
+      <div class="field">
+        <label>WhatsApp</label>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+          <input type="checkbox" id="f-wa-same" checked onchange="toggleWaSame()" style="width:16px;height:16px;cursor:pointer">
+          <span style="font-size:13px;color:var(--text2)">Même numéro que le téléphone</span>
+        </div>
+        <div id="f-wa-different" style="display:none;gap:6px;flex-direction:row">
+          <select id="f-wa-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer">
+            <option value="+221">🇸🇳 +221</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+32">🇧🇪 +32</option>
+            <option value="+41">🇨🇭 +41</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+31">🇳🇱 +31</option>
+            <option value="+225">🇨🇮 +225</option>
+            <option value="+212">🇲🇦 +212</option>
+            <option value="+223">🇲🇱 +223</option>
+            <option value="+224">🇬🇳 +224</option>
+            <option value="+237">🇨🇲 +237</option>
+          </select>
+          <input type="tel" id="f-wa-num" placeholder="77 123 45 67" style="flex:1;padding:11px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);outline:none;font-family:inherit">
+        </div>
+        <div class="hint">Le numéro WhatsApp recevra les notifications de vos clients.</div>
       </div>
       <div class="field">
         <label>Email professionnel <span class="required-mark">*</span></label>
@@ -422,6 +468,12 @@ var currentStep = 1;
 var selectedType = 'Hôtel';
 var logoBase64 = '';
 
+function toggleWaSame() {
+  var same = document.getElementById('f-wa-same').checked;
+  var el   = document.getElementById('f-wa-different');
+  el.style.display = same ? 'none' : 'flex';
+}
+
 function selectType(card, val) {
   document.querySelectorAll('.type-card').forEach(function(c) { c.classList.remove('selected'); });
   card.classList.add('selected');
@@ -484,6 +536,10 @@ function validateStep(step) {
       document.getElementById('f-tel').focus();
       return false;
     }
+    if (!document.getElementById('f-tel-code').value) {
+      alert('Veuillez sélectionner un indicatif pays.');
+      return false;
+    }
     if (!document.getElementById('f-email').value.trim()) {
       alert('Veuillez saisir votre email.');
       document.getElementById('f-email').focus();
@@ -521,11 +577,22 @@ async function submitForm() {
   var ville       = document.getElementById('f-ville').value.trim();
   var pays        = document.getElementById('f-pays').value;
   var responsable = document.getElementById('f-responsable').value.trim();
-  var tel         = document.getElementById('f-tel').value.trim();
+  var telCode     = document.getElementById('f-tel-code').value;
+  var telNum      = document.getElementById('f-tel').value.trim();
+  var tel         = telNum ? telCode + telNum : '';
   var email       = document.getElementById('f-email').value.trim();
   var password    = document.getElementById('f-password').value;
   var wifi        = document.getElementById('f-wifi').value.trim();
   var wifimdp     = document.getElementById('f-wifimdp').value.trim();
+
+  // WhatsApp : même numéro ou différent
+  var waSame = document.getElementById('f-wa-same').checked;
+  var whatsapp = tel;
+  if (!waSame) {
+    var waCode = document.getElementById('f-wa-code').value;
+    var waNum  = document.getElementById('f-wa-num').value.trim();
+    whatsapp = waNum ? waCode + waNum : tel;
+  }
 
   try {
     var res = await fetch('/register', {
@@ -533,7 +600,7 @@ async function submitForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nom, adresse, ville, pays, email, password,
-        telephone: tel, whatsapp: tel,
+        telephone: tel, whatsapp: whatsapp,
         hote_nom: responsable,
         wifi_reseau: wifi, wifi_mdp: wifimdp,
       }),

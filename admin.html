@@ -66,6 +66,24 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .btn-add { background:none; border:1px dashed var(--gold); color:var(--gold); padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; margin-top:4px; }
 .btn-add:hover { background:rgba(201,168,76,.08); }
 
+/* TICKETS */
+.tkt-filter { background:transparent; border:1px solid var(--border); padding:5px 12px; border-radius:20px; font-size:12px; cursor:pointer; }
+.tkt-filter.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.tkt-row { padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:background .15s; }
+.tkt-row:hover { background:#f8fafc; }
+.tkt-row-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.tkt-id   { font-family:monospace; font-size:11px; color:#999; }
+.tkt-subj { font-weight:600; font-size:13px; }
+.tkt-meta { font-size:11px; color:#666; }
+.tkt-status { padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+.tkt-s-received    { background:#fef3c7; color:#92400e; }
+.tkt-s-in_progress { background:#dbeafe; color:#1e40af; }
+.tkt-s-resolved    { background:#dcfce7; color:#15803d; }
+.tl-bubble { padding:8px 12px; border-radius:10px; font-size:13px; max-width:80%; line-height:1.4; word-break:break-word; }
+.tl-guest { align-self:flex-start; background:#f3f4f6; color:#1d1d1f; }
+.tl-hotel { align-self:flex-end; background:var(--blue); color:#fff; }
+.tl-time  { font-size:10px; color:#999; margin-top:3px; }
+
 /* ACTIONS */
 .success-msg { display:none; background:#e8f5e9; color:#2e7d32; padding:10px 16px; border-radius:8px; font-size:13px; margin-top:12px; }
 .switch { position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; }
@@ -466,6 +484,57 @@ input:checked + .slider:before { transform:translateX(22px); }
       <div class="field"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" placeholder="Nouveau mot de passe"></div>
       <div class="field"><label>Confirmer</label><input type="password" id="confirm-pwd" placeholder="Confirmer le mot de passe"></div>
       <div class="hint" style="margin-top:4px">⚠️ Le nouveau mot de passe sera inclus dans config.js. Redéployez après téléchargement.</div>
+    </div>
+  </div>
+
+  <!-- TICKETS D'INCIDENT -->
+  <div class="section" id="tickets-section">
+    <div class="section-head" onclick="toggle(this); loadTicketsIfNeeded()">
+      <h2>🎫 Tickets d'incident <span id="tickets-badge" style="display:none;background:#dc2626;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:8px">0</span></h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body" id="tickets-body">
+
+      <!-- Filtres -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="tkt-filter active" data-f="all" onclick="filterTickets('all')">Tous</button>
+        <button class="tkt-filter" data-f="received" onclick="filterTickets('received')">🟡 Reçus</button>
+        <button class="tkt-filter" data-f="in_progress" onclick="filterTickets('in_progress')">🔵 En traitement</button>
+        <button class="tkt-filter" data-f="resolved" onclick="filterTickets('resolved')">✅ Résolus</button>
+        <button style="margin-left:auto;background:transparent;border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer" onclick="loadTickets()">↻ Actualiser</button>
+      </div>
+
+      <div id="tickets-list"><div style="color:#999;font-size:13px;padding:20px 0;text-align:center">Chargement…</div></div>
+
+      <!-- Détail ticket (panel latéral inline) -->
+      <div id="ticket-detail" style="display:none;border:1px solid var(--border);border-radius:10px;margin-top:16px;overflow:hidden">
+        <div style="background:#f8fafc;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+          <div>
+            <span id="td-id" style="font-family:monospace;font-weight:700;font-size:14px"></span>
+            <span id="td-status-badge" style="margin-left:8px;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600"></span>
+          </div>
+          <div style="display:flex;gap:6px">
+            <select id="td-status-sel" onchange="updateTicketStatus()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">
+              <option value="received">🟡 Reçu</option>
+              <option value="in_progress">🔵 En traitement</option>
+              <option value="resolved">✅ Résolu</option>
+            </select>
+            <button onclick="document.getElementById('ticket-detail').style.display='none'" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">✕</button>
+          </div>
+        </div>
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#999;margin-bottom:3px">Objet</div>
+          <div id="td-subject" style="font-weight:600;font-size:14px"></div>
+          <div id="td-meta" style="font-size:12px;color:#666;margin-top:4px"></div>
+        </div>
+        <!-- Timeline -->
+        <div id="td-timeline" style="padding:14px 16px;max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px"></div>
+        <!-- Reply -->
+        <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+          <input type="text" id="td-reply" placeholder="Répondre au client…" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit" onkeydown="if(event.key==='Enter') sendTicketReply()">
+          <button onclick="sendTicketReply()" style="background:var(--blue);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer">Envoyer</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -997,6 +1066,165 @@ function download(filename, content) {
   a.href = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(content);
   a.download = filename;
   a.click();
+}
+
+// ─────────────────────────────────────────────
+// TICKETS D'INCIDENT
+// ─────────────────────────────────────────────
+var _allTickets    = [];
+var _ticketsLoaded = false;
+var _currentFilter = 'all';
+var _currentTicket = null;
+
+function loadTicketsIfNeeded() {
+  if (!_ticketsLoaded && document.getElementById('tickets-body').classList.contains('open')) {
+    loadTickets();
+  }
+}
+
+async function loadTickets() {
+  if (!_slug) {
+    document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#999;padding:20px 0;text-align:center">Slug hôtel non détecté. Accédez à /{slug}/admin.</div>';
+    return;
+  }
+  document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#999;padding:20px 0;text-align:center">⏳ Chargement…</div>';
+  try {
+    var resp = await fetch('/' + _slug + '/tickets', {
+      headers: { 'X-Auth-Secret': SAVE_SECRET }
+    });
+    var data = await resp.json();
+    if (!data.ok) {
+      document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#dc2626;padding:20px 0;text-align:center">Erreur : ' + (data.error || 'Non autorisé') + '</div>';
+      return;
+    }
+    _allTickets    = data.tickets || [];
+    _ticketsLoaded = true;
+    // Badge non résolus
+    var open = _allTickets.filter(function(t) { return t.status !== 'resolved'; }).length;
+    var badge = document.getElementById('tickets-badge');
+    if (open > 0) { badge.textContent = open; badge.style.display = 'inline'; }
+    else           { badge.style.display = 'none'; }
+    renderTickets();
+  } catch(e) {
+    document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#dc2626;padding:20px 0;text-align:center">Erreur de connexion.</div>';
+  }
+}
+
+function filterTickets(f) {
+  _currentFilter = f;
+  document.querySelectorAll('.tkt-filter').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.f === f);
+  });
+  renderTickets();
+}
+
+var STATUS_LABEL = { received: '🟡 Reçu', in_progress: '🔵 En traitement', resolved: '✅ Résolu' };
+var STATUS_CSS   = { received: 'tkt-s-received', in_progress: 'tkt-s-in_progress', resolved: 'tkt-s-resolved' };
+
+function renderTickets() {
+  var list = _currentFilter === 'all' ? _allTickets
+    : _allTickets.filter(function(t) { return t.status === _currentFilter; });
+
+  if (!list.length) {
+    document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#999;padding:20px 0;text-align:center">Aucun ticket' + (_currentFilter !== 'all' ? ' dans cette catégorie' : '') + '.</div>';
+    return;
+  }
+
+  var html = list.map(function(t) {
+    var d = new Date(t.created).toLocaleDateString('fr-FR');
+    return '<div class="tkt-row" onclick="openTicket(\'' + t.id + '\')">'
+      + '<div class="tkt-row-head">'
+      + '<span class="tkt-subj">' + esc(t.subject) + '</span>'
+      + '<span class="tkt-status ' + STATUS_CSS[t.status] + '">' + STATUS_LABEL[t.status] + '</span>'
+      + '</div>'
+      + '<div class="tkt-meta">👤 ' + esc(t.guestName) + (t.guestPhone ? ' · ' + esc(t.guestPhone) : '') + ' · ' + d + ' · #' + t.id + '</div>'
+      + '</div>';
+  }).join('');
+  document.getElementById('tickets-list').innerHTML = html;
+}
+
+async function openTicket(id) {
+  _currentTicket = id;
+  var resp = await fetch('/' + _slug + '/ticket/' + id + '/data');
+  var data = await resp.json();
+  if (!data.ok) { alert('Ticket introuvable'); return; }
+  var t = data.ticket;
+
+  document.getElementById('td-id').textContent = '#' + t.id;
+  document.getElementById('td-subject').textContent = t.subject;
+  document.getElementById('td-meta').textContent = '👤 ' + t.guestName + (t.guestPhone ? ' · ' + t.guestPhone : '') + ' · ' + new Date(t.created).toLocaleDateString('fr-FR');
+  document.getElementById('td-status-sel').value = t.status;
+
+  var badge = document.getElementById('td-status-badge');
+  badge.textContent  = STATUS_LABEL[t.status];
+  badge.className    = 'tkt-status ' + STATUS_CSS[t.status];
+
+  var tl = document.getElementById('td-timeline');
+  tl.innerHTML = (t.messages || []).map(function(m) {
+    var isHotel = m.from === 'hotel';
+    var time = new Date(m.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) + ' ' + new Date(m.timestamp).toLocaleDateString('fr-FR');
+    return '<div style="display:flex;flex-direction:column;align-items:' + (isHotel ? 'flex-end' : 'flex-start') + '">'
+      + '<div class="tl-bubble ' + (isHotel ? 'tl-hotel' : 'tl-guest') + '">' + esc(m.text) + '</div>'
+      + '<div class="tl-time">' + (isHotel ? '🏨 ' : '👤 ') + time + '</div>'
+      + '</div>';
+  }).join('');
+  tl.scrollTop = tl.scrollHeight;
+
+  document.getElementById('ticket-detail').style.display = 'block';
+  document.getElementById('td-reply').value = '';
+  document.getElementById('td-reply').focus();
+}
+
+async function updateTicketStatus() {
+  if (!_currentTicket) return;
+  var status = document.getElementById('td-status-sel').value;
+  var resp = await fetch('/' + _slug + '/ticket/' + _currentTicket + '/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: status, auth: SAVE_SECRET }),
+  });
+  var data = await resp.json();
+  if (data.ok) {
+    // Mise à jour locale
+    var idx = _allTickets.findIndex(function(t) { return t.id === _currentTicket; });
+    if (idx >= 0) _allTickets[idx].status = status;
+    renderTickets();
+    var badge = document.getElementById('td-status-badge');
+    badge.textContent = STATUS_LABEL[status];
+    badge.className   = 'tkt-status ' + STATUS_CSS[status];
+  } else {
+    alert('Erreur : ' + (data.error || 'Impossible de mettre à jour le statut.'));
+  }
+}
+
+async function sendTicketReply() {
+  if (!_currentTicket) return;
+  var input = document.getElementById('td-reply');
+  var text  = input.value.trim();
+  if (!text) return;
+  input.disabled = true;
+
+  var resp = await fetch('/' + _slug + '/ticket/' + _currentTicket + '/message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: 'hotel', text: text, auth: SAVE_SECRET }),
+  });
+  var data = await resp.json();
+  if (data.ok) {
+    input.value = '';
+    // Raffraîchir le ticket ouvert
+    var idx = _allTickets.findIndex(function(t) { return t.id === _currentTicket; });
+    if (idx >= 0) _allTickets[idx].status = data.ticket.status;
+    renderTickets();
+    openTicket(_currentTicket);
+  } else {
+    alert('Erreur : ' + (data.error || 'Impossible d\'envoyer le message.'));
+  }
+  input.disabled = false;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 </script>
 <script src="config.js"></script>

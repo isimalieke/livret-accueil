@@ -33,6 +33,21 @@ export default {
       return fetchAsset(env, request.url);
     }
 
+    // ── /superadmin ──
+    if (path === '/superadmin' || path === '/superadmin/') {
+      return fetchAsset(env, url.origin + '/superadmin.html');
+    }
+    if (path === '/superadmin/hotels') {
+      // Liste tous les hôtels (protégée par AUTH_SECRET maître)
+      const secret = request.headers.get('X-Auth-Secret') || '';
+      if (!env.AUTH_SECRET || secret !== env.AUTH_SECRET) {
+        return json({ ok: false, error: 'Non autorisé' }, 401);
+      }
+      const indexRaw = await env.CONFIG_KV.get('hotels:index') || '[]';
+      const hotels = JSON.parse(indexRaw);
+      return json({ ok: true, hotels });
+    }
+
     // ── /register ──
     if (path === '/register' || path === '/register/') {
       if (request.method === 'POST') return handleRegister(request, env, url);

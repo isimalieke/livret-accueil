@@ -483,16 +483,40 @@ input:checked + .slider:before { transform:translateX(22px); }
 </div>
 
 <script>
-// ── MOT DE PASSE ──
-var ADMIN_PWD = 'Admin2024!';
+// ── SLUG HÔTEL (détecté depuis l'URL) ──
+// URL attendue : /{slug}/admin  →  slug = premier segment du chemin
+var _slug = (function() {
+  var parts = window.location.pathname.split('/').filter(Boolean);
+  // Si l'URL est /teranga/admin → parts = ['teranga', 'admin']
+  if (parts.length >= 2 && (parts[parts.length-1] === 'admin' || parts[parts.length-1] === 'admin.html')) {
+    return parts[parts.length - 2];
+  }
+  // Ancienne URL directe (/admin.html) → pas de slug
+  return null;
+})();
 
-// ── AUTO-SAVE CLOUDFLARE ──
-// Remplacez cette valeur par la même que AUTH_SECRET dans les paramètres Cloudflare Pages.
-var SAVE_SECRET = 'Livret2024!xK';
+// ── MOT DE PASSE ──
+// Multi-hôtel : mot de passe stocké dans localStorage par register.html
+// Fallback : mot de passe statique pour l'ancien hôtel unique
+var _hotelPwd = _slug ? (localStorage.getItem('livret_hotel_pwd_' + _slug) || '') : '';
+var ADMIN_PWD  = _hotelPwd || 'Admin2024!';
+var SAVE_SECRET = _hotelPwd || 'Livret2024!xK';  // mot de passe hôtel = secret de sauvegarde
+
+// ── ENDPOINT CONFIG ──
+var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
 
 function checkPwd() {
   var v = document.getElementById('pwd-input').value;
-  if (v === ADMIN_PWD) {
+  // Si mot de passe hôtel disponible en localStorage, on valide contre lui
+  // Sinon, fallback sur ADMIN_PWD statique
+  var expected = _hotelPwd || ADMIN_PWD;
+  if (v === expected) {
+    // Sauvegarder le mot de passe pour la session
+    if (_slug && !_hotelPwd) {
+      localStorage.setItem('livret_hotel_pwd_' + _slug, v);
+      SAVE_SECRET = v;
+      _hotelPwd   = v;
+    }
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     initForm();
@@ -939,7 +963,7 @@ async function saveOnline() {
   var js = buildConfigContent(adminPwd);
 
   try {
-    var resp = await fetch('/config.js', {
+    var resp = await fetch(_configEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'text/javascript', 'X-Auth-Secret': SAVE_SECRET },
       body: js

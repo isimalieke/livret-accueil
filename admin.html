@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Livret d'Accueil</title>
+<style>
+:root {
+  --blue: #053372;
+  --gold: #C9A84C;
+  --white: #fff;
+  --gray: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #222;
+  --muted: #666;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: system-ui, sans-serif; background: var(--gray); color: var(--text); font-size:14px; }
+
+/* LOGIN */
+#login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:16px; }
+.login-box { background:white; border-radius:12px; padding:40px; width:320px; text-align:center; box-shadow:0 2px 20px rgba(0,0,0,.08); }
+.login-logo { font-size:32px; margin-bottom:8px; }
+.login-title { font-size:18px; font-weight:600; color:var(--blue); margin-bottom:4px; }
+.login-sub { font-size:12px; color:var(--muted); margin-bottom:24px; }
+.login-box input { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; margin-bottom:12px; }
+.login-box button { width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer; font-weight:500; }
+.login-box button:hover { background:#0A4090; }
+.login-error { color:#c0392b; font-size:12px; display:none; }
+
+/* ADMIN LAYOUT */
+#admin-panel { display:none; max-width:820px; margin:0 auto; padding:20px 16px 60px; }
+.admin-header { background:var(--blue); color:white; padding:16px 20px; border-radius:10px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+.admin-header h1 { font-size:16px; font-weight:600; }
+.admin-header span { font-size:12px; opacity:.7; }
+.btn-logout { background:transparent; border:1px solid rgba(255,255,255,.4); color:white; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+
+/* SECTIONS */
+.section { background:white; border-radius:10px; margin-bottom:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.section-head { padding:14px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; border-bottom:1px solid transparent; }
+.section-head:hover { background:#fafafa; }
+.section-head.open { border-bottom-color:var(--border); }
+.section-head h2 { font-size:14px; font-weight:600; color:var(--blue); }
+.section-head .chevron { transition:transform .2s; font-size:12px; color:var(--muted); }
+.section-head.open .chevron { transform:rotate(180deg); }
+.section-body { display:none; padding:18px; }
+.section-body.open { display:block; }
+
+/* FORM FIELDS */
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; font-weight:500; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.3px; }
+.field input, .field textarea, .field select { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:6px; font-size:14px; font-family:inherit; background:white; }
+.field textarea { resize:vertical; min-height:80px; }
+.field input:focus, .field textarea:focus { outline:none; border-color:var(--blue); }
+.field .hint { font-size:11px; color:var(--muted); margin-top:3px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.row3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+.sub-label { font-size:12px; font-weight:600; color:var(--blue); margin:14px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--border); }
+
+/* DYNAMIC ROWS */
+.dyn-table { width:100%; border-collapse:collapse; margin-bottom:8px; }
+.dyn-table th { font-size:11px; font-weight:500; color:var(--muted); text-align:left; padding:4px 6px; border-bottom:1px solid var(--border); }
+.dyn-table td { padding:4px 4px; vertical-align:top; }
+.dyn-table input { padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:13px; width:100%; }
+.dyn-table .btn-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:16px; padding:4px; }
+.btn-add { background:none; border:1px dashed var(--gold); color:var(--gold); padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; margin-top:4px; }
+.btn-add:hover { background:rgba(201,168,76,.08); }
+
+/* ACTIONS */
+.success-msg { display:none; background:#e8f5e9; color:#2e7d32; padding:10px 16px; border-radius:8px; font-size:13px; margin-top:12px; }
+.switch { position:relative; display:inline-block; width:48px; height:26px; flex-shrink:0; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:26px; transition:.3s; }
+.slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+input:checked + .slider { background:#053372; }
+input:checked + .slider:before { transform:translateX(22px); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🏨</div>
+    <div class="login-title">Administration</div>
+    <div class="login-sub">Livret d'Accueil Digital</div>
+    <input type="password" id="pwd-input" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkPwd()">
+    <button onclick="checkPwd()">Connexion</button>
+    <div class="login-error" id="login-error">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div>
+      <h1>🏨 Panneau Administration</h1>
+      <span>Modifiez votre livret d'accueil</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+
+  <!-- 1. ÉTABLISSEMENT -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🏨 Établissement</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="row2">
+        <div class="field"><label>Nom complet</label><input id="h-nom" value="Hôtel Teranga"></div>
+        <div class="field"><label>Nom court</label><input id="h-nom-court" value="Teranga"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Ville</label><input id="h-ville" value="Almadies · Dakar"></div>
+        <div class="field"><label>Pays</label><input id="h-pays" value="Sénégal"></div>
+      </div>
+      <div class="field"><label>Adresse complète</label><input id="h-adresse" value="Rue des Almadies, Résidence Teranga, face à la pharmacie"></div>
+      <div class="row3">
+        <div class="field"><label>Téléphone</label><input id="h-tel" value="+221 77 123 45 67"></div>
+        <div class="field"><label>WhatsApp</label><input id="h-wa" value="+221 77 123 45 67"></div>
+        <div class="field"><label>Email</label><input id="h-email" value="contact@hotelteranga.sn"></div>
+      </div>
+      <div class="field"><label>Nom de l'hôte / propriétaire</label><input id="h-hote" value="Fatou &amp; Mamadou Diallo"></div>
+      <div class="field"><label>Photo de couverture (URL ou nom de fichier)</label><input id="h-photo" value="cover.jpg"><div class="hint">Laisser vide pour fond bleu. Ex : cover.jpg ou https://...</div></div>
+    </div>
+  </div>
+
+  <!-- 2. BIENVENUE -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>👋 Message de bienvenue</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field"><label>Texte français (HTML accepté : &lt;strong&gt;, &lt;em&gt;)</label><textarea id="bvn-fr">C'est avec une immense joie que nous vous accueillons à l'&lt;strong&gt;Hôtel Teranga&lt;/strong&gt;.</textarea></div>
+      <div class="field"><label>Texte anglais</label><textarea id="bvn-en">It is with great joy that we welcome you to &lt;strong&gt;Hôtel Teranga&lt;/strong&gt;.</textarea></div>
+      <div class="field"><label>Formule de signature</label><input id="bvn-sig" value="Avec toute notre cordialité"></div>
+    </div>
+  </div>
+
+  <!-- 3. INFOS PRATIQUES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>ℹ️ Infos pratiques</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="row2">
+        <div class="field"><label>Réseau WiFi</label><input id="wifi-reseau" value="Teranga_Guest"></div>
+        <div class="field"><label>Mot de passe WiFi</label><input id="wifi-mdp" value="Teranga2024!"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Check-in (heure)</label><input id="ci-heure" value="14h00"></div>
+        <div class="field"><label>Check-out (heure)</label><input id="co-heure" value="11h00"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Instructions clés (FR)</label><input id="cles-fr" value="Déposez les clés à la réception"></div>
+        <div class="field"><label>Instructions clés (EN)</label><input id="cles-en" value="Leave keys at reception"></div>
+      </div>
+      <div class="field">
+        <label>Règles de la maison</label>
+        <table class="dyn-table" id="regles-table">
+          <thead><tr><th style="width:42px">Icône</th><th>Règle FR</th><th>Rule EN</th><th style="width:30px"></th></tr></thead>
+          <tbody id="regles-rows"></tbody>
+        </table>
+        <button class="btn-add" onclick="addRow('regles-rows', reglesTpl)">+ Ajouter une règle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ACCÈS VOYAGEUR -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔐 Accès voyageur</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div style="display:flex; align-items:center; gap:14px; background:#f0f4ff; border:1px solid #ccd6f6; border-radius:8px; padding:14px 16px; margin-bottom:18px;">
+        <label class="switch">
+          <input type="checkbox" id="acc-actif">
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div style="font-weight:600; font-size:14px; color:#053372">Protection par mot de passe</div>
+          <div style="font-size:12px; color:#666; margin-top:2px">Activez pour un séjour en cours. Désactivez pour laisser le livret libre d'accès.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Mot de passe voyageur</label>
+        <input id="acc-pwd" value="Teranga2024">
+        <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. PAIEMENT -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>💳 Options de paiement</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="row2">
+        <div class="field"><label>Numéro Wave</label><input id="pay-wave-num" value="+221 77 123 45 67"><div class="hint">Laisser vide pour masquer</div></div>
+        <div class="field"><label>Nom compte Wave</label><input id="pay-wave-nom" value="Fatou Diallo"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Numéro Orange Money</label><input id="pay-om-num" value="+221 76 123 45 67"></div>
+        <div class="field"><label>Nom compte Orange Money</label><input id="pay-om-nom" value="Fatou Diallo"></div>
+      </div>
+      <div class="field"><label>Lien PayPal.me</label><input id="pay-paypal" value="https://paypal.me/hotelteranga"><div class="hint">Ex : https://paypal.me/votrenom</div></div>
+      <div class="row2">
+        <div class="field"><label>IBAN</label><input id="pay-iban" value="SN28 A002 0030 8230 0300 0705"></div>
+        <div class="field"><label>Code SWIFT / BIC</label><input id="pay-swift" value="ATTISNDAXXX"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Banque</label><input id="pay-banque" value="CBAO Groupe Attijariwafa Bank"></div>
+        <div class="field"><label>Titulaire du compte</label><input id="pay-titulaire" value="Fatou Diallo"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. SERVICES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🛎️ Services</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Services inclus dans le séjour</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Service FR</th><th>Service EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="inclus-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('inclus-rows', servicesTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Services sur demande</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Service FR</th><th>Service EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
+        <tbody id="demande-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('demande-rows', serviceDemandeTpl)">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. APPAREILS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔌 Appareils & Mode d'emploi</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">❄️ Climatisation</div>
+      <div class="row2">
+        <div class="field"><label>Instructions FR</label><textarea id="appl-clim-fr" style="min-height:60px">Télécommande sur la table de nuit. Temp. recommandée 22-24°C. Éteignez en quittant.</textarea></div>
+        <div class="field"><label>Instructions EN</label><textarea id="appl-clim-en" style="min-height:60px">Remote on bedside table. Recommended temp: 22-24°C. Switch off when leaving.</textarea></div>
+      </div>
+      <div class="sub-label">📺 Télévision</div>
+      <div class="row2">
+        <div class="field"><label>Instructions FR</label><textarea id="appl-tv-fr" style="min-height:60px">Télécommande sur le meuble TV. Netflix disponible — code à la réception.</textarea></div>
+        <div class="field"><label>Instructions EN</label><textarea id="appl-tv-en" style="min-height:60px">Remote on TV stand. Netflix available — code at reception.</textarea></div>
+      </div>
+      <div class="sub-label">🚿 Chauffe-eau</div>
+      <div class="row2">
+        <div class="field"><label>Instructions FR</label><textarea id="appl-chauffe-fr" style="min-height:60px">Allumez l'interrupteur 15 min avant utilisation. Eau chaude garantie.</textarea></div>
+        <div class="field"><label>Instructions EN</label><textarea id="appl-chauffe-en" style="min-height:60px">Switch on 15 min before. Hot water guaranteed.</textarea></div>
+      </div>
+      <div class="sub-label">⚡ Électricité / Groupe électrogène</div>
+      <div class="row2">
+        <div class="field"><label>Instructions FR</label><textarea id="appl-groupe-fr" style="min-height:60px">En cas de coupure, démarrage automatique en 1-2 min. Aucune action requise.</textarea></div>
+        <div class="field"><label>Instructions EN</label><textarea id="appl-groupe-en" style="min-height:60px">Power cut: auto-start in 1-2 min. No action required.</textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. RESTAURANTS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🍽️ Restaurants</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Cuisine sénégalaise</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
+        <tbody id="resto-sn-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('resto-sn-rows', restoTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Internationale</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
+        <tbody id="resto-intl-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('resto-intl-rows', restoTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Plats à goûter absolument</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Plat FR</th><th>Dish EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="gouter-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('gouter-rows', gouterTpl)">+ Ajouter un plat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. QUARTIER -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>📍 Quartier & Points d'intérêt</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Points d'intérêt</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Lieu FR</th><th>Lieu EN</th><th>Distance</th><th style="width:30px"></th></tr></thead>
+        <tbody id="quartier-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('quartier-rows', quartierTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Commerces à proximité</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Commerce FR</th><th>Commerce EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="commerces-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('commerces-rows', commerceTpl)">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. TRANSPORTS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🚗 Transports</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">VTC & Taxis</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-vtc-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-vtc-rows', transportTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Transport commun</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-commun-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-commun-rows', transportTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Location (voiture, scooter…)</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-location-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-location-rows', transportTpl)">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. PLAGES & ACTIVITÉS -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🏖️ Plages & Activités</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Plages</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom FR</th><th>Name EN</th><th>Distance</th><th style="width:30px"></th></tr></thead>
+        <tbody id="plages-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('plages-rows', plageTpl)">+ Ajouter une plage</button>
+      </div>
+      <div class="sub-label">Activités</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Activité FR</th><th>Activity EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
+        <tbody id="activites-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('activites-rows', activiteTpl)">+ Ajouter une activité</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. SHOPPING -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🛍️ Marchés & Shopping</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Horaires</th><th style="width:30px"></th></tr></thead>
+        <tbody id="marches-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('marches-rows', marcheTpl)">+ Ajouter un marché</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. URGENCES MÉDICALES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🏥 Urgences médicales</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="sub-label">Numéros d'urgence médicale</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th>Numéro</th><th>Libellé FR</th><th>Label EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="urgences-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('urgences-rows', urgenceTpl)">+ Ajouter</button>
+      </div>
+      <div class="sub-label">Cliniques</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Téléphone</th><th>Info FR</th><th>Info EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="cliniques-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('cliniques-rows', cliniqueTpl)">+ Ajouter une clinique</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. SÉCURITÉ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🚔 Sécurité & Police</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <label>Numéros d'urgence sécurité</label>
+        <table class="dyn-table"><thead><tr><th>Numéro</th><th>Libellé FR</th><th>Label EN</th><th style="width:30px"></th></tr></thead>
+        <tbody id="securite-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('securite-rows', urgenceTpl)">+ Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. AMBASSADES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🏛️ Ambassades</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <div class="hint" style="margin-bottom:8px">Ex : 🇫🇷 France — utilisez le drapeau emoji comme nom de pays</div>
+        <table class="dyn-table"><thead><tr><th>Pays (+ emoji)</th><th>Adresse</th><th>Téléphone</th><th>Numéro urgence</th><th style="width:30px"></th></tr></thead>
+        <tbody id="ambassades-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('ambassades-rows', ambassadeTpl)">+ Ajouter une ambassade</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16. CHECK-OUT -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔑 Check-out</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="row2">
+        <div class="field"><label>Heure limite (FR)</label><input id="co-heure2" value="11h00"></div>
+        <div class="field"><label>Heure limite (EN)</label><input id="co-heure2-en" value="11:00 AM"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Instructions clés départ (FR)</label><input id="co-cles-fr" value="Déposez les clés à la réception"></div>
+        <div class="field"><label>Instructions clés départ (EN)</label><input id="co-cles-en" value="Leave keys at reception"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 17. AVIS (liens optionnels) -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>⭐ Liens avis voyageurs</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="hint" style="margin-bottom:12px">Optionnel. Si remplis, les boutons de la section "Laisser un avis" pointent directement vers votre fiche.</div>
+      <div class="field"><label>Lien Google (page d'avis)</label><input id="avis-google" placeholder="https://g.page/votre-etablissement/review"></div>
+      <div class="field"><label>Lien TripAdvisor</label><input id="avis-tripadvisor" placeholder="https://www.tripadvisor.fr/Hotel_Review-..."></div>
+      <div class="field"><label>Lien Booking.com</label><input id="avis-booking" placeholder="https://www.booking.com/hotel/..."></div>
+    </div>
+  </div>
+
+  <!-- MOT DE PASSE ADMIN -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔒 Mot de passe admin</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="field"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" placeholder="Nouveau mot de passe"></div>
+      <div class="field"><label>Confirmer</label><input type="password" id="confirm-pwd" placeholder="Confirmer le mot de passe"></div>
+      <div class="hint" style="margin-top:4px">⚠️ Le nouveau mot de passe sera inclus dans config.js. Redéployez après téléchargement.</div>
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div style="background:white; border-radius:10px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+      <button style="background:transparent; border:1px solid var(--blue); color:var(--blue); padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer;" onclick="window.open('index.html','_blank')">👁 Prévisualiser</button>
+      <button style="background:transparent; border:1px solid var(--gold); color:#7a5e1a; padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer;" onclick="generateConfig()">⬇️ Télécharger config.js</button>
+      <button id="save-online-btn" style="background:var(--blue); color:white; border:none; padding:10px 24px; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer;" onclick="saveOnline()">☁️ Enregistrer en ligne</button>
+    </div>
+    <div class="success-msg" id="dl-msg" style="display:none"></div>
+    <div class="success-msg" id="online-msg" style="display:none"></div>
+  </div>
+
+</div>
+
+<script>
+// ── MOT DE PASSE ──
+var ADMIN_PWD = 'Admin2024!';
+
+// ── AUTO-SAVE CLOUDFLARE ──
+// Remplacez cette valeur par la même que AUTH_SECRET dans les paramètres Cloudflare Pages.
+var SAVE_SECRET = 'Livret2024!xK';
+
+function checkPwd() {
+  var v = document.getElementById('pwd-input').value;
+  if (v === ADMIN_PWD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    initForm();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+function logout() {
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pwd-input').value = '';
+}
+
+// ── ACCORDION ──
+function toggle(head) {
+  head.classList.toggle('open');
+  head.nextElementSibling.classList.toggle('open');
+}
+
+// ── DYNAMIC ROWS ──
+function addRow(tbodyId, tplFn, data) {
+  var tbody = document.getElementById(tbodyId);
+  var tr = document.createElement('tr');
+  tr.innerHTML = tplFn(data || {});
+  tbody.appendChild(tr);
+}
+function delRow(btn) { btn.closest('tr').remove(); }
+function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── TEMPLATES ──
+function reglesTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🔇') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function servicesTpl(d) {
+  return '<td><input value="' + esc(d.icon||'✅') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function serviceDemandeTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🛎️') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function restoTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🍽️') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.nom||'') + '"></td>'
+       + '<td><input value="' + esc(d.desc_fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.desc_en||'') + '"></td>'
+       + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function gouterTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🥘') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function quartierTpl(d) {
+  return '<td><input value="' + esc(d.icon||'📍') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><input value="' + esc(d.distance||'') + '" style="width:80px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function commerceTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🏪') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function transportTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🚗') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function plageTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🏖️') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><input value="' + esc(d.distance||'') + '" style="width:80px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function activiteTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🤿') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function marcheTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🏺') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.nom||'') + '"></td>'
+       + '<td><input value="' + esc(d.desc_fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.desc_en||'') + '"></td>'
+       + '<td><input value="' + esc(d.horaires||'') + '" style="width:70px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function urgenceTpl(d) {
+  return '<td><input value="' + esc(d.numero||'') + '" style="width:90px"></td>'
+       + '<td><input value="' + esc(d.label_fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.label_en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function cliniqueTpl(d) {
+  return '<td><input value="' + esc(d.icon||'🏥') + '" style="width:50px;text-align:center"></td>'
+       + '<td><input value="' + esc(d.nom||'') + '"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" style="width:110px"></td>'
+       + '<td><input value="' + esc(d.info_fr||'') + '"></td>'
+       + '<td><input value="' + esc(d.info_en||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function ambassadeTpl(d) {
+  return '<td><input value="' + esc(d.pays||'') + '"></td>'
+       + '<td><input value="' + esc(d.adresse||'') + '"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" style="width:110px"></td>'
+       + '<td><input value="' + esc(d.urgence||'') + '" style="width:110px"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+
+// ── INIT DEPUIS CONFIG EXISTANT ──
+function sv(id, val) { var el = document.getElementById(id); if(el && val !== undefined) el.value = val; }
+
+function initForm() {
+  if (typeof CONFIG === 'undefined') return;
+  var C = CONFIG; var h = C.hotel;
+
+  // Établissement
+  sv('h-nom', h.nom); sv('h-nom-court', h.nom_court);
+  sv('h-ville', h.ville); sv('h-pays', h.pays);
+  sv('h-adresse', h.adresse); sv('h-tel', h.telephone);
+  sv('h-wa', h.whatsapp); sv('h-email', h.email);
+  sv('h-hote', h.hote_nom); sv('h-photo', h.cover_photo);
+
+  // Bienvenue
+  sv('bvn-fr', C.bienvenue.texte_fr); sv('bvn-en', C.bienvenue.texte_en);
+  sv('bvn-sig', C.bienvenue.signature);
+
+  // Pratique
+  sv('wifi-reseau', C.pratique.wifi_reseau); sv('wifi-mdp', C.pratique.wifi_mdp);
+  sv('ci-heure', C.pratique.checkin); sv('co-heure', C.pratique.checkout);
+  sv('cles-fr', C.pratique.cles); sv('cles-en', C.pratique.cles_en);
+  C.pratique.regles.forEach(function(r){ addRow('regles-rows', reglesTpl, r); });
+
+  // Accès
+  if (C.acces) {
+    document.getElementById('acc-actif').checked = !!C.acces.actif;
+    sv('acc-pwd', C.acces.mot_de_passe);
+  }
+
+  // Paiement
+  if (C.paiement) {
+    var P = C.paiement;
+    sv('pay-wave-num', P.wave_numero); sv('pay-wave-nom', P.wave_nom);
+    sv('pay-om-num', P.orange_numero); sv('pay-om-nom', P.orange_nom);
+    sv('pay-paypal', P.paypal_lien);
+    sv('pay-iban', P.iban); sv('pay-swift', P.swift);
+    sv('pay-banque', P.banque); sv('pay-titulaire', P.titulaire);
+  }
+
+  // Services
+  C.services.inclus.forEach(function(s){ addRow('inclus-rows', servicesTpl, s); });
+  C.services.sur_demande.forEach(function(s){ addRow('demande-rows', serviceDemandeTpl, s); });
+
+  // Appareils
+  if (C.appareils) {
+    sv('appl-clim-fr',    C.appareils.clim_fr);
+    sv('appl-clim-en',    C.appareils.clim_en);
+    sv('appl-tv-fr',      C.appareils.tv_fr);
+    sv('appl-tv-en',      C.appareils.tv_en);
+    sv('appl-chauffe-fr', C.appareils.chauffe_fr);
+    sv('appl-chauffe-en', C.appareils.chauffe_en);
+    sv('appl-groupe-fr',  C.appareils.groupe_fr);
+    sv('appl-groupe-en',  C.appareils.groupe_en);
+  }
+
+  // Restaurants
+  C.restaurants.senegalais.forEach(function(r){ addRow('resto-sn-rows', restoTpl, r); });
+  C.restaurants.international.forEach(function(r){ addRow('resto-intl-rows', restoTpl, r); });
+  if (C.restaurants.a_gouter) {
+    C.restaurants.a_gouter.forEach(function(g){ addRow('gouter-rows', gouterTpl, g); });
+  }
+
+  // Quartier
+  C.quartier.points.forEach(function(p){ addRow('quartier-rows', quartierTpl, p); });
+  C.quartier.commerces.forEach(function(p){ addRow('commerces-rows', commerceTpl, p); });
+
+  // Transport
+  if (C.transport) {
+    C.transport.vtc.forEach(function(t){ addRow('transport-vtc-rows', transportTpl, t); });
+    C.transport.commun.forEach(function(t){ addRow('transport-commun-rows', transportTpl, t); });
+    C.transport.location.forEach(function(t){ addRow('transport-location-rows', transportTpl, t); });
+  }
+
+  // Plages
+  if (C.plages) {
+    C.plages.plages.forEach(function(p){ addRow('plages-rows', plageTpl, p); });
+    C.plages.activites.forEach(function(a){ addRow('activites-rows', activiteTpl, a); });
+  }
+
+  // Shopping
+  if (C.shopping) {
+    C.shopping.marches.forEach(function(m){ addRow('marches-rows', marcheTpl, m); });
+  }
+
+  // Médical
+  C.medical.urgences.forEach(function(u){ addRow('urgences-rows', urgenceTpl, u); });
+  C.medical.cliniques.forEach(function(c){ addRow('cliniques-rows', cliniqueTpl, c); });
+
+  // Sécurité
+  if (C.securite && C.securite.urgences) {
+    C.securite.urgences.forEach(function(u){ addRow('securite-rows', urgenceTpl, u); });
+  }
+
+  // Ambassades
+  if (C.ambassades) {
+    C.ambassades.forEach(function(a){ addRow('ambassades-rows', ambassadeTpl, a); });
+  }
+
+  // Check-out
+  sv('co-heure2', C.checkout.heure); sv('co-heure2-en', C.checkout.heure_en);
+  sv('co-cles-fr', C.checkout.cles_fr); sv('co-cles-en', C.checkout.cles_en);
+
+  // Avis
+  if (C.avis) {
+    sv('avis-google',      C.avis.google      || '');
+    sv('avis-tripadvisor', C.avis.tripadvisor || '');
+    sv('avis-booking',     C.avis.booking     || '');
+  }
+}
+
+// ── LECTURE LIGNES DYNAMIQUES ──
+function readRows(tbodyId, fields) {
+  var rows = document.getElementById(tbodyId).querySelectorAll('tr');
+  return Array.from(rows).map(function(tr) {
+    var inputs = tr.querySelectorAll('input');
+    var obj = {};
+    fields.forEach(function(f, i){ if(inputs[i]) obj[f] = inputs[i].value; });
+    return obj;
+  }).filter(function(o){ return Object.values(o).some(function(v){ return String(v).trim(); }); });
+}
+
+// ── GÉNÉRATION CONFIG.JS ──
+function buildConfigContent(adminPwd) {
+  var regles        = readRows('regles-rows',          ['icon','fr','en']);
+  var inclus        = readRows('inclus-rows',          ['icon','fr','en']);
+  var demande       = readRows('demande-rows',         ['icon','fr','en','prix']);
+  var restoSn       = readRows('resto-sn-rows',        ['icon','nom','desc_fr','desc_en','prix']);
+  var restoIntl     = readRows('resto-intl-rows',      ['icon','nom','desc_fr','desc_en','prix']);
+  var gouter        = readRows('gouter-rows',          ['icon','fr','en']);
+  var quartierPts   = readRows('quartier-rows',        ['icon','fr','en','distance']);
+  var commerces     = readRows('commerces-rows',       ['icon','fr','en']);
+  var vtc           = readRows('transport-vtc-rows',   ['icon','fr','en']);
+  var commun        = readRows('transport-commun-rows',['icon','fr','en']);
+  var location      = readRows('transport-location-rows',['icon','fr','en']);
+  var plages        = readRows('plages-rows',          ['icon','fr','en','distance']);
+  var activites     = readRows('activites-rows',       ['icon','fr','en','prix']);
+  var marches       = readRows('marches-rows',         ['icon','nom','desc_fr','desc_en','horaires']);
+  var urgences      = readRows('urgences-rows',        ['numero','label_fr','label_en']);
+  var cliniques     = readRows('cliniques-rows',       ['icon','nom','tel','info_fr','info_en']);
+  var securite      = readRows('securite-rows',        ['numero','label_fr','label_en']);
+  var ambassades    = readRows('ambassades-rows',      ['pays','adresse','tel','urgence']);
+
+  function j(o) { return JSON.stringify(o, null, 4); }
+  function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+
+  var js = '/**\n * CONFIGURATION DU LIVRET D\'ACCUEIL\n * Généré par le panneau admin\n */\n\n';
+  js += '// Mot de passe admin (ne pas partager ce fichier)\n';
+  js += 'var ADMIN_PASSWORD = ' + JSON.stringify(adminPwd) + ';\n\n';
+  js += 'const CONFIG = {\n\n';
+
+  // Hôtel
+  js += '  hotel: {\n';
+  js += '    nom:         ' + JSON.stringify(gv('h-nom')) + ',\n';
+  js += '    nom_court:   ' + JSON.stringify(gv('h-nom-court')) + ',\n';
+  js += '    ville:       ' + JSON.stringify(gv('h-ville')) + ',\n';
+  js += '    pays:        ' + JSON.stringify(gv('h-pays')) + ',\n';
+  js += '    adresse:     ' + JSON.stringify(gv('h-adresse')) + ',\n';
+  js += '    telephone:   ' + JSON.stringify(gv('h-tel')) + ',\n';
+  js += '    whatsapp:    ' + JSON.stringify(gv('h-wa')) + ',\n';
+  js += '    email:       ' + JSON.stringify(gv('h-email')) + ',\n';
+  js += '    hote_nom:    ' + JSON.stringify(gv('h-hote')) + ',\n';
+  js += '    cover_photo: ' + JSON.stringify(gv('h-photo')) + ',\n';
+  js += '  },\n\n';
+
+  // Bienvenue
+  js += '  bienvenue: {\n';
+  js += '    texte_fr:  ' + JSON.stringify(gv('bvn-fr')) + ',\n';
+  js += '    texte_en:  ' + JSON.stringify(gv('bvn-en')) + ',\n';
+  js += '    signature: ' + JSON.stringify(gv('bvn-sig')) + ',\n';
+  js += '  },\n\n';
+
+  // Pratique
+  js += '  pratique: {\n';
+  js += '    wifi_reseau: ' + JSON.stringify(gv('wifi-reseau')) + ',\n';
+  js += '    wifi_mdp:    ' + JSON.stringify(gv('wifi-mdp')) + ',\n';
+  js += '    checkin:     ' + JSON.stringify(gv('ci-heure')) + ',\n';
+  js += '    checkout:    ' + JSON.stringify(gv('co-heure')) + ',\n';
+  js += '    cles:        ' + JSON.stringify(gv('cles-fr')) + ',\n';
+  js += '    cles_en:     ' + JSON.stringify(gv('cles-en')) + ',\n';
+  js += '    regles: ' + j(regles) + ',\n';
+  js += '  },\n\n';
+
+  // Accès
+  js += '  acces: {\n';
+  js += '    actif:        ' + document.getElementById('acc-actif').checked + ',\n';
+  js += '    mot_de_passe: ' + JSON.stringify(gv('acc-pwd')) + ',\n';
+  js += '  },\n\n';
+
+  // Paiement
+  js += '  paiement: {\n';
+  js += '    wave_numero:   ' + JSON.stringify(gv('pay-wave-num')) + ',\n';
+  js += '    wave_nom:      ' + JSON.stringify(gv('pay-wave-nom')) + ',\n';
+  js += '    orange_numero: ' + JSON.stringify(gv('pay-om-num')) + ',\n';
+  js += '    orange_nom:    ' + JSON.stringify(gv('pay-om-nom')) + ',\n';
+  js += '    paypal_lien:   ' + JSON.stringify(gv('pay-paypal')) + ',\n';
+  js += '    iban:          ' + JSON.stringify(gv('pay-iban')) + ',\n';
+  js += '    swift:         ' + JSON.stringify(gv('pay-swift')) + ',\n';
+  js += '    banque:        ' + JSON.stringify(gv('pay-banque')) + ',\n';
+  js += '    titulaire:     ' + JSON.stringify(gv('pay-titulaire')) + ',\n';
+  js += '  },\n\n';
+
+  // Services
+  js += '  services: {\n';
+  js += '    inclus:      ' + j(inclus) + ',\n';
+  js += '    sur_demande: ' + j(demande) + ',\n';
+  js += '  },\n\n';
+
+  // Appareils
+  js += '  appareils: {\n';
+  js += '    clim_fr:    ' + JSON.stringify(gv('appl-clim-fr')) + ',\n';
+  js += '    clim_en:    ' + JSON.stringify(gv('appl-clim-en')) + ',\n';
+  js += '    tv_fr:      ' + JSON.stringify(gv('appl-tv-fr')) + ',\n';
+  js += '    tv_en:      ' + JSON.stringify(gv('appl-tv-en')) + ',\n';
+  js += '    chauffe_fr: ' + JSON.stringify(gv('appl-chauffe-fr')) + ',\n';
+  js += '    chauffe_en: ' + JSON.stringify(gv('appl-chauffe-en')) + ',\n';
+  js += '    groupe_fr:  ' + JSON.stringify(gv('appl-groupe-fr')) + ',\n';
+  js += '    groupe_en:  ' + JSON.stringify(gv('appl-groupe-en')) + ',\n';
+  js += '  },\n\n';
+
+  // Restaurants
+  js += '  restaurants: {\n';
+  js += '    senegalais:    ' + j(restoSn) + ',\n';
+  js += '    international: ' + j(restoIntl) + ',\n';
+  js += '    a_gouter:      ' + j(gouter) + ',\n';
+  js += '  },\n\n';
+
+  // Quartier
+  js += '  quartier: {\n';
+  js += '    points:    ' + j(quartierPts) + ',\n';
+  js += '    commerces: ' + j(commerces) + ',\n';
+  js += '  },\n\n';
+
+  // Transport
+  js += '  transport: {\n';
+  js += '    vtc:      ' + j(vtc) + ',\n';
+  js += '    commun:   ' + j(commun) + ',\n';
+  js += '    location: ' + j(location) + ',\n';
+  js += '  },\n\n';
+
+  // Plages
+  js += '  plages: {\n';
+  js += '    plages:    ' + j(plages) + ',\n';
+  js += '    activites: ' + j(activites) + ',\n';
+  js += '  },\n\n';
+
+  // Shopping
+  js += '  shopping: {\n';
+  js += '    marches: ' + j(marches) + ',\n';
+  js += '  },\n\n';
+
+  // Médical
+  js += '  medical: {\n';
+  js += '    urgences:  ' + j(urgences) + ',\n';
+  js += '    cliniques: ' + j(cliniques) + ',\n';
+  js += '  },\n\n';
+
+  // Sécurité
+  js += '  securite: {\n';
+  js += '    urgences: ' + j(securite) + ',\n';
+  js += '  },\n\n';
+
+  // Ambassades
+  js += '  ambassades: ' + j(ambassades) + ',\n\n';
+
+  // Checkout
+  js += '  checkout: {\n';
+  js += '    heure:    ' + JSON.stringify(gv('co-heure2')) + ',\n';
+  js += '    heure_en: ' + JSON.stringify(gv('co-heure2-en')) + ',\n';
+  js += '    cles_fr:  ' + JSON.stringify(gv('co-cles-fr')) + ',\n';
+  js += '    cles_en:  ' + JSON.stringify(gv('co-cles-en')) + ',\n';
+  js += '  },\n\n';
+
+  // Avis
+  js += '  avis: {\n';
+  js += '    google:      ' + JSON.stringify(gv('avis-google')) + ',\n';
+  js += '    tripadvisor: ' + JSON.stringify(gv('avis-tripadvisor')) + ',\n';
+  js += '    booking:     ' + JSON.stringify(gv('avis-booking')) + ',\n';
+  js += '  },\n\n';
+
+  js += '};\n\n';
+  js += '// Appel direct\nif (typeof applyConfig === \'function\') applyConfig();\n';
+  return js;
+}
+
+function resolveAdminPwd() {
+  var newPwd   = document.getElementById('new-pwd').value;
+  var confirmP = document.getElementById('confirm-pwd').value;
+  if (newPwd) {
+    if (newPwd !== confirmP) { alert('Les mots de passe ne correspondent pas.'); return null; }
+    return newPwd;
+  }
+  return ADMIN_PWD;
+}
+
+function generateConfig() {
+  var adminPwd = resolveAdminPwd();
+  if (adminPwd === null) return;
+  var js = buildConfigContent(adminPwd);
+  if (adminPwd !== ADMIN_PWD) ADMIN_PWD = adminPwd;
+  download('config.js', js);
+  showMsg('dl-msg', '✅ config.js téléchargé.');
+}
+
+async function saveOnline() {
+  var adminPwd = resolveAdminPwd();
+  if (adminPwd === null) return;
+
+  if (SAVE_SECRET === 'CHANGER_CETTE_VALEUR') {
+    alert('⚠️ SAVE_SECRET n\'est pas configuré.\nOuvrez admin.html et remplacez CHANGER_CETTE_VALEUR par votre AUTH_SECRET Cloudflare.');
+    return;
+  }
+
+  var btn = document.getElementById('save-online-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enregistrement…';
+
+  var js = buildConfigContent(adminPwd);
+
+  try {
+    var resp = await fetch('/config.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/javascript', 'X-Auth-Secret': SAVE_SECRET },
+      body: js
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      if (adminPwd !== ADMIN_PWD) ADMIN_PWD = adminPwd;
+      showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
+    } else {
+      showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);
+    }
+  } catch(e) {
+    showMsg('online-msg', '❌ Impossible de contacter le serveur. Vérifiez votre connexion.', true);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '☁️ Enregistrer en ligne';
+}
+
+function showMsg(id, text, isError) {
+  var el = document.getElementById(id);
+  el.textContent = text;
+  el.style.display = 'block';
+  el.style.background = isError ? '#fdecea' : '#e8f5e9';
+  el.style.color      = isError ? '#b71c1c' : '#2e7d32';
+  setTimeout(function(){ el.style.display = 'none'; }, 7000);
+}
+
+function download(filename, content) {
+  var a = document.createElement('a');
+  a.href = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(content);
+  a.download = filename;
+  a.click();
+}
+</script>
+<script src="config.js"></script>
+</body>
+</html>

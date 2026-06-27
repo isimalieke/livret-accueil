@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a1f38">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Livret">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<title id="page-title">Livret d'Accueil</title>
+<style>
+:root {
+  --bg:      #0a1f38;
+  --bg2:     #071628;
+  --card:    #0f2d52;
+  --gold:    #C9A84C;
+  --gold-bg: rgba(201,168,76,0.10);
+  --blue:    #4a9eff;
+  --white:   #FFFFFF;
+  --gray:    rgba(255,255,255,0.55);
+  --border:  rgba(255,255,255,0.08);
+  --hh:      54px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { font-size:16px; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--white); overflow-x:hidden; }
+
+/* ── AUTH ── */
+#auth-screen {
+  position:fixed; inset:0; z-index:1000;
+  background:#053372;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:24px;
+}
+.auth-box { width:100%; max-width:340px; text-align:center; }
+.auth-logo { font-size:42px; margin-bottom:12px; }
+.auth-hotel { font-size:20px; letter-spacing:3px; text-transform:uppercase; color:var(--white); margin-bottom:4px; font-family:'Playfair Display',Georgia,serif; }
+.auth-sub { font-size:12px; color:var(--gold); font-style:italic; letter-spacing:1px; margin-bottom:32px; }
+.auth-input { width:100%; padding:12px 16px; background:rgba(255,255,255,0.08); border:1px solid rgba(201,168,76,0.4); border-radius:24px; color:var(--white); font-size:15px; text-align:center; letter-spacing:2px; font-family:'Playfair Display',Georgia,serif; outline:none; margin-bottom:12px; }
+.auth-input::placeholder { color:rgba(255,255,255,0.35); }
+.auth-input:focus { border-color:var(--gold); }
+.auth-btn { width:100%; padding:12px; background:transparent; border:1px solid var(--gold); color:var(--gold); border-radius:24px; font-size:14px; font-family:'Playfair Display',Georgia,serif; cursor:pointer; letter-spacing:1px; }
+.auth-btn:hover { background:var(--gold-bg); }
+.auth-error { color:#ff8a80; font-size:13px; margin-top:10px; display:none; }
+.auth-contact { font-size:12px; color:rgba(255,255,255,0.45); margin-top:24px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  position:fixed; top:0; left:0; right:0; height:var(--hh);
+  background:var(--bg2); z-index:200;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; border-bottom:1px solid rgba(201,168,76,0.25);
+}
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.back-btn { background:rgba(255,255,255,0.07); border:none; color:rgba(255,255,255,0.7); width:34px; height:34px; border-radius:10px; font-size:18px; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
+.back-btn.vis { display:flex; }
+.hotel-title {}
+.hotel-name { color:var(--white); font-size:14px; letter-spacing:1.5px; font-family:'Playfair Display',Georgia,serif; }
+.hotel-sub { color:var(--gold); font-size:10px; font-style:italic; margin-top:1px; letter-spacing:0.5px; }
+.lang-toggle { display:flex; gap:5px; }
+.lang-btn { background:transparent; border:1px solid rgba(201,168,76,0.4); color:var(--gold); padding:3px 9px; border-radius:20px; font-size:11px; cursor:pointer; }
+.lang-btn.active { background:var(--gold); color:#053372; }
+
+/* ── MAIN ── */
+.main { padding-top:var(--hh); min-height:100vh; }
+
+/* ── SCREENS ── */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* ── HOME ── */
+.home-cover {
+  background:linear-gradient(180deg,#071628 0%,var(--bg) 100%);
+  padding:22px 20px 18px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+}
+.home-orn { color:var(--gold); font-size:10px; letter-spacing:8px; opacity:0.4; margin-bottom:8px; }
+.home-hotel { font-family:'Playfair Display',Georgia,serif; font-size:21px; color:var(--white); letter-spacing:3px; text-transform:uppercase; }
+.home-loc { font-size:10px; color:var(--gold); letter-spacing:2px; margin-top:4px; opacity:0.8; }
+.home-actions { display:flex; gap:10px; justify-content:center; margin-top:14px; }
+.btn-wa { display:none; align-items:center; gap:6px; background:rgba(37,211,102,0.10); border:1px solid rgba(37,211,102,0.25); color:#25d366; padding:7px 14px; border-radius:20px; font-size:12px; cursor:pointer; text-decoration:none; }
+
+.grid-wrap { padding:14px 14px 20px; }
+.grid-lbl { font-size:10px; color:rgba(255,255,255,0.28); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:9px; padding-left:2px; }
+.tile-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:16px; }
+
+.tile {
+  background:var(--card); border-radius:13px; border:1px solid var(--border);
+  padding:13px 7px; display:flex; flex-direction:column; align-items:center; gap:7px;
+  cursor:pointer; text-align:center; -webkit-user-select:none; user-select:none;
+  transition:transform .1s;
+}
+.tile:active { transform:scale(0.95); opacity:0.8; }
+.t-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.t-lbl { font-size:10.5px; color:rgba(255,255,255,0.65); line-height:1.3; }
+
+.ti-b { background:rgba(74,158,255,0.15); }
+.ti-g { background:rgba(29,158,117,0.15); }
+.ti-a { background:rgba(239,178,74,0.15); }
+.ti-c { background:rgba(216,90,48,0.15); }
+.ti-p { background:rgba(127,119,221,0.15); }
+.ti-t { background:rgba(29,158,117,0.10); }
+.ti-r { background:rgba(226,75,74,0.15); }
+.ti-gr { background:rgba(136,135,128,0.15); }
+
+.tile-wide {
+  grid-column:span 3; border-radius:13px; padding:13px 15px;
+  display:flex; align-items:center; gap:13px; cursor:pointer;
+  -webkit-user-select:none; user-select:none; transition:transform .1s;
+}
+.tile-wide:active { transform:scale(0.98); opacity:0.8; }
+.tw-info .tw-title { font-size:13.5px; font-weight:500; color:var(--white); margin-bottom:2px; }
+.tw-info .tw-sub { font-size:11px; color:rgba(255,255,255,0.38); }
+.tile-avis     { background:rgba(239,178,74,0.07); border:1px solid rgba(239,178,74,0.18); }
+.tile-incident { background:rgba(226,75,74,0.08); border:1px solid rgba(226,75,74,0.2); }
+
+/* ── PAGE HEADER ── */
+.page-hdr {
+  padding:13px 16px; background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:11px;
+}
+.page-hdr-icon { font-size:22px; }
+.page-hdr-title { font-size:16px; font-family:'Playfair Display',Georgia,serif; color:var(--white); }
+.page-hdr-sub { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }
+.page-body { padding:16px; padding-bottom:40px; }
+
+/* ── CARDS ── */
+.card { background:rgba(255,255,255,0.07); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:12px; }
+.card-lbl { font-size:9px; color:var(--gold); text-transform:uppercase; letter-spacing:3px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(201,168,76,0.22); }
+.card-hl { background:rgba(201,168,76,0.10); border:1px solid rgba(201,168,76,0.25); border-radius:12px; padding:14px 16px; margin-bottom:12px; }
+
+/* ── ROWS ── */
+.row { display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.07); }
+.row:last-child { border-bottom:none; padding-bottom:0; }
+.ri { font-size:17px; flex-shrink:0; margin-top:2px; }
+.rf { font-size:14px; color:rgba(255,255,255,0.90); flex:1; line-height:1.5; font-family:'Playfair Display',Georgia,serif; }
+.re { font-size:13px; color:rgba(255,255,255,0.50); font-style:italic; margin-top:2px; line-height:1.4; display:none; }
+body.lang-en .rf { display:none; }
+body.lang-en .re { display:block; }
+
+/* ── WIFI ── */
+.wifi-box { background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); border-radius:12px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.wifi-info .wi-lbl { font-size:10px; color:rgba(255,255,255,0.35); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.wifi-info .wi-name { font-size:16px; color:var(--white); font-weight:500; }
+.wifi-pwd { font-size:13px; color:var(--blue); display:flex; align-items:center; gap:5px; cursor:pointer; padding:6px 10px; background:rgba(74,158,255,0.1); border-radius:20px; }
+
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.info-card { background:rgba(255,255,255,0.06); border-radius:10px; padding:12px; border:1px solid var(--border); }
+.info-card .ic-lbl { font-size:10px; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.info-card .ic-val { font-size:16px; color:var(--white); font-weight:500; font-family:'Playfair Display',Georgia,serif; }
+
+/* ── APPAREILS GRID ── */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+@media(max-width:380px) { .grid2 { grid-template-columns:1fr; } }
+.gc { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:12px; padding:14px; }
+.gc-title { font-size:12px; color:var(--gold); margin-bottom:6px; letter-spacing:0.5px; }
+.gc-text { font-size:12px; color:rgba(255,255,255,0.68); line-height:1.55; }
+.gc-text.fr-t { display:block; }
+.gc-text.en-t { display:none; }
+body.lang-en .gc-text.fr-t { display:none; }
+body.lang-en .gc-text.en-t { display:block; }
+
+/* ── BIENVENUE ── */
+.welcome-body { background:rgba(255,255,255,0.07); border:1px solid var(--border); border-radius:14px; padding:20px; }
+.wt-fr { font-size:15px; line-height:1.85; color:rgba(255,255,255,0.92); font-family:'Playfair Display',Georgia,serif; }
+.wt-en { font-size:14px; line-height:1.8; color:rgba(255,255,255,0.52); font-style:italic; padding-top:16px; border-top:1px solid var(--border); margin-top:16px; display:none; }
+body.lang-en .wt-fr { display:none; }
+body.lang-en .wt-en { display:block; }
+.signature { font-size:13px; color:var(--gold); font-style:italic; margin-top:14px; opacity:.85; }
+
+/* ── TIP ── */
+.tip { background:rgba(201,168,76,0.10); border:1px solid rgba(201,168,76,0.20); border-radius:10px; padding:12px 14px; margin-top:8px; font-size:13px; color:rgba(201,168,76,0.9); display:flex; gap:8px; align-items:flex-start; line-height:1.55; }
+
+/* ── URGENCES ── */
+.emergency { background:rgba(180,40,40,0.20); border:1px solid rgba(255,120,120,0.3); border-radius:12px; padding:14px 16px; margin-bottom:10px; }
+.emer-num { font-size:28px; color:#FF9090; font-family:'Playfair Display',Georgia,serif; }
+.emer-lbl { font-size:12px; color:rgba(255,255,255,0.65); margin-top:3px; }
+
+/* ── EMBASSY ── */
+.embassy { background:rgba(255,255,255,0.06); border-radius:12px; padding:14px 16px; margin-bottom:10px; border:1px solid var(--border); }
+.emb-name { font-size:15px; color:var(--white); margin-bottom:8px; font-family:'Playfair Display',Georgia,serif; }
+.emb-row { font-size:13px; color:rgba(255,255,255,0.60); display:flex; align-items:center; gap:8px; margin-top:4px; }
+
+/* ── PAIEMENT ── */
+.pay-block { border-top:1px solid var(--border); padding:14px 0 6px; }
+.pay-logo { font-size:14px; font-weight:500; color:var(--white); margin-bottom:6px; }
+.pay-info { font-size:13px; color:var(--gray); margin-bottom:10px; line-height:1.6; }
+.pay-btn { display:inline-block; background:transparent; border:1px solid var(--gold); color:var(--gold); padding:8px 16px; border-radius:20px; font-size:13px; font-family:'Playfair Display',Georgia,serif; text-decoration:none; cursor:pointer; }
+.pay-btn:hover { background:var(--gold-bg); }
+
+/* ── MAPS ── */
+.maps-btn { display:inline-flex; align-items:center; gap:3px; color:var(--gold); font-size:10px; text-decoration:none; margin-left:6px; opacity:0.75; vertical-align:middle; border:1px solid rgba(201,168,76,0.35); border-radius:10px; padding:1px 6px; white-space:nowrap; font-family:sans-serif; }
+.maps-btn:hover, .maps-btn:active { opacity:1; background:var(--gold-bg); }
+
+/* ── CHECKOUT STEPS ── */
+.co-step { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.06); border-radius:12px; padding:11px 14px; margin-bottom:8px; border:1px solid var(--border); }
+.co-num { width:26px; height:26px; border-radius:50%; background:rgba(74,158,255,0.15); color:var(--blue); font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.co-txt { font-size:13px; color:rgba(255,255,255,0.70); }
+
+/* ── AVIS ── */
+.avis-card { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:opacity .1s; }
+.avis-card:active { opacity:0.75; }
+.avis-logo { font-size:26px; }
+.avis-info { flex:1; }
+.avis-name { font-size:14px; font-weight:500; color:var(--white); margin-bottom:3px; }
+.avis-desc { font-size:12px; color:rgba(255,255,255,0.38); }
+.avis-arr { font-size:16px; color:rgba(255,255,255,0.22); }
+
+/* ── CONSEILS ── */
+.conseil-card { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; }
+.cc-title { font-size:13px; font-weight:500; color:var(--gold); margin-bottom:6px; display:flex; align-items:center; gap:7px; }
+.cc-text { font-size:13px; color:rgba(255,255,255,0.65); line-height:1.6; }
+.cc-text.fr-t { display:block; }
+.cc-text.en-t { display:none; }
+body.lang-en .cc-text.fr-t { display:none; }
+body.lang-en .cc-text.en-t { display:block; }
+
+/* ── INCIDENT FORM ── */
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; color:rgba(255,255,255,0.42); margin-bottom:5px; }
+.field label.fr-t { display:block; }
+.field label.en-t { display:none; }
+body.lang-en .field label.fr-t { display:none; }
+body.lang-en .field label.en-t { display:block; }
+.field input, .field textarea { width:100%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.11); border-radius:10px; padding:10px 13px; font-size:14px; color:var(--white); outline:none; font-family:inherit; }
+.field textarea { height:80px; resize:none; }
+.field input::placeholder, .field textarea::placeholder { color:rgba(255,255,255,0.2); }
+.field input:focus, .field textarea:focus { border-color:rgba(74,158,255,0.5); }
+.photo-zone { border:1px dashed rgba(255,255,255,0.14); border-radius:12px; padding:20px; text-align:center; cursor:pointer; margin-bottom:14px; }
+.pz-icon { font-size:26px; margin-bottom:6px; opacity:0.3; }
+.pz-text { font-size:12px; color:rgba(255,255,255,0.3); }
+.pz-text.fr-t { display:block; }
+.pz-text.en-t { display:none; }
+body.lang-en .pz-text.fr-t { display:none; }
+body.lang-en .pz-text.en-t { display:block; }
+.btn-primary { width:100%; background:var(--blue); border:none; color:var(--white); padding:13px; border-radius:24px; font-size:14px; font-weight:500; cursor:pointer; font-family:inherit; }
+.btn-primary:active { opacity:0.82; }
+.btn-success { display:none; background:rgba(29,158,117,0.15); border:1px solid rgba(29,158,117,0.35); color:#5dcaa5; padding:14px; border-radius:24px; font-size:13px; text-align:center; margin-top:10px; }
+
+/* ── FOOTER ── */
+.footer { text-align:center; padding:28px 20px; background:rgba(5,12,25,0.35); border-top:1px solid var(--border); margin-top:12px; border-radius:16px; }
+.ft-title { color:var(--white); font-size:17px; font-family:'Playfair Display',Georgia,serif; margin-bottom:8px; }
+.ft-sub { color:var(--gold); font-size:13px; font-style:italic; margin-bottom:16px; }
+.ft-contact { font-size:12px; color:rgba(255,255,255,0.38); line-height:1.7; }
+.admin-lnk { display:inline-block; margin-top:20px; color:rgba(255,255,255,0.13); font-size:11px; text-decoration:none; letter-spacing:1px; }
+
+/* ── LANG HELPERS ── */
+.fr-o { display:block; }
+.en-o { display:none; }
+body.lang-en .fr-o { display:none; }
+body.lang-en .en-o { display:block; }
+</style>
+</head>
+<body class="lang-fr">
+
+<!-- ── AUTH ── -->
+<div id="auth-screen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">🏨</div>
+    <div class="auth-hotel" id="auth-hotel-nom">Hôtel Teranga</div>
+    <div class="auth-sub" id="auth-hotel-ville">Dakar · Sénégal</div>
+    <div id="auth-form">
+      <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe / Password" onkeydown="if(event.key==='Enter') checkAuth()">
+      <button class="auth-btn" onclick="checkAuth()">Accéder au livret · Enter</button>
+      <div class="auth-error" id="auth-error">Mot de passe incorrect · Incorrect password</div>
+    </div>
+    <div class="auth-contact" id="auth-contact"></div>
+  </div>
+</div>
+
+<!-- ── TOPBAR ── -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="back-btn" id="back-btn" onclick="goHome()">←</button>
+    <div class="hotel-title">
+      <div class="hotel-name" id="hdr-nom">Hôtel Teranga</div>
+      <div class="hotel-sub" id="hdr-ville">Dakar · Sénégal</div>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- ══ HOME ══ -->
+<div class="screen active" id="screen-home">
+  <div class="home-cover">
+    <div class="home-orn">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <div class="home-hotel" id="cov-nom">Hôtel Teranga</div>
+    <div class="home-loc" id="cov-loc">Almadies · Dakar · Sénégal</div>
+    <div class="home-actions">
+      <a id="cov-resa-wa" href="#" class="btn-wa" onclick="openResa(event,'wa')">💬 <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
+      <a id="cov-resa-email" href="#" class="btn-wa" onclick="openResa(event,'email')">✉️ <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
+    </div>
+  </div>
+
+  <div class="grid-wrap">
+
+    <!-- Votre séjour -->
+    <div class="grid-lbl">Votre séjour</div>
+    <div class="tile-grid">
+      <div class="tile" onclick="showPage('bienvenue')">
+        <div class="t-icon ti-b">👋</div>
+        <div class="t-lbl fr-o">Bienvenue</div>
+        <div class="t-lbl en-o">Welcome</div>
+      </div>
+      <div class="tile" onclick="showPage('pratique')">
+        <div class="t-icon ti-b">📶</div>
+        <div class="t-lbl fr-o">WiFi &amp; Infos</div>
+        <div class="t-lbl en-o">WiFi &amp; Info</div>
+      </div>
+      <div class="tile" onclick="showPage('appareils')">
+        <div class="t-icon ti-t">🔌</div>
+        <div class="t-lbl fr-o">Mode d'emploi</div>
+        <div class="t-lbl en-o">Appliances</div>
+      </div>
+      <div class="tile" onclick="showPage('services')">
+        <div class="t-icon ti-g">✅</div>
+        <div class="t-lbl fr-o">Services inclus</div>
+        <div class="t-lbl en-o">Included</div>
+      </div>
+      <div class="tile" onclick="showPage('sur-demande')">
+        <div class="t-icon ti-a">🛎️</div>
+        <div class="t-lbl fr-o">Sur demande</div>
+        <div class="t-lbl en-o">On request</div>
+      </div>
+      <div class="tile" onclick="showPage('paiement')">
+        <div class="t-icon ti-g">💳</div>
+        <div class="t-lbl fr-o">Paiement</div>
+        <div class="t-lbl en-o">Payment</div>
+      </div>
+    </div>
+
+    <!-- Découvrir -->
+    <div class="grid-lbl">Découvrir</div>
+    <div class="tile-grid">
+      <div class="tile" onclick="showPage('restaurants')">
+        <div class="t-icon ti-c">🍽️</div>
+        <div class="t-lbl fr-o">Restaurants</div>
+        <div class="t-lbl en-o">Restaurants</div>
+      </div>
+      <div class="tile" onclick="showPage('quartier')">
+        <div class="t-icon ti-p">📍</div>
+        <div class="t-lbl fr-o">Quartier</div>
+        <div class="t-lbl en-o">Neighbourhood</div>
+      </div>
+      <div class="tile" onclick="showPage('transport')">
+        <div class="t-icon ti-t">🚗</div>
+        <div class="t-lbl fr-o">Transports</div>
+        <div class="t-lbl en-o">Transport</div>
+      </div>
+      <div class="tile" onclick="showPage('plages')">
+        <div class="t-icon ti-b">🏖️</div>
+        <div class="t-lbl fr-o">Plages &amp; activités</div>
+        <div class="t-lbl en-o">Beaches</div>
+      </div>
+      <div class="tile" onclick="showPage('shopping')">
+        <div class="t-icon ti-p">🛍️</div>
+        <div class="t-lbl fr-o">Shopping</div>
+        <div class="t-lbl en-o">Shopping</div>
+      </div>
+      <div class="tile" onclick="showPage('conseils')">
+        <div class="t-icon ti-a">🌍</div>
+        <div class="t-lbl fr-o">Conseils locaux</div>
+        <div class="t-lbl en-o">Local tips</div>
+      </div>
+    </div>
+
+    <!-- Urgences & Départ -->
+    <div class="grid-lbl">Urgences &amp; Départ</div>
+    <div class="tile-grid">
+      <div class="tile" onclick="showPage('medical')">
+        <div class="t-icon ti-r">🏥</div>
+        <div class="t-lbl fr-o">Urgences médicales</div>
+        <div class="t-lbl en-o">Medical</div>
+      </div>
+      <div class="tile" onclick="showPage('securite')">
+        <div class="t-icon ti-r">🚔</div>
+        <div class="t-lbl fr-o">Sécurité</div>
+        <div class="t-lbl en-o">Safety</div>
+      </div>
+      <div class="tile" onclick="showPage('ambassades')">
+        <div class="t-icon ti-gr">🏛️</div>
+        <div class="t-lbl fr-o">Ambassades</div>
+        <div class="t-lbl en-o">Embassies</div>
+      </div>
+      <div class="tile" onclick="showPage('checkout')">
+        <div class="t-icon ti-gr">🔑</div>
+        <div class="t-lbl fr-o">Check-out</div>
+        <div class="t-lbl en-o">Check-out</div>
+      </div>
+      <div class="tile-wide tile-avis" onclick="showPage('avis')" style="grid-column:span 2">
+        <div class="t-icon ti-a">⭐</div>
+        <div class="tw-info">
+          <div class="tw-title fr-o">Laisser un avis</div>
+          <div class="tw-title en-o">Leave a review</div>
+          <div class="tw-sub">Google · TripAdvisor · Booking</div>
+        </div>
+      </div>
+      <div class="tile-wide tile-incident" onclick="showPage('incident')" style="grid-column:span 3">
+        <div class="t-icon ti-r">⚠️</div>
+        <div class="tw-info">
+          <div class="tw-title fr-o">Signaler un problème</div>
+          <div class="tw-title en-o">Report an issue</div>
+          <div class="tw-sub fr-o">Panne, incident — l'hôte est notifié immédiatement</div>
+          <div class="tw-sub en-o">Issue, breakdown — host notified immediately</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ BIENVENUE ══ -->
+<div class="screen" id="screen-bienvenue">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">👋</div>
+    <div>
+      <div class="page-hdr-title fr-o">Mot de Bienvenue</div>
+      <div class="page-hdr-title en-o">Welcome Message</div>
+      <div class="page-hdr-sub">Welcome · Bienvenue</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="welcome-body">
+      <div class="wt-fr">Chers hôtes,<br><br><span id="bvn-fr"></span></div>
+      <div class="wt-en">Dear guests,<br><br><span id="bvn-en"></span></div>
+      <div class="signature" id="bvn-sig"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRATIQUE ══ -->
+<div class="screen" id="screen-pratique">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">ℹ️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Infos Pratiques</div>
+      <div class="page-hdr-title en-o">Practical Info</div>
+      <div class="page-hdr-sub">WiFi · Horaires · Règles</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="wifi-box">
+      <div class="wifi-info">
+        <div class="wi-lbl">WiFi</div>
+        <div class="wi-name" id="wifi-reseau">—</div>
+      </div>
+      <div class="wifi-pwd" onclick="copyWifi()" title="Copier">📋 <span id="wifi-mdp">—</span></div>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="ic-lbl">Check-in</div>
+        <div class="ic-val" id="ci-heure">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-lbl">Check-out</div>
+        <div class="ic-val" id="co-heure">—</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Règles de la maison</div>
+      <div class="card-lbl en-o">House Rules</div>
+      <div id="regles-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Contact</div>
+      <div class="row"><span class="ri">📱</span><div><div class="rf" id="contact-tel"></div></div></div>
+      <div class="row"><span class="ri">📧</span><div><div class="rf" id="contact-email"></div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Clés</div>
+      <div class="card-lbl en-o">Keys</div>
+      <div class="row"><span class="ri">🔑</span><div><div class="rf" id="cles-fr"></div><div class="re" id="cles-en"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APPAREILS ══ -->
+<div class="screen" id="screen-appareils">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🔌</div>
+    <div>
+      <div class="page-hdr-title fr-o">Mode d'Emploi</div>
+      <div class="page-hdr-title en-o">Appliances</div>
+      <div class="page-hdr-sub">Clim · TV · Chauffe-eau · Groupe</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="grid2">
+      <div class="gc">
+        <div class="gc-title">❄️ Climatisation</div>
+        <div class="gc-text fr-t" id="appl-clim-fr">—</div>
+        <div class="gc-text en-t" id="appl-clim-en">—</div>
+      </div>
+      <div class="gc">
+        <div class="gc-title">📺 Télévision</div>
+        <div class="gc-text fr-t" id="appl-tv-fr">—</div>
+        <div class="gc-text en-t" id="appl-tv-en">—</div>
+      </div>
+      <div class="gc">
+        <div class="gc-title">🚿 Chauffe-eau</div>
+        <div class="gc-text fr-t" id="appl-chauffe-fr">—</div>
+        <div class="gc-text en-t" id="appl-chauffe-en">—</div>
+      </div>
+      <div class="gc">
+        <div class="gc-title">⚡ Électricité</div>
+        <div class="gc-text fr-t" id="appl-groupe-fr">—</div>
+        <div class="gc-text en-t" id="appl-groupe-en">—</div>
+      </div>
+    </div>
+    <div class="tip">💡 <span class="fr-o">En cas de problème, contactez-nous immédiatement.</span><span class="en-o">If any issue, contact us immediately.</span></div>
+  </div>
+</div>
+
+<!-- ══ SERVICES INCLUS ══ -->
+<div class="screen" id="screen-services">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">✅</div>
+    <div>
+      <div class="page-hdr-title fr-o">Services Inclus</div>
+      <div class="page-hdr-title en-o">Included Services</div>
+      <div class="page-hdr-sub">Compris dans votre séjour</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Inclus dans votre séjour</div>
+      <div class="card-lbl en-o">Included in your stay</div>
+      <div id="services-inclus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUR DEMANDE ══ -->
+<div class="screen" id="screen-sur-demande">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🛎️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Services Sur Demande</div>
+      <div class="page-hdr-title en-o">On-Request Services</div>
+      <div class="page-hdr-sub">À commander à la réception</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Disponible sur demande</div>
+      <div class="card-lbl en-o">Available on request</div>
+      <div id="services-demande"></div>
+    </div>
+    <div class="tip">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
+  </div>
+</div>
+
+<!-- ══ RESTAURANTS ══ -->
+<div class="screen" id="screen-restaurants">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🍽️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Restaurants &amp; Maquis</div>
+      <div class="page-hdr-title en-o">Restaurants</div>
+      <div class="page-hdr-sub fr-o">Sélection de l'hôte</div>
+      <div class="page-hdr-sub en-o">Host's selection</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Cuisine sénégalaise</div>
+      <div class="card-lbl en-o">Senegalese cuisine</div>
+      <div id="resto-senegalais"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Internationale</div>
+      <div class="card-lbl en-o">International</div>
+      <div id="resto-intl"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">À goûter absolument</div>
+      <div class="card-lbl en-o">Must-try dishes</div>
+      <div id="resto-gouter"></div>
+    </div>
+    <div class="tip">💡 <span class="fr-o">Pour les taxis, négociez le prix avant de monter.</span><span class="en-o">For taxis, negotiate the price before getting in.</span></div>
+  </div>
+</div>
+
+<!-- ══ QUARTIER ══ -->
+<div class="screen" id="screen-quartier">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">📍</div>
+    <div>
+      <div class="page-hdr-title fr-o">Quartier &amp; Ville</div>
+      <div class="page-hdr-title en-o">Neighbourhood &amp; City</div>
+      <div class="page-hdr-sub">Points d'intérêt · Commerces</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">À proximité</div>
+      <div class="card-lbl en-o">Nearby</div>
+      <div id="quartier-points"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Commerces</div>
+      <div class="card-lbl en-o">Shops</div>
+      <div id="quartier-commerces"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRANSPORT ══ -->
+<div class="screen" id="screen-transport">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🚗</div>
+    <div>
+      <div class="page-hdr-title">Transports</div>
+      <div class="page-hdr-sub">VTC · Bus · Location</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl">VTC &amp; Taxis</div>
+      <div id="transport-vtc"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Transport commun</div>
+      <div class="card-lbl en-o">Public transport</div>
+      <div id="transport-commun"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Location</div>
+      <div class="card-lbl en-o">Rental</div>
+      <div id="transport-location"></div>
+    </div>
+    <div class="tip">📍 <span id="transport-adresse"></span></div>
+  </div>
+</div>
+
+<!-- ══ PLAGES ══ -->
+<div class="screen" id="screen-plages">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🏖️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Plages &amp; Activités</div>
+      <div class="page-hdr-title en-o">Beaches &amp; Activities</div>
+      <div class="page-hdr-sub">Surf · Plongée · Excursions</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Plages</div>
+      <div class="card-lbl en-o">Beaches</div>
+      <div id="plages-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Activités</div>
+      <div class="card-lbl en-o">Activities</div>
+      <div id="activites-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHOPPING ══ -->
+<div class="screen" id="screen-shopping">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🛍️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Marchés &amp; Shopping</div>
+      <div class="page-hdr-title en-o">Markets &amp; Shopping</div>
+      <div class="page-hdr-sub">Artisanat · Tissus · Bijoux</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Marchés</div>
+      <div class="card-lbl en-o">Markets</div>
+      <div id="marches-list"></div>
+    </div>
+    <div class="tip">💡 <span class="fr-o">Commencez à négocier à 50% du prix affiché. Payez en FCFA.</span><span class="en-o">Start at 50% of asking price. Pay in XOF (FCFA).</span></div>
+  </div>
+</div>
+
+<!-- ══ CONSEILS LOCAUX ══ -->
+<div class="screen" id="screen-conseils">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🌍</div>
+    <div>
+      <div class="page-hdr-title fr-o">Conseils Pratiques</div>
+      <div class="page-hdr-title en-o">Local Tips</div>
+      <div class="page-hdr-sub">Change · Sécurité · Coutumes</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="conseil-card">
+      <div class="cc-title">💰 <span class="fr-o">Change de monnaie</span><span class="en-o">Currency exchange</span></div>
+      <div class="cc-text fr-t">La monnaie locale est le Franc CFA (FCFA / XOF). Les distributeurs CBAO, BICIS et Ecobank sont fiables. Évitez les changeurs de rue. 1 € ≈ 655 FCFA.</div>
+      <div class="cc-text en-t">Local currency is the CFA Franc (XOF). CBAO, BICIS and Ecobank ATMs are reliable. Avoid street money changers. 1 EUR ≈ 655 XOF.</div>
+    </div>
+    <div class="conseil-card">
+      <div class="cc-title">🔒 <span class="fr-o">Sécurité</span><span class="en-o">Safety</span></div>
+      <div class="cc-text fr-t">Dakar est globalement sûre. Évitez d'afficher bijoux et téléphones en public. La nuit, privilégiez Yango ou un taxi plutôt que de marcher. Gardez une copie de votre passeport.</div>
+      <div class="cc-text en-t">Dakar is generally safe. Avoid displaying jewellery and phones in public. At night, use Yango or a taxi rather than walking. Keep a copy of your passport.</div>
+    </div>
+    <div class="conseil-card">
+      <div class="cc-title">🕌 <span class="fr-o">Coutumes &amp; respect</span><span class="en-o">Customs &amp; respect</span></div>
+      <div class="cc-text fr-t">Le Sénégal est un pays à majorité musulmane. Couvrez épaules et genoux dans les mosquées et marchés. Enlever ses chaussures avant d'entrer dans une maison est apprécié.</div>
+      <div class="cc-text en-t">Senegal is a majority Muslim country. Cover shoulders and knees in mosques and markets. Removing shoes before entering a home is appreciated.</div>
+    </div>
+    <div class="conseil-card">
+      <div class="cc-title">🤝 <span class="fr-o">Pourboires</span><span class="en-o">Tipping</span></div>
+      <div class="cc-text fr-t">Non obligatoire mais apprécié. Au restaurant : 5-10% si pas inclus. Guides, chauffeurs : 2 000–5 000 FCFA/jour selon satisfaction.</div>
+      <div class="cc-text en-t">Not mandatory but appreciated. Restaurants: 5-10% if not included. Guides, drivers: 2,000–5,000 XOF/day depending on satisfaction.</div>
+    </div>
+    <div class="conseil-card">
+      <div class="cc-title">📱 <span class="fr-o">Connectivité</span><span class="en-o">Connectivity</span></div>
+      <div class="cc-text fr-t">Cartes SIM locales disponibles (Orange, Free, Expresso) pour moins de 3 000 FCFA. Excellente couverture 4G à Dakar. Yango fonctionne sans SIM locale si vous avez le WiFi.</div>
+      <div class="cc-text en-t">Local SIM cards available (Orange, Free, Expresso) for under 3,000 XOF. Excellent 4G coverage in Dakar. Yango works without a local SIM if you have WiFi.</div>
+    </div>
+    <div class="conseil-card">
+      <div class="cc-title">☀️ <span class="fr-o">Soleil &amp; santé</span><span class="en-o">Sun &amp; health</span></div>
+      <div class="cc-text fr-t">Crème solaire indispensable (SPF 50+). Buvez uniquement de l'eau en bouteille. Évitez les glaçons dans les restaurants de rue. Prenez vos médicaments antipaludéens si recommandés.</div>
+      <div class="cc-text en-t">Sunscreen is essential (SPF 50+). Drink only bottled water. Avoid ice in street restaurants. Take antimalarial medication if advised by your doctor.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MÉDICAL ══ -->
+<div class="screen" id="screen-medical">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🏥</div>
+    <div>
+      <div class="page-hdr-title fr-o">Urgences Médicales</div>
+      <div class="page-hdr-title en-o">Medical Emergencies</div>
+      <div class="page-hdr-sub">SAMU · Cliniques · Pharmacie</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div id="medical-urgences"></div>
+    <div class="card">
+      <div class="card-lbl fr-o">Cliniques</div>
+      <div class="card-lbl en-o">Clinics</div>
+      <div id="medical-cliniques"></div>
+    </div>
+    <div class="tip">⚠️ <span class="fr-o">Souscrivez une assurance voyage avant votre départ.</span><span class="en-o">Purchase travel insurance before departure.</span></div>
+  </div>
+</div>
+
+<!-- ══ SÉCURITÉ ══ -->
+<div class="screen" id="screen-securite">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🚔</div>
+    <div>
+      <div class="page-hdr-title fr-o">Sécurité &amp; Démarches</div>
+      <div class="page-hdr-title en-o">Safety &amp; Procedures</div>
+      <div class="page-hdr-sub">Police · Conseils</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div id="secu-urgences"></div>
+    <div class="card">
+      <div class="card-lbl fr-o">En cas de vol</div>
+      <div class="card-lbl en-o">In case of theft</div>
+      <div class="row"><span class="ri">1️⃣</span><div><div class="rf">Rendez-vous au commissariat le plus proche</div><div class="re">Go to the nearest police station</div></div></div>
+      <div class="row"><span class="ri">2️⃣</span><div><div class="rf">Demandez un procès-verbal (PV) de plainte</div><div class="re">Request an official police report</div></div></div>
+      <div class="row"><span class="ri">3️⃣</span><div><div class="rf">Indispensable pour votre assurance</div><div class="re">Required for insurance claims</div></div></div>
+      <div class="row"><span class="ri">4️⃣</span><div><div class="rf">Contactez votre ambassade si papiers volés</div><div class="re">Contact embassy if documents stolen</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-lbl fr-o">Conseils</div>
+      <div class="card-lbl en-o">Tips</div>
+      <div class="row"><span class="ri">💡</span><div><div class="rf">Évitez d'afficher bijoux et électronique en public</div><div class="re">Avoid displaying jewellery and electronics</div></div></div>
+      <div class="row"><span class="ri">💡</span><div><div class="rf">Yango ou taxi la nuit plutôt que marcher</div><div class="re">Use Yango or taxi at night, don't walk</div></div></div>
+      <div class="row"><span class="ri">💡</span><div><div class="rf">Gardez une copie de votre passeport</div><div class="re">Keep a passport copy stored separately</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AMBASSADES ══ -->
+<div class="screen" id="screen-ambassades">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🏛️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Ambassades à Dakar</div>
+      <div class="page-hdr-title en-o">Embassies in Dakar</div>
+      <div class="page-hdr-sub">FR · BE · CH · CA · US · UK</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div id="ambassades-list"></div>
+  </div>
+</div>
+
+<!-- ══ PAIEMENT ══ -->
+<div class="screen" id="screen-paiement">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">💳</div>
+    <div>
+      <div class="page-hdr-title fr-o">Paiement</div>
+      <div class="page-hdr-title en-o">Payment</div>
+      <div class="page-hdr-sub">Wave · Orange Money · Virement</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card">
+      <div class="card-lbl fr-o">Réglez votre séjour ou vos services</div>
+      <div class="card-lbl en-o">Pay for your stay or services</div>
+      <div id="pay-wave" style="display:none" class="pay-block">
+        <div class="pay-logo">📱 Wave</div>
+        <div class="pay-info" id="pay-wave-info"></div>
+        <a id="pay-wave-btn" href="#" class="pay-btn" onclick="return openWave(event)">Payer via Wave / Pay via Wave</a>
+      </div>
+      <div id="pay-om" style="display:none" class="pay-block">
+        <div class="pay-logo">🟠 Orange Money</div>
+        <div class="pay-info" id="pay-om-info"></div>
+        <a id="pay-om-btn" href="#" class="pay-btn" onclick="return openOM(event)">Payer via Orange Money</a>
+      </div>
+      <div id="pay-paypal" style="display:none" class="pay-block">
+        <div class="pay-logo">🔵 PayPal</div>
+        <a id="pay-paypal-btn" href="#" class="pay-btn" onclick="event.stopPropagation();window.open(this.dataset.url,'_blank','noopener');return false;">Payer via PayPal / Pay via PayPal</a>
+      </div>
+      <div id="pay-virement" style="display:none" class="pay-block">
+        <div class="pay-logo">🏦 Virement bancaire / Bank transfer</div>
+        <div class="pay-info" id="pay-virement-info"></div>
+      </div>
+    </div>
+    <div class="tip fr-o">💡 Indiquez votre nom et numéro de chambre lors du paiement.</div>
+    <div class="tip en-o">💡 Include your name and room number when making payment.</div>
+  </div>
+</div>
+
+<!-- ══ CHECK-OUT ══ -->
+<div class="screen" id="screen-checkout">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🔑</div>
+    <div>
+      <div class="page-hdr-title fr-o">Check-out &amp; Départ</div>
+      <div class="page-hdr-title en-o">Check-out &amp; Departure</div>
+      <div class="page-hdr-sub" id="co-heure-display">11h00</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="card-hl card">
+      <div class="row"><span class="ri">⏰</span><div>
+        <div class="rf">Heure limite : <strong style="font-size:18px" id="co-heure2"></strong></div>
+        <div class="re">Deadline: <strong id="co-heure2-en"></strong></div>
+      </div></div>
+    </div>
+    <div class="co-step"><div class="co-num">1</div><div><div class="co-txt fr-o">Vérifiez les armoires et tiroirs</div><div class="co-txt en-o">Check wardrobes and drawers</div></div></div>
+    <div class="co-step"><div class="co-num">2</div><div><div class="co-txt fr-o">Éteignez lumières et climatisation</div><div class="co-txt en-o">Turn off lights and AC</div></div></div>
+    <div class="co-step"><div class="co-num">3</div><div><div class="co-txt fr-o">Fermez toutes les fenêtres</div><div class="co-txt en-o">Close all windows</div></div></div>
+    <div class="co-step"><div class="co-num">4</div><div><div class="co-txt fr-o" id="co-cles-fr">Déposez les clés à la réception</div><div class="co-txt en-o" id="co-cles-en">Leave keys at reception</div></div></div>
+    <div class="tip">🧳 <span class="fr-o">Besoin de laisser vos bagages ? Contactez-nous !</span><span class="en-o">Need to store luggage? Contact us!</span></div>
+    <div class="footer">
+      <div class="ft-title fr-o">Merci pour votre confiance.</div>
+      <div class="ft-title en-o">Thank you for your stay.</div>
+      <div class="ft-sub">Thank you for choosing <span id="footer-nom"></span>.</div>
+      <div class="ft-contact" id="footer-contact"></div>
+      <a href="admin.html" class="admin-lnk" onclick="event.stopPropagation();window.open('admin.html','_blank','noopener');return false;">⚙ Administration</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INCIDENT ══ -->
+<div class="screen" id="screen-incident">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">⚠️</div>
+    <div>
+      <div class="page-hdr-title fr-o">Signaler un problème</div>
+      <div class="page-hdr-title en-o">Report an issue</div>
+      <div class="page-hdr-sub fr-o">L'hôte est notifié immédiatement</div>
+      <div class="page-hdr-sub en-o">Host is notified immediately</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="tip" style="margin-bottom:16px">💡 <span class="fr-o">Décrivez ce que vous avez constaté. Une photo est utile mais non obligatoire.</span><span class="en-o">Describe what you noticed. A photo is helpful but not required.</span></div>
+    <div class="field">
+      <label class="fr-t">Votre nom</label>
+      <label class="en-t">Your name</label>
+      <input type="text" id="inc-nom" placeholder="ex : Jean Martin">
+    </div>
+    <div class="field">
+      <label class="fr-t">Téléphone / WhatsApp</label>
+      <label class="en-t">Phone / WhatsApp</label>
+      <input type="tel" id="inc-tel" placeholder="ex : +221 77 123 45 67">
+    </div>
+    <div class="field">
+      <label class="fr-t">Description du problème</label>
+      <label class="en-t">Issue description</label>
+      <textarea id="inc-desc" placeholder="ex : La climatisation ne fonctionne pas…"></textarea>
+    </div>
+    <div class="photo-zone" onclick="document.getElementById('inc-photo').click()">
+      <div class="pz-icon">📷</div>
+      <div class="pz-text fr-t">Ajouter une photo (optionnel)</div>
+      <div class="pz-text en-t">Add a photo (optional)</div>
+      <input type="file" id="inc-photo" accept="image/*" style="display:none" onchange="photoSelected(this)">
+    </div>
+    <div id="inc-photo-name" style="font-size:12px;color:rgba(255,255,255,0.38);margin-bottom:12px;display:none"></div>
+    <button class="btn-primary" id="inc-send-btn" onclick="sendIncident()">
+      <span class="fr-o">📤 Envoyer le signalement</span>
+      <span class="en-o">📤 Send report</span>
+    </button>
+    <div class="btn-success" id="inc-success">
+      ✅ <span class="fr-o">Signalement envoyé ! L'hôte a été notifié.</span><span class="en-o">Report sent! Host has been notified.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AVIS ══ -->
+<div class="screen" id="screen-avis">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">⭐</div>
+    <div>
+      <div class="page-hdr-title fr-o">Laisser un avis</div>
+      <div class="page-hdr-title en-o">Leave a review</div>
+      <div class="page-hdr-sub fr-o">2 minutes · Ça aide vraiment !</div>
+      <div class="page-hdr-sub en-o">2 minutes · It really helps!</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="tip" style="margin-bottom:16px">💛 <span class="fr-o">Votre avis aide d'autres voyageurs à nous trouver et encourage notre équipe. Merci !</span><span class="en-o">Your review helps other travellers find us and motivates our team. Thank you!</span></div>
+    <div class="avis-card" id="avis-google" onclick="openAvis('google')">
+      <div class="avis-logo">🔍</div>
+      <div class="avis-info">
+        <div class="avis-name">Google</div>
+        <div class="avis-desc fr-o">Laisser un avis sur Google Maps</div>
+        <div class="avis-desc en-o">Leave a review on Google Maps</div>
+      </div>
+      <div class="avis-arr">→</div>
+    </div>
+    <div class="avis-card" onclick="openAvis('tripadvisor')">
+      <div class="avis-logo">🦉</div>
+      <div class="avis-info">
+        <div class="avis-name">TripAdvisor</div>
+        <div class="avis-desc fr-o">Partagez votre expérience</div>
+        <div class="avis-desc en-o">Share your experience</div>
+      </div>
+      <div class="avis-arr">→</div>
+    </div>
+    <div class="avis-card" onclick="openAvis('booking')">
+      <div class="avis-logo">🏨</div>
+      <div class="avis-info">
+        <div class="avis-name">Booking.com</div>
+        <div class="avis-desc fr-o">Notez votre séjour</div>
+        <div class="avis-desc en-o">Rate your stay</div>
+      </div>
+      <div class="avis-arr">→</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── NAVIGATION ──
+function showPage(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  document.getElementById('back-btn').classList.add('vis');
+  window.scrollTo(0, 0);
+  // Reset incident form when navigating away
+  if (id !== 'incident') resetIncident();
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-home').classList.add('active');
+  document.getElementById('back-btn').classList.remove('vis');
+  window.scrollTo(0, 0);
+}
+
+// Legacy compat (drawer links from admin.html preview)
+function goTo(subId) { showPage(subId); }
+function switchTab() { goHome(); }
+
+// ── WIFI COPY ──
+function copyWifi() {
+  var pwd = document.getElementById('wifi-mdp').textContent;
+  if (navigator.clipboard && pwd) {
+    navigator.clipboard.writeText(pwd).then(function() {
+      var el = document.querySelector('.wifi-pwd');
+      var orig = el.innerHTML;
+      el.innerHTML = '✅ Copié !';
+      setTimeout(function() { el.innerHTML = orig; }, 1500);
+    });
+  }
+}
+
+// ── AVIS ──
+var _avisUrls = {};
+function openAvis(platform) {
+  var url = _avisUrls[platform];
+  if (!url) url = 'https://www.google.com/search?q=';
+  window.open(url, '_blank', 'noopener');
+}
+
+// ── INCIDENT ──
+function photoSelected(input) {
+  var el = document.getElementById('inc-photo-name');
+  if (input.files && input.files[0]) {
+    el.textContent = '📎 ' + input.files[0].name;
+    el.style.display = 'block';
+  }
+}
+function resetIncident() {
+  var n = document.getElementById('inc-nom');
+  var t = document.getElementById('inc-tel');
+  var d = document.getElementById('inc-desc');
+  var btn = document.getElementById('inc-send-btn');
+  var suc = document.getElementById('inc-success');
+  var pn = document.getElementById('inc-photo-name');
+  if (n) n.value = '';
+  if (t) t.value = '';
+  if (d) d.value = '';
+  if (btn) btn.style.display = 'block';
+  if (suc) suc.style.display = 'none';
+  if (pn) { pn.style.display = 'none'; pn.textContent = ''; }
+}
+function sendIncident() {
+  var nom  = document.getElementById('inc-nom').value.trim();
+  var tel  = document.getElementById('inc-tel').value.trim();
+  var desc = document.getElementById('inc-desc').value.trim();
+  if (!nom || !desc) {
+    alert('Veuillez remplir votre nom et la description.\nPlease fill in your name and description.');
+    return;
+  }
+  if (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.whatsapp) {
+    var msg = '🚨 SIGNALEMENT\n'
+            + 'Logement : ' + CONFIG.hotel.nom + '\n'
+            + 'Client : ' + nom + (tel ? ' · ' + tel : '') + '\n'
+            + 'Problème : ' + desc;
+    var phone = CONFIG.hotel.whatsapp.replace(/[\s\+\-]/g, '');
+    var url = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg);
+    window.open(url, '_blank', 'noopener');
+  } else {
+    alert('Signalement enregistré. Contactez l\'hôte directement.');
+  }
+  document.getElementById('inc-send-btn').style.display = 'none';
+  document.getElementById('inc-success').style.display = 'block';
+}
+
+// ── AUTHENTIFICATION ──
+function initAuth() {
+  if (typeof CONFIG === 'undefined' || !CONFIG.acces || !CONFIG.acces.actif) {
+    document.getElementById('auth-screen').style.display = 'none';
+    return;
+  }
+  var A = CONFIG.acces;
+  var h = CONFIG.hotel;
+  document.getElementById('auth-hotel-nom').textContent = h.nom;
+  document.getElementById('auth-hotel-ville').textContent = h.ville + ' · ' + h.pays;
+  document.getElementById('auth-contact').textContent = '📱 ' + h.telephone;
+  var stored = localStorage.getItem('livret_auth');
+  if (stored) {
+    try {
+      var data = JSON.parse(stored);
+      if (data.pwd === A.mot_de_passe) {
+        document.getElementById('auth-screen').style.display = 'none';
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('livret_auth');
+  }
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function checkAuth() {
+  if (typeof CONFIG === 'undefined' || !CONFIG.acces) return;
+  var input = document.getElementById('auth-pwd').value;
+  if (input === CONFIG.acces.mot_de_passe) {
+    localStorage.setItem('livret_auth', JSON.stringify({ pwd: CONFIG.acces.mot_de_passe }));
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('auth-error').style.display = 'none';
+  } else {
+    document.getElementById('auth-error').style.display = 'block';
+    document.getElementById('auth-pwd').value = '';
+    document.getElementById('auth-pwd').focus();
+  }
+}
+
+// ── RÉSERVATION ──
+function openResa(e, type) {
+  e.preventDefault(); e.stopPropagation();
+  if (typeof CONFIG === 'undefined') return;
+  var h = CONFIG.hotel;
+  var url = '';
+  if (type === 'wa') {
+    var msg = encodeURIComponent('Bonjour, je souhaite faire une réservation à ' + h.nom + '.');
+    url = 'https://wa.me/' + h.whatsapp.replace(/[\s\+\-]/g,'') + '?text=' + msg;
+  } else {
+    url = 'mailto:' + h.email + '?subject=' + encodeURIComponent('Réservation — ' + h.nom);
+  }
+  window.open(url, '_blank', 'noopener');
+}
+
+// ── PAIEMENT ──
+function openWave(e) {
+  e.preventDefault(); e.stopPropagation();
+  window.open(document.getElementById('pay-wave-btn').dataset.url, '_blank', 'noopener');
+  return false;
+}
+function openOM(e) {
+  e.preventDefault(); e.stopPropagation();
+  window.open(document.getElementById('pay-om-btn').dataset.url, '_blank', 'noopener');
+  return false;
+}
+
+// ── LANGUE ──
+function setLang(lang) {
+  document.body.className = 'lang-' + lang;
+  document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.querySelector('.lang-btn[onclick="setLang(\'' + lang + '\')"]');
+  if (btn) btn.classList.add('active');
+}
+
+// ── PWA ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+
+// ── APPLY CONFIG ──
+function r(id, html) { var el = document.getElementById(id); if(el) el.innerHTML = html; }
+function t(id, txt)  { var el = document.getElementById(id); if(el) el.textContent = txt; }
+
+function applyConfig() {
+  if (typeof CONFIG === 'undefined') {
+    console.error('[Livret] config.js non chargé');
+    return;
+  }
+  var C = CONFIG;
+  var h = C.hotel;
+
+  // Google Maps helper
+  var city = (h.ville || 'Dakar').split('·').pop().trim();
+  function ml(name) {
+    var q = encodeURIComponent(name + ', ' + city + ', Sénégal');
+    var url = 'https://maps.google.com/?q=' + q;
+    return '<a href="' + url + '" class="maps-btn" onclick="event.preventDefault();event.stopPropagation();window.open(\'' + url + '\',\'_blank\',\'noopener\');return false;">📍 Maps</a>';
+  }
+
+  // Title
+  document.title = h.nom + ' · Livret d\'Accueil';
+
+  // Header & home
+  t('hdr-nom', h.nom);
+  t('hdr-ville', h.ville + ' · ' + h.pays);
+  t('cov-nom', h.nom);
+  t('cov-loc', h.ville + ' · ' + h.pays);
+
+  // Bouton réservation
+  if (h.whatsapp) {
+    document.getElementById('cov-resa-wa').style.display = 'inline-flex';
+  } else if (h.email) {
+    document.getElementById('cov-resa-email').style.display = 'inline-flex';
+  }
+
+  // Bienvenue
+  r('bvn-fr', C.bienvenue.texte_fr);
+  r('bvn-en', C.bienvenue.texte_en);
+  r('bvn-sig', C.bienvenue.signature + ', <strong>' + h.hote_nom + '</strong>');
+
+  // Pratique
+  t('wifi-reseau', C.pratique.wifi_reseau);
+  t('wifi-mdp', C.pratique.wifi_mdp);
+  t('ci-heure', C.pratique.checkin);
+  t('co-heure', C.pratique.checkout);
+  t('cles-fr', C.pratique.cles);
+  t('cles-en', C.pratique.cles_en);
+  t('contact-tel', h.telephone + (h.whatsapp ? ' (WhatsApp)' : ''));
+  t('contact-email', h.email);
+  r('regles-list', C.pratique.regles.map(function(rg) {
+    return '<div class="row"><span class="ri">' + rg.icon + '</span><div><div class="rf">' + rg.fr + '</div><div class="re">' + rg.en + '</div></div></div>';
+  }).join(''));
+
+  // Appareils (injection depuis config)
+  if (C.appareils) {
+    t('appl-clim-fr',    C.appareils.clim_fr);
+    t('appl-clim-en',    C.appareils.clim_en);
+    t('appl-tv-fr',      C.appareils.tv_fr);
+    t('appl-tv-en',      C.appareils.tv_en);
+    t('appl-chauffe-fr', C.appareils.chauffe_fr);
+    t('appl-chauffe-en', C.appareils.chauffe_en);
+    t('appl-groupe-fr',  C.appareils.groupe_fr);
+    t('appl-groupe-en',  C.appareils.groupe_en);
+  }
+
+  // Services
+  r('services-inclus', C.services.inclus.map(function(s) {
+    return '<div class="row"><span class="ri">' + s.icon + '</span><div><div class="rf">' + s.fr + '</div><div class="re">' + s.en + '</div></div></div>';
+  }).join(''));
+  r('services-demande', C.services.sur_demande.map(function(s) {
+    return '<div class="row"><span class="ri">' + s.icon + '</span><div><div class="rf"><strong>' + s.fr + '</strong> — ' + s.prix + '</div><div class="re">' + s.en + ' — ' + s.prix + '</div></div></div>';
+  }).join(''));
+
+  // Quartier
+  r('quartier-points', C.quartier.points.map(function(p) {
+    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf"><strong>' + p.fr + '</strong>' + ml(p.fr) + ' — ' + p.distance + '</div><div class="re">' + p.en + ml(p.en) + ' — ' + p.distance + '</div></div></div>';
+  }).join(''));
+  r('quartier-commerces', C.quartier.commerces.map(function(p) {
+    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf">' + p.fr + ml(p.fr.split('—')[0].trim()) + '</div><div class="re">' + p.en + ml(p.en.split('—')[0].trim()) + '</div></div></div>';
+  }).join(''));
+
+  // Transport
+  r('transport-vtc', C.transport.vtc.map(function(tt) {
+    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
+  }).join(''));
+  r('transport-commun', C.transport.commun.map(function(tt) {
+    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
+  }).join(''));
+  r('transport-location', C.transport.location.map(function(tt) {
+    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
+  }).join(''));
+  r('transport-adresse', 'Notre adresse / Our address : <strong>' + h.adresse + '</strong>');
+
+  // Restaurants
+  r('resto-senegalais', C.restaurants.senegalais.map(function(rr) {
+    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_fr + ' — ' + rr.prix + '</div><div class="re"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_en + ' — ' + rr.prix + '</div></div></div>';
+  }).join(''));
+  r('resto-intl', C.restaurants.international.map(function(rr) {
+    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_fr + ' — ' + rr.prix + '</div><div class="re"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_en + ' — ' + rr.prix + '</div></div></div>';
+  }).join(''));
+  r('resto-gouter', C.restaurants.a_gouter.map(function(rr) {
+    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf">' + rr.fr + '</div><div class="re">' + rr.en + '</div></div></div>';
+  }).join(''));
+
+  // Plages
+  r('plages-list', C.plages.plages.map(function(p) {
+    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf"><strong>' + p.fr + '</strong>' + ml(p.fr) + ' — ' + p.distance + '</div><div class="re">' + p.en + ml(p.en) + ' — ' + p.distance + '</div></div></div>';
+  }).join(''));
+  r('activites-list', C.plages.activites.map(function(a) {
+    return '<div class="row"><span class="ri">' + a.icon + '</span><div><div class="rf">' + a.fr + ml(a.fr.split('—')[0].trim()) + ' — ' + a.prix + '</div><div class="re">' + a.en + ml(a.en.split('—')[0].trim()) + ' — ' + a.prix + '</div></div></div>';
+  }).join(''));
+
+  // Shopping
+  r('marches-list', C.shopping.marches.map(function(m) {
+    return '<div class="row"><span class="ri">' + m.icon + '</span><div><div class="rf"><strong>' + m.nom + '</strong>' + ml(m.nom) + ' — ' + m.desc_fr + ' — ' + m.horaires + '</div><div class="re"><strong>' + m.nom + '</strong>' + ml(m.nom) + ' — ' + m.desc_en + ' — ' + m.horaires + '</div></div></div>';
+  }).join(''));
+
+  // Médical
+  r('medical-urgences', C.medical.urgences.map(function(u) {
+    return '<div class="emergency"><div class="emer-num">' + u.numero + '</div><div class="emer-lbl">' + u.label_fr + ' / ' + u.label_en + '</div></div>';
+  }).join(''));
+  r('medical-cliniques', C.medical.cliniques.map(function(cc) {
+    return '<div class="row"><span class="ri">' + cc.icon + '</span><div><div class="rf"><strong>' + cc.nom + '</strong>' + ml(cc.nom) + (cc.tel ? ' — ' + cc.tel : '') + ' — ' + cc.info_fr + '</div><div class="re">' + cc.nom + ml(cc.nom) + (cc.tel ? ' — ' + cc.tel : '') + ' — ' + cc.info_en + '</div></div></div>';
+  }).join(''));
+
+  // Sécurité
+  r('secu-urgences', C.securite.urgences.map(function(u) {
+    return '<div class="emergency"><div class="emer-num">' + u.numero + '</div><div class="emer-lbl">' + u.label_fr + ' / ' + u.label_en + '</div></div>';
+  }).join(''));
+
+  // Ambassades
+  r('ambassades-list', C.ambassades.map(function(a) {
+    return '<div class="embassy"><div class="emb-name">' + a.pays + '</div>'
+         + '<div class="emb-row">📍 ' + a.adresse + ml(a.adresse) + '</div>'
+         + '<div class="emb-row">📞 ' + a.tel + '</div>'
+         + (a.urgence ? '<div class="emb-row">🚨 Urgence / Emergency : ' + a.urgence + '</div>' : '')
+         + '</div>';
+  }).join(''));
+
+  // Paiement
+  if (C.paiement) {
+    var P = C.paiement;
+    if (P.wave_numero) {
+      var wUrl = 'https://web.wave.com/pay/' + encodeURIComponent(P.wave_numero.replace(/\s/g,''));
+      document.getElementById('pay-wave').style.display = 'block';
+      t('pay-wave-info', P.wave_nom + ' · ' + P.wave_numero);
+      document.getElementById('pay-wave-btn').dataset.url = wUrl;
+    }
+    if (P.orange_numero) {
+      var oUrl = 'https://www.orange-money.com/send?to=' + P.orange_numero.replace(/\s/g,'');
+      document.getElementById('pay-om').style.display = 'block';
+      t('pay-om-info', P.orange_nom + ' · ' + P.orange_numero);
+      document.getElementById('pay-om-btn').dataset.url = oUrl;
+    }
+    if (P.paypal_lien) {
+      document.getElementById('pay-paypal').style.display = 'block';
+      document.getElementById('pay-paypal-btn').dataset.url = P.paypal_lien;
+    }
+    if (P.iban) {
+      document.getElementById('pay-virement').style.display = 'block';
+      r('pay-virement-info',
+        '<strong>' + P.titulaire + '</strong><br>'
+        + 'IBAN : ' + P.iban + '<br>'
+        + 'SWIFT : ' + P.swift + '<br>'
+        + 'Banque : ' + P.banque);
+    }
+  }
+
+  // Checkout
+  t('co-heure2',        C.checkout.heure);
+  t('co-heure2-en',     C.checkout.heure_en);
+  t('co-heure-display', C.checkout.heure);
+  t('co-cles-fr', C.checkout.cles_fr);
+  t('co-cles-en', C.checkout.cles_en);
+  r('footer-nom', h.nom);
+  r('footer-contact', '📱 ' + h.telephone + ' &nbsp;|&nbsp; 📧 ' + h.email + '<br>' + h.adresse);
+
+  // Avis — URLs depuis config si définies
+  if (C.avis) {
+    if (C.avis.google)      _avisUrls.google      = C.avis.google;
+    if (C.avis.tripadvisor) _avisUrls.tripadvisor = C.avis.tripadvisor;
+    if (C.avis.booking)     _avisUrls.booking     = C.avis.booking;
+  }
+  // Fallback Google Maps search
+  if (!_avisUrls.google)      _avisUrls.google      = 'https://www.google.com/search?q=' + encodeURIComponent(h.nom + ' ' + h.ville + ' avis');
+  if (!_avisUrls.tripadvisor) _avisUrls.tripadvisor = 'https://www.tripadvisor.fr/Search?q=' + encodeURIComponent(h.nom);
+  if (!_avisUrls.booking)     _avisUrls.booking     = 'https://www.booking.com/searchresults.fr.html?ss=' + encodeURIComponent(h.nom);
+
+  // Auth
+  initAuth();
+}
+</script>
+<script src="config.js"></script>
+</body>
+</html>

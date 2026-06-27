@@ -1,0 +1,12 @@
+# Fichiers système macOS
+.DS_Store
+
+# Fichiers personnels (ne pas pousser sur GitHub)
+15 06 2026 ordonnance-de-medicaments.pdf
+ImmoHub - fiche incident.png
+
+# Copies de config téléchargées
+config (1).js
+
+# Node (si utilisé plus tard)
+node_modules/

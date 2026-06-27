@@ -1,0 +1,26 @@
+{
+  "name": "Livret d'Accueil · Hôtel Teranga",
+  "short_name": "Teranga",
+  "description": "Livret d'accueil digital de l'Hôtel Teranga Dakar",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#053372",
+  "theme_color": "#053372",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "lifestyle"],
+  "lang": "fr"
+}

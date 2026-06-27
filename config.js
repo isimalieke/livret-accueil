@@ -16,6 +16,7 @@ const CONFIG = {
     whatsapp:    "+221 XX XXX XX XX",
     email:       "contact@etablissement.sn",
     hote_nom:    "Prénom & Nom",
+    logo_url:    "",       // URL du logo hébergé (png/jpg, fond transparent conseillé)
     cover_photo: "",
   },
 

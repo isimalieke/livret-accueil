@@ -337,12 +337,25 @@ body.lang-en .pz-text.en-t { display:block; }
 .btn-primary:active { opacity:0.85; }
 .btn-success { display:none; background:#dcfce7; border:1px solid #86efac; color:#15803d; padding:14px; border-radius:12px; font-size:13px; text-align:center; margin-top:10px; }
 
+/* ══ LOGO ══ */
+.hotel-logo-wrap { margin-bottom:12px; }
+.hotel-logo { max-height:64px; max-width:160px; object-fit:contain; filter:brightness(0) invert(1); display:none; }
+
 /* ══ FOOTER ══ */
 .footer { text-align:center; padding:28px 20px; background:var(--card-bg); border:1px solid var(--border); margin-top:16px; border-radius:16px; }
 .ft-title { color:var(--text); font-size:17px; font-family:'Playfair Display',Georgia,serif; margin-bottom:8px; }
 .ft-sub   { color:var(--text2); font-size:13px; margin-bottom:16px; }
 .ft-contact { font-size:12px; color:var(--text2); line-height:1.7; }
-.admin-lnk { display:inline-block; margin-top:20px; color:var(--border); font-size:11px; text-decoration:none; letter-spacing:1px; }
+.admin-lnk { display:inline-block; margin-top:20px; color:rgba(0,0,0,0.12); font-size:11px; text-decoration:none; letter-spacing:1px; }
+
+/* ══ ASSENKA BAR ══ */
+.assenka-bar {
+  text-align:center; padding:14px 20px;
+  border-top:1px solid var(--border); margin-top:4px;
+  font-size:11px; color:rgba(0,0,0,0.28); line-height:1.7;
+}
+.assenka-bar a { color:rgba(0,0,0,0.35); text-decoration:none; }
+.assenka-bar a:hover { text-decoration:underline; }
 
 /* ══ LANG HELPERS ══ */
 .fr-o { display:block; }
@@ -389,6 +402,7 @@ body.lang-en .en-o { display:block; }
 <!-- ══ HOME ══ -->
 <div class="screen active" id="screen-home">
   <div class="home-cover">
+    <div class="hotel-logo-wrap"><img id="cov-logo" class="hotel-logo" src="" alt="Logo"></div>
     <div class="home-hotel" id="cov-nom">Hôtel Teranga</div>
     <div class="home-loc" id="cov-loc">Almadies · Dakar · Sénégal</div>
     <div class="home-actions">
@@ -1052,6 +1066,12 @@ body.lang-en .en-o { display:block; }
 
 </main>
 
+<!-- ── ASSENKA ── -->
+<div class="assenka-bar">
+  Livret d'accueil digital · Une solution <a href="https://assenka.com" target="_blank" rel="noopener">Assenka.com</a><br>
+  <a href="tel:+221785917503">+221 78 591 75 03</a>
+</div>
+
 <script>
 // ── NAVIGATION ──
 function showPage(id) {
@@ -1215,7 +1235,8 @@ function setLang(lang) {
 
 // ── PWA ──
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(function(){});
+  // Chemin absolu : le SW est toujours à la racine, même si la page est sur /{slug}/
+  navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
 }
 
 // ── APPLY CONFIG ──
@@ -1253,6 +1274,12 @@ function applyConfig() {
   t('hdr-ville', h.ville + ' · ' + h.pays);
   t('cov-nom', h.nom);
   t('cov-loc', h.ville + ' · ' + h.pays);
+
+  // Logo
+  if (h.logo_url) {
+    var logoEl = document.getElementById('cov-logo');
+    if (logoEl) { logoEl.src = h.logo_url; logoEl.style.display = 'block'; }
+  }
 
   // Bouton réservation
   if (h.whatsapp) {

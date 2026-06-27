@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2c3e50">
+<title>Assenka · Créer mon livret d'accueil</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --cover:  #2c3e50;
+  --blue:   #2563eb;
+  --bg:     #f5f5f7;
+  --white:  #ffffff;
+  --text:   #1d1d1f;
+  --text2:  #6e6e73;
+  --border: rgba(0,0,0,0.1);
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --radius: 14px;
+  --green:  #16a34a;
+}
+body {
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background:var(--cover); color:#fff;
+  text-align:center; padding:40px 20px 36px;
+}
+.brand { font-size:13px; letter-spacing:4px; text-transform:uppercase; opacity:0.6; margin-bottom:10px; }
+.header h1 { font-size:28px; font-weight:700; margin-bottom:6px; }
+.header p  { font-size:14px; opacity:0.65; line-height:1.6; }
+
+/* ── PROGRESS ── */
+.progress-wrap { background:var(--white); border-bottom:1px solid var(--border); padding:16px 20px; position:sticky; top:0; z-index:10; }
+.progress-bar  { height:4px; background:#e5e7eb; border-radius:2px; max-width:600px; margin:0 auto 10px; }
+.progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width .4s ease; }
+.steps-label { display:flex; justify-content:space-between; max-width:600px; margin:0 auto; }
+.step-dot { font-size:11px; color:var(--text2); font-weight:500; text-align:center; transition:color .3s; }
+.step-dot.active { color:var(--blue); }
+.step-dot.done   { color:var(--green); }
+
+/* ── FORM ── */
+.form-wrap { max-width:600px; margin:0 auto; padding:24px 16px 60px; }
+
+.step-panel { display:none; }
+.step-panel.active { display:block; }
+
+.step-title { font-size:20px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.step-sub   { font-size:14px; color:var(--text2); margin-bottom:24px; line-height:1.5; }
+
+.card-form {
+  background:var(--white); border-radius:var(--radius);
+  border:1px solid var(--border); box-shadow:var(--shadow);
+  padding:20px; margin-bottom:16px;
+}
+
+.field { margin-bottom:18px; }
+.field:last-child { margin-bottom:0; }
+.field label {
+  display:block; font-size:12px; font-weight:600; color:var(--text2);
+  text-transform:uppercase; letter-spacing:0.6px; margin-bottom:6px;
+}
+.required-mark { color:#dc2626; margin-left:2px; }
+.field input, .field select, .field textarea {
+  width:100%; background:var(--bg);
+  border:1.5px solid var(--border); border-radius:10px;
+  padding:11px 14px; font-size:15px; color:var(--text);
+  outline:none; font-family:inherit; transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.field select { cursor:pointer; }
+.field textarea { height:90px; resize:none; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color:var(--blue); background:#fff;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+}
+.field input::placeholder, .field textarea::placeholder { color:#adb5bd; }
+.field .hint { font-size:11px; color:var(--text2); margin-top:5px; line-height:1.5; }
+
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:400px) { .field-row { grid-template-columns:1fr; } }
+
+/* Type cards */
+.type-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.type-card {
+  border:2px solid var(--border); border-radius:12px; padding:14px 12px;
+  cursor:pointer; text-align:center; transition:border-color .2s, background .2s;
+  background:var(--bg);
+}
+.type-card:hover { border-color:#93c5fd; background:#eff6ff; }
+.type-card.selected { border-color:var(--blue); background:#eff6ff; }
+.type-card input { display:none; }
+.type-card .tc-icon { font-size:24px; margin-bottom:6px; }
+.type-card .tc-lbl  { font-size:13px; font-weight:600; color:var(--text); }
+.type-card .tc-sub  { font-size:11px; color:var(--text2); margin-top:2px; }
+
+/* Upload zone */
+.upload-zone {
+  border:2px dashed var(--border); border-radius:12px; padding:24px;
+  text-align:center; cursor:pointer; background:var(--bg);
+  transition:border-color .2s;
+}
+.upload-zone:hover { border-color:#93c5fd; }
+.upload-zone .uz-icon { font-size:32px; margin-bottom:8px; opacity:0.4; }
+.upload-zone .uz-txt  { font-size:13px; color:var(--text2); }
+.upload-zone .uz-sub  { font-size:11px; color:#adb5bd; margin-top:4px; }
+#logo-preview { display:none; max-height:80px; max-width:200px; border-radius:8px; margin:12px auto 0; object-fit:contain; }
+
+/* Separator */
+.sep { border:none; border-top:1px solid var(--border); margin:4px 0; }
+
+/* Nav buttons */
+.nav-btns { display:flex; gap:12px; margin-top:24px; }
+.btn-prev {
+  flex:1; padding:13px; border:1.5px solid var(--border); background:#fff;
+  color:var(--text); border-radius:12px; font-size:15px; font-weight:600;
+  cursor:pointer; font-family:inherit;
+}
+.btn-next {
+  flex:2; padding:13px; border:none; background:var(--cover);
+  color:#fff; border-radius:12px; font-size:15px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:background .2s;
+}
+.btn-next:hover { background:#243342; }
+.btn-next:disabled { opacity:0.5; cursor:default; }
+
+/* Submit button */
+.btn-submit {
+  width:100%; padding:15px; border:none; background:var(--blue);
+  color:#fff; border-radius:12px; font-size:16px; font-weight:700;
+  cursor:pointer; font-family:inherit; margin-top:24px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:background .2s;
+}
+.btn-submit:hover { background:#1d4ed8; }
+
+/* Success */
+#success-panel {
+  display:none; text-align:center; padding:48px 20px;
+  max-width:480px; margin:0 auto;
+}
+.success-icon { font-size:60px; margin-bottom:20px; }
+.success-title { font-size:24px; font-weight:700; margin-bottom:12px; }
+.success-text  { font-size:15px; color:var(--text2); line-height:1.65; margin-bottom:24px; }
+.success-contact {
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:16px 20px; font-size:13px; color:var(--text2); line-height:1.8;
+}
+
+/* Info box */
+.info-box {
+  background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px;
+  padding:14px 16px; font-size:13px; color:#1e40af; margin-bottom:16px;
+  display:flex; gap:10px; align-items:flex-start; line-height:1.6;
+}
+
+/* Footer */
+.page-footer {
+  text-align:center; padding:20px; font-size:11px;
+  color:var(--text2); border-top:1px solid var(--border);
+  background:var(--white); margin-top:40px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">Assenka · Solutions Hospitality</div>
+  <h1>Créez votre livret d'accueil digital</h1>
+  <p>En 3 minutes, votre livret est configuré et prêt pour vos clients.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:33%"></div></div>
+  <div class="steps-label">
+    <div class="step-dot active" id="dot-1">1 · Établissement</div>
+    <div class="step-dot" id="dot-2">2 · Contact</div>
+    <div class="step-dot" id="dot-3">3 · Livret</div>
+  </div>
+</div>
+
+<div class="form-wrap">
+
+  <!-- ── STEP 1 : ÉTABLISSEMENT ── -->
+  <div class="step-panel active" id="step-1">
+    <div class="step-title">Votre établissement</div>
+    <div class="step-sub">Ces informations apparaîtront sur votre livret d'accueil.</div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Type d'établissement <span class="required-mark">*</span></label>
+        <div class="type-grid" id="type-grid">
+          <label class="type-card selected" onclick="selectType(this,'Hôtel')">
+            <input type="radio" name="type" value="Hôtel" checked>
+            <div class="tc-icon">🏨</div>
+            <div class="tc-lbl">Hôtel</div>
+            <div class="tc-sub">Tout type d'hôtel</div>
+          </label>
+          <label class="type-card" onclick="selectType(this,'Maison d\'hôtes')">
+            <input type="radio" name="type" value="Maison d'hôtes">
+            <div class="tc-icon">🏡</div>
+            <div class="tc-lbl">Maison d'hôtes</div>
+            <div class="tc-sub">Riad, villa, chambre</div>
+          </label>
+          <label class="type-card" onclick="selectType(this,'Appartement')">
+            <input type="radio" name="type" value="Appartement">
+            <div class="tc-icon">🏢</div>
+            <div class="tc-lbl">Appartement</div>
+            <div class="tc-sub">Airbnb, meublé</div>
+          </label>
+          <label class="type-card" onclick="selectType(this,'Autre')">
+            <input type="radio" name="type" value="Autre">
+            <div class="tc-icon">✨</div>
+            <div class="tc-lbl">Autre</div>
+            <div class="tc-sub">Lodge, éco-lodge…</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Nom de l'établissement <span class="required-mark">*</span></label>
+        <input type="text" id="f-nom" placeholder="ex : Hôtel Teranga">
+      </div>
+      <div class="field">
+        <label>Adresse complète <span class="required-mark">*</span></label>
+        <input type="text" id="f-adresse" placeholder="ex : 12 Route des Almadies">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Ville <span class="required-mark">*</span></label>
+          <input type="text" id="f-ville" placeholder="ex : Dakar">
+        </div>
+        <div class="field">
+          <label>Pays</label>
+          <select id="f-pays">
+            <option value="Sénégal" selected>🇸🇳 Sénégal</option>
+            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+            <option value="Mali">🇲🇱 Mali</option>
+            <option value="Guinée">🇬🇳 Guinée</option>
+            <option value="Cameroun">🇨🇲 Cameroun</option>
+            <option value="Maroc">🇲🇦 Maroc</option>
+            <option value="France">🇫🇷 France</option>
+            <option value="Autre">🌍 Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Nombre de chambres / logements</label>
+        <select id="f-chambres">
+          <option value="1-5">1 à 5</option>
+          <option value="6-15" selected>6 à 15</option>
+          <option value="16-30">16 à 30</option>
+          <option value="30+">Plus de 30</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-next" onclick="goStep(2)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2 : CONTACT ── -->
+  <div class="step-panel" id="step-2">
+    <div class="step-title">Vos coordonnées</div>
+    <div class="step-sub">Pour vous contacter et configurer votre espace Assenka.</div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Nom &amp; prénom du responsable <span class="required-mark">*</span></label>
+        <input type="text" id="f-responsable" placeholder="ex : Isima Lieke">
+      </div>
+      <div class="field">
+        <label>Téléphone / WhatsApp <span class="required-mark">*</span></label>
+        <input type="tel" id="f-tel" placeholder="ex : +221 77 123 45 67">
+        <div class="hint">Nous vous contacterons sur WhatsApp pour finaliser la configuration.</div>
+      </div>
+      <div class="field">
+        <label>Email professionnel <span class="required-mark">*</span></label>
+        <input type="email" id="f-email" placeholder="ex : contact@hotel-teranga.sn">
+      </div>
+      <div class="field">
+        <label>Site web (optionnel)</label>
+        <input type="url" id="f-site" placeholder="ex : https://hotel-teranga.com">
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Mot de passe de votre livret <span class="required-mark">*</span></label>
+        <input type="password" id="f-password" placeholder="Choisissez un mot de passe sécurisé" autocomplete="new-password">
+        <div class="hint">Ce mot de passe protège votre espace admin et votre livret. Minimum 6 caractères.</div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Comment avez-vous connu Assenka ?</label>
+        <select id="f-source">
+          <option value="">Choisir…</option>
+          <option value="Bouche à oreille">Bouche à oreille</option>
+          <option value="Réseaux sociaux">Réseaux sociaux</option>
+          <option value="Google">Google</option>
+          <option value="Recommandation partenaire">Recommandation partenaire</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-prev" onclick="goStep(1)">← Retour</button>
+      <button class="btn-next" onclick="goStep(3)">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3 : LIVRET ── -->
+  <div class="step-panel" id="step-3">
+    <div class="step-title">Votre livret</div>
+    <div class="step-sub">Quelques paramètres pour personnaliser votre livret d'accueil.</div>
+
+    <div class="info-box">
+      ℹ️ Ces informations peuvent être modifiées à tout moment depuis votre espace administrateur.
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Logo de l'établissement</label>
+        <div class="upload-zone" onclick="document.getElementById('logo-file').click()">
+          <div class="uz-icon">🖼️</div>
+          <div class="uz-txt">Cliquez pour ajouter votre logo</div>
+          <div class="uz-sub">PNG ou JPG · fond transparent conseillé · max 2 Mo</div>
+          <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="previewLogo(this)">
+          <img id="logo-preview" src="" alt="Aperçu logo">
+        </div>
+        <div class="hint" id="logo-hint" style="margin-top:8px">Votre logo apparaîtra en haut de votre livret, en version blanche sur fond sombre.</div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Réseau WiFi</label>
+        <input type="text" id="f-wifi" placeholder="ex : Teranga_Guests">
+      </div>
+      <div class="field">
+        <label>Mot de passe WiFi</label>
+        <input type="text" id="f-wifimdp" placeholder="ex : teranga2024">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Heure check-in</label>
+          <input type="text" id="f-checkin" placeholder="14h00">
+        </div>
+        <div class="field">
+          <label>Heure check-out</label>
+          <input type="text" id="f-checkout" placeholder="11h00">
+        </div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Message de bienvenue (optionnel)</label>
+        <textarea id="f-bienvenue" placeholder="Chers hôtes, bienvenue dans notre établissement. Nous espérons que votre séjour sera agréable…"></textarea>
+        <div class="hint">Si vous ne remplissez pas ce champ, notre équipe rédigera un message de bienvenue adapté à votre établissement.</div>
+      </div>
+    </div>
+
+    <div class="nav-btns" style="display:block">
+      <button class="btn-prev" onclick="goStep(2)" style="width:100%;margin-bottom:10px">← Retour</button>
+    </div>
+
+    <button class="btn-submit" onclick="submitForm()">
+      ✅ Créer mon livret maintenant
+    </button>
+    <p style="font-size:11px;color:var(--text2);text-align:center;margin-top:10px;line-height:1.6">
+      Votre livret est créé instantanément et disponible immédiatement.
+    </p>
+  </div>
+
+  <!-- ── SUCCÈS ── -->
+  <div id="success-panel">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Votre livret est prêt !</div>
+    <div class="success-text">
+      Votre livret d'accueil est créé et disponible immédiatement. Complétez vos informations via votre espace admin.
+    </div>
+    <div class="success-contact" style="text-align:left">
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6e6e73;margin-bottom:4px">Votre livret (partagez à vos clients)</div>
+        <a id="livret-url" href="#" target="_blank" style="color:#2563eb;font-weight:600;word-break:break-all">#</a>
+      </div>
+      <div style="border-top:1px solid #e5e7eb;padding-top:10px;margin-top:4px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6e6e73;margin-bottom:4px">Votre espace admin</div>
+        <a id="admin-url" href="#" target="_blank" style="color:#2563eb;font-weight:600;word-break:break-all">#</a>
+      </div>
+      <div style="border-top:1px solid #e5e7eb;padding-top:10px;margin-top:10px;font-size:12px;color:#6e6e73">
+        💡 Notez bien votre URL et mot de passe — ils ne vous seront pas renvoyés par email.
+      </div>
+    </div>
+    <a id="go-admin-btn" href="#" target="_blank"
+       style="display:block;margin-top:16px;background:#2c3e50;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:700;text-decoration:none;font-size:15px">
+      ⚙️ Configurer mon livret maintenant →
+    </a>
+  </div>
+
+</div>
+
+<div class="page-footer">
+  Livret d'accueil digital · Une solution <a href="https://assenka.com" style="color:inherit">Assenka.com</a> · +221 78 591 75 03
+</div>
+
+<script>
+var currentStep = 1;
+var selectedType = 'Hôtel';
+var logoBase64 = '';
+
+function selectType(card, val) {
+  document.querySelectorAll('.type-card').forEach(function(c) { c.classList.remove('selected'); });
+  card.classList.add('selected');
+  selectedType = val;
+}
+
+function previewLogo(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = document.getElementById('logo-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    logoBase64 = file.name; // store filename for WA message
+    document.getElementById('logo-hint').textContent = '✅ Logo sélectionné : ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function goStep(n) {
+  // Validate current step
+  if (n > currentStep) {
+    if (!validateStep(currentStep)) return;
+  }
+
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('step-' + n).classList.add('active');
+  currentStep = n;
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+  if (step === 1) {
+    if (!document.getElementById('f-nom').value.trim()) {
+      alert('Veuillez saisir le nom de votre établissement.');
+      document.getElementById('f-nom').focus();
+      return false;
+    }
+    if (!document.getElementById('f-adresse').value.trim()) {
+      alert('Veuillez saisir l\'adresse de votre établissement.');
+      document.getElementById('f-adresse').focus();
+      return false;
+    }
+    if (!document.getElementById('f-ville').value.trim()) {
+      alert('Veuillez saisir la ville.');
+      document.getElementById('f-ville').focus();
+      return false;
+    }
+  }
+  if (step === 2) {
+    if (!document.getElementById('f-responsable').value.trim()) {
+      alert('Veuillez saisir le nom du responsable.');
+      document.getElementById('f-responsable').focus();
+      return false;
+    }
+    if (!document.getElementById('f-tel').value.trim()) {
+      alert('Veuillez saisir un numéro de téléphone.');
+      document.getElementById('f-tel').focus();
+      return false;
+    }
+    if (!document.getElementById('f-email').value.trim()) {
+      alert('Veuillez saisir votre email.');
+      document.getElementById('f-email').focus();
+      return false;
+    }
+    var pwd = document.getElementById('f-password').value;
+    if (!pwd || pwd.length < 6) {
+      alert('Le mot de passe doit contenir au moins 6 caractères.');
+      document.getElementById('f-password').focus();
+      return false;
+    }
+  }
+  return true;
+}
+
+function updateProgress() {
+  var pct = { 1:33, 2:66, 3:100 };
+  document.getElementById('progress-fill').style.width = pct[currentStep] + '%';
+
+  for (var i = 1; i <= 3; i++) {
+    var dot = document.getElementById('dot-' + i);
+    dot.classList.remove('active','done');
+    if (i === currentStep) dot.classList.add('active');
+    else if (i < currentStep) dot.classList.add('done');
+  }
+}
+
+async function submitForm() {
+  var btn = document.querySelector('.btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Création de votre livret…';
+
+  var nom         = document.getElementById('f-nom').value.trim();
+  var adresse     = document.getElementById('f-adresse').value.trim();
+  var ville       = document.getElementById('f-ville').value.trim();
+  var pays        = document.getElementById('f-pays').value;
+  var responsable = document.getElementById('f-responsable').value.trim();
+  var tel         = document.getElementById('f-tel').value.trim();
+  var email       = document.getElementById('f-email').value.trim();
+  var password    = document.getElementById('f-password').value;
+  var wifi        = document.getElementById('f-wifi').value.trim();
+  var wifimdp     = document.getElementById('f-wifimdp').value.trim();
+
+  try {
+    var res = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom, adresse, ville, pays, email, password,
+        telephone: tel, whatsapp: tel,
+        hote_nom: responsable,
+        wifi_reseau: wifi, wifi_mdp: wifimdp,
+      }),
+    });
+
+    var data = await res.json();
+
+    if (data.ok) {
+      // Stocker les identifiants dans localStorage pour pré-remplir l'admin
+      localStorage.setItem('livret_slug', data.slug);
+      localStorage.setItem('livret_hotel_pwd_' + data.slug, password);
+
+      // Afficher le succès avec l'URL du livret
+      document.getElementById('livret-url').textContent = data.livretUrl;
+      document.getElementById('livret-url').href = data.livretUrl;
+      document.getElementById('admin-url').href = data.livretUrl + '/admin';
+      document.getElementById('admin-url').textContent = data.livretUrl + '/admin';
+
+      document.getElementById('go-admin-btn').href = data.livretUrl + '/admin';
+
+      document.getElementById('step-3').classList.remove('active');
+      document.getElementById('success-panel').style.display = 'block';
+      document.getElementById('progress-wrap').style.display = 'none';
+    } else {
+      alert('Erreur : ' + data.error);
+      btn.disabled = false;
+      btn.innerHTML = '✅ Créer mon livret maintenant';
+    }
+  } catch (e) {
+    alert('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
+    btn.disabled = false;
+    btn.innerHTML = '✅ Créer mon livret maintenant';
+  }
+}
+</script>
+
+</body>
+</html>

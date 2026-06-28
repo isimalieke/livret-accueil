@@ -84,8 +84,9 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 /* TICKETS */
 .tkt-filter { background:transparent; border:1px solid var(--border); padding:5px 12px; border-radius:20px; font-size:12px; cursor:pointer; }
 .tkt-filter.active { background:var(--blue); color:#fff; border-color:var(--blue); }
-.tkt-row { padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:background .15s; }
+.tkt-row { padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:4px; cursor:pointer; transition:background .15s; }
 .tkt-row:hover { background:#f8fafc; }
+.tkt-row-active { background:#eff6ff; border-color:#93c5fd; border-bottom-left-radius:0; border-bottom-right-radius:0; margin-bottom:0; }
 .tkt-row-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
 .tkt-id   { font-family:monospace; font-size:11px; color:#999; }
 .tkt-subj { font-weight:600; font-size:13px; }
@@ -558,7 +559,7 @@ input:checked + .slider:before { transform:translateX(22px); }
       <div id="tickets-list"><div style="color:#999;font-size:13px;padding:20px 0;text-align:center">Chargement…</div></div>
 
       <!-- Détail ticket (panel latéral inline) -->
-      <div id="ticket-detail" style="display:none;border:1px solid var(--border);border-radius:10px;margin-top:16px;overflow:hidden">
+      <div id="ticket-detail" style="display:none;border:1px solid #93c5fd;border-top:none;border-radius:0 0 10px 10px;margin-bottom:8px;overflow:hidden;background:#fff">
         <div style="background:#f8fafc;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
           <div>
             <span id="td-id" style="font-family:monospace;font-weight:700;font-size:14px"></span>
@@ -1334,7 +1335,7 @@ function renderTickets() {
 
   var html = list.map(function(t) {
     var d = new Date(t.created).toLocaleDateString('fr-FR');
-    return '<div class="tkt-row" onclick="openTicket(\'' + t.id + '\')">'
+    return '<div class="tkt-row" id="tkt-row-' + t.id + '" data-id="' + t.id + '" onclick="openTicket(\'' + t.id + '\')">'
       + '<div class="tkt-row-head">'
       + '<span class="tkt-subj">' + esc(t.subject) + '</span>'
       + '<span class="tkt-status ' + STATUS_CSS[t.status] + '">' + STATUS_LABEL[t.status] + '</span>'
@@ -1343,10 +1344,36 @@ function renderTickets() {
       + '</div>';
   }).join('');
   document.getElementById('tickets-list').innerHTML = html;
+  // Si un ticket était ouvert, le réinsérer inline
+  if (_currentTicket) {
+    var activeRow = document.getElementById('tkt-row-' + _currentTicket);
+    if (activeRow) {
+      activeRow.classList.add('tkt-row-active');
+      activeRow.after(document.getElementById('ticket-detail'));
+    }
+  }
 }
 
 async function openTicket(id) {
+  // Si on clique sur le même ticket déjà ouvert → fermer
+  if (_currentTicket === id && document.getElementById('ticket-detail').style.display !== 'none') {
+    document.getElementById('ticket-detail').style.display = 'none';
+    document.querySelectorAll('.tkt-row-active').forEach(function(r) { r.classList.remove('tkt-row-active'); });
+    _currentTicket = null;
+    return;
+  }
+
   _currentTicket = id;
+
+  // Surligner la ligne active
+  document.querySelectorAll('.tkt-row-active').forEach(function(r) { r.classList.remove('tkt-row-active'); });
+  var activeRow = document.getElementById('tkt-row-' + id);
+  if (activeRow) {
+    activeRow.classList.add('tkt-row-active');
+    // Déplacer le panel juste après la ligne cliquée
+    activeRow.after(document.getElementById('ticket-detail'));
+  }
+
   var resp = await fetch('/' + _slug + '/ticket/' + id + '/data');
   var data = await resp.json();
   if (!data.ok) { alert('Ticket introuvable'); return; }
@@ -1365,9 +1392,9 @@ async function openTicket(id) {
   tl.innerHTML = (t.messages || []).map(function(m) {
     var isHotel = m.from === 'hotel';
     var time = new Date(m.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) + ' ' + new Date(m.timestamp).toLocaleDateString('fr-FR');
-    return '<div style="display:flex;flex-direction:column;align-items:' + (isHotel ? 'flex-end' : 'flex-start') + '">'
-      + '<div class="tl-bubble ' + (isHotel ? 'tl-hotel' : 'tl-guest') + '">' + esc(m.text) + '</div>'
-      + '<div class="tl-time">' + (isHotel ? '🏨 ' : '👤 ') + time + '</div>'
+    return '<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:8px">'
+      + '<div style="font-size:10px;color:#999;margin-bottom:3px">' + (isHotel ? '🏨 Hôtel' : '👤 Client') + ' · ' + time + '</div>'
+      + '<div class="tl-bubble ' + (isHotel ? 'tl-hotel' : 'tl-guest') + '" style="align-self:' + (isHotel ? 'flex-end' : 'flex-start') + '">' + esc(m.text) + '</div>'
       + '</div>';
   }).join('');
   tl.scrollTop = tl.scrollHeight;

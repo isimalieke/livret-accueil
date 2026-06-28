@@ -2029,19 +2029,22 @@ function saveTicketLocal(slug, id, subject) {
 function renderTicketFollow(slug, list) {
   var wrap = document.getElementById('ticket-follow-wrap');
   if (!wrap || !list || !list.length) return;
-  var last = list[0];
   var lang = document.body.classList.contains('lang-en') ? 'en' : 'fr';
-  var labelTitle = lang === 'en' ? 'Track my ticket' : 'Suivre mon ticket';
-  var labelSub   = lang === 'en' ? 'Tap to view the conversation' : 'Voir la conversation en cours';
-  wrap.innerHTML =
-    '<a class="ticket-follow" href="/' + slug + '/ticket/' + last.id + '" target="_blank" rel="noopener">' +
-      '<div class="ticket-follow-ico">🎫</div>' +
-      '<div>' +
-        '<div class="ticket-follow-id">' + labelTitle + ' — #' + last.id + '</div>' +
-        '<div class="ticket-follow-sub">' + (last.subject || labelSub) + '</div>' +
-      '</div>' +
-      '<div style="margin-left:auto;color:#c8d4de;font-size:18px">›</div>' +
-    '</a>';
+  var headerLabel = lang === 'en' ? 'My tickets' : 'Mes tickets';
+  var html = '<div style="margin-top:10px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;">'
+    + '<div style="padding:10px 16px;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)">🎫 ' + headerLabel + '</div>';
+  list.forEach(function(t) {
+    html += '<a class="ticket-follow" href="/' + slug + '/ticket/' + t.id + '" target="_blank" rel="noopener" style="border-radius:0;border:none;border-bottom:1px solid var(--border);margin-top:0;">'
+      + '<div class="ticket-follow-ico">🎫</div>'
+      + '<div>'
+        + '<div class="ticket-follow-id">#' + t.id + '</div>'
+        + '<div class="ticket-follow-sub">' + (t.subject || '') + '</div>'
+      + '</div>'
+      + '<div style="margin-left:auto;color:#c8d4de;font-size:18px">›</div>'
+      + '</a>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
 }
 
 // Afficher le bouton ticket au chargement si un ticket existe dans localStorage

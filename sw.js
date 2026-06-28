@@ -1,4 +1,4 @@
-const CACHE = 'livret-v30';
+const CACHE = 'livret-v31';
 // config.js exclu du pré-cache — contenu dynamique (KV)
 const FILES = ['./index.html', './manifest.json', './admin.html'];
 

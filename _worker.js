@@ -420,6 +420,85 @@ async function sendCheckoutReminder(env, stay, hotelNom, slug) {
   });
 }
 
+// ── Helpers email HTML partagé ──
+function emailBase(hotelNom, headerColor, headerIcon, headerTitle) {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px 12px}
+.card{max-width:520px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10)}
+.cover{background:${headerColor};padding:28px 24px 22px;text-align:center}
+.cover-ico{font-size:36px;margin-bottom:8px}
+.cover-hotel{color:#fff;font-size:20px;font-weight:700;letter-spacing:.3px}
+.cover-sub{color:rgba(255,255,255,.65);font-size:13px;margin-top:4px}
+.body{padding:24px}
+.greeting{font-size:16px;font-weight:600;margin-bottom:12px}
+.intro{font-size:14px;color:#444;line-height:1.6;margin-bottom:18px}
+.ticket-box{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:16px 20px;margin-bottom:18px;text-align:center}
+.ticket-label{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#64748b;font-weight:600;margin-bottom:4px}
+.ticket-id{font-size:28px;font-weight:800;font-family:monospace;color:#1e293b;letter-spacing:2px}
+.ticket-subject{font-size:13px;color:#64748b;margin-top:4px}
+.msg-box{background:#f1f5f9;border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:14px;color:#334155;line-height:1.6;white-space:pre-wrap}
+.cta{display:block;background:${headerColor};color:#fff;text-decoration:none;text-align:center;padding:14px 24px;border-radius:10px;font-weight:700;font-size:15px;margin-bottom:18px}
+.footer{border-top:1px solid #f1f5f9;padding:16px 24px;text-align:center}
+.footer-thanks{font-size:13px;color:#64748b}
+.footer-sub{font-size:11px;color:#94a3b8;margin-top:4px}
+</style></head><body>
+<div class="card">
+<div class="cover"><div class="cover-ico">${headerIcon}</div><div class="cover-hotel">${hotelNom}</div><div class="cover-sub">${headerTitle}</div></div>
+<div class="body">`;
+}
+function emailFooter(hotelNom) {
+  return `</div><div class="footer"><div class="footer-thanks">Merci de votre confiance.</div><div class="footer-sub">${hotelNom} — Ce message est automatique.</div></div></div></body></html>`;
+}
+async function resendEmail(env, to, subject, html, from) {
+  if (!env.RESEND_API_KEY) return;
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: [to], subject, html }),
+  });
+}
+
+// 1. Confirmation au vacancier après création du ticket
+async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
+  const ticketUrl = `https://livret-accueil-2wc.pages.dev/${slug}/ticket/${ticket.id}`;
+  const html = emailBase(hotelNom, '#2c3e50', '🎫', 'Votre signalement a bien été reçu')
+    + `<div class="greeting">Bonjour ${ticket.guestName},</div>`
+    + `<div class="intro">Nous avons bien reçu votre signalement et nous vous en remercions. Notre équipe va traiter votre demande dans les meilleurs délais.</div>`
+    + `<div class="ticket-box"><div class="ticket-label">Votre numéro de ticket</div><div class="ticket-id">#${ticket.id}</div><div class="ticket-subject">${ticket.subject}</div></div>`
+    + `<div class="intro">Vous pouvez suivre l'avancement de votre demande et échanger avec nous en cliquant ci-dessous :</div>`
+    + `<a class="cta" href="${ticketUrl}">Suivre mon ticket →</a>`
+    + emailFooter(hotelNom);
+  await resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <noreply@assenka.com>`);
+}
+
+// 2. Notification à l'hôtelier quand le vacancier crée un ticket ou répond
+async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, newMessage, slug) {
+  const adminUrl = `https://livret-accueil-2wc.pages.dev/${slug}/admin`;
+  const html = emailBase(hotelNom, '#dc2626', '⚠️', 'Nouveau signalement reçu')
+    + `<div class="greeting">Nouveau message sur le ticket #${ticket.id}</div>`
+    + `<div class="intro"><strong>De :</strong> ${ticket.guestName}${ticket.guestPhone ? ' · ' + ticket.guestPhone : ''}<br><strong>Objet :</strong> ${ticket.subject}</div>`
+    + `<div class="ticket-box"><div class="ticket-label">Message reçu</div></div>`
+    + `<div class="msg-box">${newMessage}</div>`
+    + `<a class="cta" href="${adminUrl}">Répondre depuis l'admin →</a>`
+    + emailFooter(hotelNom);
+  await resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Livret Assenka <noreply@assenka.com>`);
+}
+
+// 3. Notification au vacancier quand l'hôtelier répond
+async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
+  const ticketUrl = `https://livret-accueil-2wc.pages.dev/${slug}/ticket/${ticket.id}`;
+  const html = emailBase(hotelNom, '#2c3e50', '💬', 'Réponse à votre signalement')
+    + `<div class="greeting">Bonjour ${ticket.guestName},</div>`
+    + `<div class="intro"><strong>${hotelNom}</strong> a répondu à votre ticket <strong>#${ticket.id}</strong> — ${ticket.subject} :</div>`
+    + `<div class="msg-box">${replyText}</div>`
+    + `<div class="intro">Vous pouvez continuer la conversation ou consulter l'historique complet en cliquant ci-dessous :</div>`
+    + `<a class="cta" href="${ticketUrl}">Voir la conversation →</a>`
+    + emailFooter(hotelNom);
+  await resendEmail(env, ticket.guestEmail, `Réponse à votre ticket #${ticket.id} — ${hotelNom}`, html, `${hotelNom} <noreply@assenka.com>`);
+}
+
 async function fetchAsset(env, urlString) {
   try {
     return await env.ASSETS.fetch(new Request(urlString));
@@ -461,7 +540,7 @@ function genTicketId() {
 async function handleCreateTicket(request, env, slug) {
   try {
     const data = await request.json();
-    const { guestName, guestPhone, subject, message } = data;
+    const { guestName, guestPhone, guestEmail, subject, message } = data;
     if (!subject || !message) return json({ ok: false, error: 'Objet et message requis.' }, 400);
 
     let id = genTicketId();
@@ -472,8 +551,9 @@ async function handleCreateTicket(request, env, slug) {
 
     const ticket = {
       id, slug, status: 'received',
-      guestName: guestName || 'Visiteur',
+      guestName:  guestName  || 'Visiteur',
       guestPhone: guestPhone || '',
+      guestEmail: guestEmail || '',
       subject,
       messages: [{ from: 'guest', text: message, timestamp: new Date().toISOString() }],
       created: new Date().toISOString(),
@@ -488,7 +568,24 @@ async function handleCreateTicket(request, env, slug) {
     index.unshift({ id, status: 'received', subject, guestName: ticket.guestName, guestPhone: ticket.guestPhone, created: ticket.created });
     await env.CONFIG_KV.put('hotel:' + slug + ':tickets', JSON.stringify(index));
 
-    return json({ ok: true, id, ticketUrl: '/' + slug + '/ticket/' + id });
+    // Récupérer infos hôtel pour les emails
+    const authRaw = await env.CONFIG_KV.get('hotel:' + slug + ':auth');
+    const hotelAuth = authRaw ? JSON.parse(authRaw) : {};
+    const hotelNom = hotelAuth.nom || slug;
+    const hotelEmail = hotelAuth.email || '';
+
+    // Email de confirmation au vacancier (si email fourni)
+    let emailSent = false;
+    if (guestEmail && env.RESEND_API_KEY) {
+      await sendTicketConfirmationToGuest(env, ticket, hotelNom, slug);
+      emailSent = true;
+    }
+    // Notification à l'hôtelier
+    if (hotelEmail && env.RESEND_API_KEY) {
+      await sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, message, slug);
+    }
+
+    return json({ ok: true, id, ticketUrl: '/' + slug + '/ticket/' + id, emailSent });
   } catch(e) {
     return json({ ok: false, error: String(e) }, 500);
   }
@@ -532,6 +629,23 @@ async function handleAddMessage(request, env, slug, ticketId) {
     }
 
     await env.CONFIG_KV.put('hotel:' + slug + ':ticket:' + ticketId, JSON.stringify(ticket));
+
+    // Notifications email
+    if (env.RESEND_API_KEY) {
+      const authRaw = await env.CONFIG_KV.get('hotel:' + slug + ':auth');
+      const hotelAuth = authRaw ? JSON.parse(authRaw) : {};
+      const hotelNom   = hotelAuth.nom   || slug;
+      const hotelEmail = hotelAuth.email || '';
+
+      if (from === 'guest' && hotelEmail) {
+        // Vacancier répond → notifier l'hôtelier
+        await sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, text, slug);
+      } else if (from === 'hotel' && ticket.guestEmail) {
+        // Hôtelier répond → notifier le vacancier
+        await sendTicketReplyToGuest(env, ticket, hotelNom, text, slug);
+      }
+    }
+
     return json({ ok: true, ticket });
   } catch(e) {
     return json({ ok: false, error: String(e) }, 500);

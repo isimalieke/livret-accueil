@@ -452,12 +452,18 @@ function emailFooter(hotelNom) {
   return `</div><div class="footer"><div class="footer-thanks">Merci de votre confiance.</div><div class="footer-sub">${hotelNom} — Ce message est automatique.</div></div></div></body></html>`;
 }
 async function resendEmail(env, to, subject, html, from) {
-  if (!env.RESEND_API_KEY) return;
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: [to], subject, html }),
-  });
+  if (!env.RESEND_API_KEY) return { error: 'RESEND_API_KEY manquante' };
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [to], subject, html }),
+    });
+    const body = await r.text();
+    return { status: r.status, body };
+  } catch(e) {
+    return { error: String(e) };
+  }
 }
 
 // 1. Confirmation au vacancier après création du ticket
@@ -470,7 +476,7 @@ async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
     + `<div class="intro">Vous pouvez suivre l'avancement de votre demande et échanger avec nous en cliquant ci-dessous :</div>`
     + `<a class="cta" href="${ticketUrl}">Suivre mon ticket →</a>`
     + emailFooter(hotelNom);
-  await resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <onboarding@resend.dev>`);
+  return await resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <onboarding@resend.dev>`);
 }
 
 // 2. Notification à l'hôtelier quand le vacancier crée un ticket ou répond
@@ -576,16 +582,19 @@ async function handleCreateTicket(request, env, slug) {
 
     // Email de confirmation au vacancier (si email fourni)
     let emailSent = false;
+    let resendDebug = null;
     if (guestEmail && env.RESEND_API_KEY) {
-      await sendTicketConfirmationToGuest(env, ticket, hotelNom, slug);
-      emailSent = true;
+      resendDebug = await sendTicketConfirmationToGuest(env, ticket, hotelNom, slug);
+      emailSent = resendDebug && resendDebug.status === 200;
+    } else if (!env.RESEND_API_KEY) {
+      resendDebug = 'RESEND_API_KEY non disponible dans env';
     }
     // Notification à l'hôtelier
     if (hotelEmail && env.RESEND_API_KEY) {
       await sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, message, slug);
     }
 
-    return json({ ok: true, id, ticketUrl: '/' + slug + '/ticket/' + id, emailSent });
+    return json({ ok: true, id, ticketUrl: '/' + slug + '/ticket/' + id, emailSent, resendDebug });
   } catch(e) {
     return json({ ok: false, error: String(e) }, 500);
   }

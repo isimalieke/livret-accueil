@@ -48,10 +48,12 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .step-pill.done   { background:#dcfce7; color:var(--green); }
 
 /* ── SUBJECT ── */
-.subject-bar { background:#fff8e7; border-bottom:1px solid #fde68a; padding:10px 16px; flex-shrink:0; }
-.subject-lbl  { font-size:10px; text-transform:uppercase; letter-spacing:.8px; color:#92400e; font-weight:600; margin-bottom:2px; }
-.subject-text { font-size:14px; font-weight:600; color:#78350f; }
-.subject-meta { font-size:11px; color:#a16207; margin-top:2px; }
+.subject-bar { background:#fef9c3; border-bottom:1.5px solid #fde047; padding:12px 16px; flex-shrink:0; display:flex; align-items:center; gap:12px; }
+.subject-ico { font-size:20px; width:38px; height:38px; border-radius:9px; background:#fef08a; border:2px solid #1a1a1a; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.subject-info { flex:1; min-width:0; }
+.subject-lbl  { font-size:10px; text-transform:uppercase; letter-spacing:.8px; color:#713f12; font-weight:700; margin-bottom:2px; }
+.subject-text { font-size:14px; font-weight:700; color:#1a1a1a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.subject-meta { font-size:11px; color:#92400e; margin-top:2px; }
 
 /* ── CHAT ZONE ── */
 .chat-zone { flex:1; overflow-y:auto; padding:14px 12px 12px; }
@@ -280,9 +282,12 @@ function render() {
   var dateStr = d.toLocaleDateString(fr?'fr-FR':'en-GB') + ' ' + d.toLocaleTimeString(fr?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('subject-bar-wrap').innerHTML =
     '<div class="subject-bar">' +
-      '<div class="subject-lbl">' + (fr?'Objet du signalement':'Subject') + '</div>' +
-      '<div class="subject-text">' + esc(_ticket.subject) + '</div>' +
-      '<div class="subject-meta">' + esc(_ticket.guestName) + ' · ' + dateStr + '</div>' +
+      '<div class="subject-ico">⚠️</div>' +
+      '<div class="subject-info">' +
+        '<div class="subject-lbl">' + (fr?'Objet du signalement':'Subject') + '</div>' +
+        '<div class="subject-text">' + esc(_ticket.subject) + '</div>' +
+        '<div class="subject-meta">' + esc(_ticket.guestName) + ' · ' + dateStr + '</div>' +
+      '</div>' +
     '</div>';
 
   // ── Messages ──

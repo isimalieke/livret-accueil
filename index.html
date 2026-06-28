@@ -425,6 +425,11 @@ body.lang-en .en-o { display:block; }
 }
 .incident-home-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:2px; }
 .incident-home-sub { font-size:12px; color:#713f12; }
+.ticket-follow { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:12px; margin-top:10px; cursor:pointer; text-decoration:none; -webkit-user-select:none; transition:transform .1s; }
+.ticket-follow:active { transform:scale(0.98); }
+.ticket-follow-ico { width:40px; height:40px; border-radius:10px; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.ticket-follow-id { font-size:13px; font-weight:700; color:var(--cover); font-family:monospace; letter-spacing:.5px; }
+.ticket-follow-sub { font-size:11px; color:var(--text2); margin-top:1px; }
 
 /* ══ CATEGORY PAGE ══ */
 .cat-page-hdr {
@@ -567,6 +572,7 @@ body.lang-en .en-o { display:block; }
         <div class="incident-home-sub en-o">Breakdown, incident — host notified immediately</div>
       </div>
     </div>
+    <div id="ticket-follow-wrap"></div>
 
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
@@ -1524,6 +1530,8 @@ async function sendIncident() {
       if (email && data.emailSent) {
         document.getElementById('inc-email-confirm').style.display = 'block';
       }
+      // Sauvegarder le ticket dans localStorage pour le retrouver plus tard
+      saveTicketLocal(_slug, data.id, subject);
     } else {
       alert('Erreur : ' + (data.error || 'Impossible de créer le ticket.'));
       btn.disabled = false;
@@ -1974,6 +1982,50 @@ function swapCurrencies() {
 // Initialiser le convertisseur quand on ouvre la page
 var _convInit = false;
 var _origShowPage = showPage;
+// ── Tickets localStorage ──
+function saveTicketLocal(slug, id, subject) {
+  try {
+    var key = 'livret_tickets_' + slug;
+    var list = JSON.parse(localStorage.getItem(key) || '[]');
+    // Éviter les doublons
+    list = list.filter(function(t) { return t.id !== id; });
+    list.unshift({ id: id, subject: subject, created: new Date().toISOString() });
+    // Garder max 5 tickets
+    list = list.slice(0, 5);
+    localStorage.setItem(key, JSON.stringify(list));
+    renderTicketFollow(slug, list);
+  } catch(e) {}
+}
+
+function renderTicketFollow(slug, list) {
+  var wrap = document.getElementById('ticket-follow-wrap');
+  if (!wrap || !list || !list.length) return;
+  var last = list[0];
+  var lang = document.body.classList.contains('lang-en') ? 'en' : 'fr';
+  var labelTitle = lang === 'en' ? 'Track my ticket' : 'Suivre mon ticket';
+  var labelSub   = lang === 'en' ? 'Tap to view the conversation' : 'Voir la conversation en cours';
+  wrap.innerHTML =
+    '<a class="ticket-follow" href="/' + slug + '/ticket/' + last.id + '" target="_blank" rel="noopener">' +
+      '<div class="ticket-follow-ico">🎫</div>' +
+      '<div>' +
+        '<div class="ticket-follow-id">' + labelTitle + ' — #' + last.id + '</div>' +
+        '<div class="ticket-follow-sub">' + (last.subject || labelSub) + '</div>' +
+      '</div>' +
+      '<div style="margin-left:auto;color:#c8d4de;font-size:18px">›</div>' +
+    '</a>';
+}
+
+// Afficher le bouton ticket au chargement si un ticket existe dans localStorage
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    if (!slug) return;
+    var key = 'livret_tickets_' + slug;
+    var list = JSON.parse(localStorage.getItem(key) || '[]');
+    if (list.length) renderTicketFollow(slug, list);
+  } catch(e) {}
+});
+
 // Hook : init convertisseur à la première ouverture
 (function() {
   var orig = showPage;

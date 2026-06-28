@@ -1333,8 +1333,8 @@ body.lang-en .en-o { display:block; }
           <input type="number" id="conv-amount" class="conv-input" value="1000" min="0" step="any" oninput="convertCurrency()">
         </div>
         <div class="conv-field">
-          <label class="conv-lbl fr-o">De</label>
-          <label class="conv-lbl en-o">From</label>
+          <label class="conv-lbl fr-o">Devise</label>
+          <label class="conv-lbl en-o">Currency</label>
           <select id="conv-from" class="conv-select" onchange="convertCurrency()"></select>
         </div>
       </div>
@@ -1343,14 +1343,14 @@ body.lang-en .en-o { display:block; }
       </div>
       <div class="conv-row">
         <div class="conv-field">
-          <label class="conv-lbl fr-o">Vers</label>
-          <label class="conv-lbl en-o">To</label>
-          <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
+          <label class="conv-lbl fr-o">Montant</label>
+          <label class="conv-lbl en-o">Amount</label>
+          <div class="conv-result" id="conv-result">—</div>
         </div>
         <div class="conv-field">
-          <label class="conv-lbl fr-o">Résultat</label>
-          <label class="conv-lbl en-o">Result</label>
-          <div class="conv-result" id="conv-result">—</div>
+          <label class="conv-lbl fr-o">Devise</label>
+          <label class="conv-lbl en-o">Currency</label>
+          <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
         </div>
       </div>
     </div>

@@ -154,7 +154,7 @@ async function handleRegister(request, env, url) {
     if (existing) {
       return json({
         ok: false,
-        error: 'Un établissement "' + nom + '" existe déjà. Contactez contact@assenka.com si c\'est le vôtre.',
+        error: 'Un établissement "' + nom + '" existe déjà. Contactez le support si c\'est le vôtre.',
       }, 409);
     }
 
@@ -412,7 +412,7 @@ async function sendCheckoutReminder(env, stay, hotelNom, slug) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: `${hotelNom} <noreply@assenka.com>`,
+      from: `${hotelNom} <onboarding@resend.dev>`,
       to: [stay.email],
       subject: `Votre check-out demain — ${hotelNom}`,
       html,
@@ -470,7 +470,7 @@ async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
     + `<div class="intro">Vous pouvez suivre l'avancement de votre demande et échanger avec nous en cliquant ci-dessous :</div>`
     + `<a class="cta" href="${ticketUrl}">Suivre mon ticket →</a>`
     + emailFooter(hotelNom);
-  await resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <noreply@assenka.com>`);
+  await resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <onboarding@resend.dev>`);
 }
 
 // 2. Notification à l'hôtelier quand le vacancier crée un ticket ou répond
@@ -483,7 +483,7 @@ async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, 
     + `<div class="msg-box">${newMessage}</div>`
     + `<a class="cta" href="${adminUrl}">Répondre depuis l'admin →</a>`
     + emailFooter(hotelNom);
-  await resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Livret Assenka <noreply@assenka.com>`);
+  await resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Livret Digital <onboarding@resend.dev>`);
 }
 
 // 3. Notification au vacancier quand l'hôtelier répond
@@ -496,7 +496,7 @@ async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
     + `<div class="intro">Vous pouvez continuer la conversation ou consulter l'historique complet en cliquant ci-dessous :</div>`
     + `<a class="cta" href="${ticketUrl}">Voir la conversation →</a>`
     + emailFooter(hotelNom);
-  await resendEmail(env, ticket.guestEmail, `Réponse à votre ticket #${ticket.id} — ${hotelNom}`, html, `${hotelNom} <noreply@assenka.com>`);
+  await resendEmail(env, ticket.guestEmail, `Réponse à votre ticket #${ticket.id} — ${hotelNom}`, html, `${hotelNom} <onboarding@resend.dev>`);
 }
 
 async function fetchAsset(env, urlString) {

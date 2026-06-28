@@ -94,6 +94,11 @@ export default {
       return handleCreateTicket(request, env, slug);
     }
 
+    // ── /{slug}/guest-stay → enregistrer les infos du séjour en cours ──
+    if (sub === 'guest-stay' && request.method === 'POST') {
+      return handleSaveGuestStay(request, env, slug);
+    }
+
     // ── /{slug}/tickets/search → recherche par téléphone ──
     if (sub === 'tickets' && parts[2] === 'search' && request.method === 'POST') {
       return handleSearchTickets(request, env, slug);
@@ -122,6 +127,11 @@ export default {
 
     // Tout le reste → statique
     return fetchAsset(env, request.url);
+  },
+
+  // ── Cron quotidien : rappel check-out J-1 ──
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(runCheckoutReminders(env));
   },
 };
 
@@ -269,6 +279,147 @@ async function handleManifest(env, slug, url) {
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// SÉJOUR EN COURS — sauvegarde infos guest
+// ─────────────────────────────────────────────
+async function handleSaveGuestStay(request, env, slug) {
+  const secret = request.headers.get('X-Auth-Secret') || '';
+  if (!env.AUTH_SECRET || secret !== env.AUTH_SECRET) {
+    return json({ ok: false, error: 'Non autorisé' }, 401);
+  }
+  try {
+    const { nom, email, checkout } = await request.json();
+    if (!email || !checkout) return json({ ok: false, error: 'Email et date de checkout requis' }, 400);
+    await env.CONFIG_KV.put(
+      `hotel:${slug}:current_stay`,
+      JSON.stringify({ nom: nom || '', email, checkout, saved: new Date().toISOString() })
+    );
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+// ─────────────────────────────────────────────
+// CRON — envoi des rappels check-out J-1
+// ─────────────────────────────────────────────
+async function runCheckoutReminders(env) {
+  if (!env.RESEND_API_KEY) return; // Resend non configuré
+
+  // Récupérer la liste de tous les hôtels
+  const indexRaw = await env.CONFIG_KV.get('hotels:index') || '[]';
+  const hotels = JSON.parse(indexRaw);
+
+  // Date de demain (checkout = demain → on envoie aujourd'hui)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  for (const h of hotels) {
+    try {
+      const stayRaw = await env.CONFIG_KV.get(`hotel:${h.slug}:current_stay`);
+      if (!stayRaw) continue;
+      const stay = JSON.parse(stayRaw);
+      if (stay.checkout !== tomorrowStr) continue; // pas demain
+
+      // Charger le nom de l'hôtel depuis la config
+      const configRaw = await env.CONFIG_KV.get(`hotel:${h.slug}:config`) || '';
+      const nomMatch = configRaw.match(/nom:\s*"([^"]+)"/);
+      const hotelNom = nomMatch ? nomMatch[1] : h.nom || 'votre hôtel';
+
+      await sendCheckoutReminder(env, stay, hotelNom, h.slug);
+
+      // Supprimer le séjour après envoi (évite les doublons)
+      await env.CONFIG_KV.delete(`hotel:${h.slug}:current_stay`);
+    } catch (_) { /* continue les autres hôtels */ }
+  }
+}
+
+async function sendCheckoutReminder(env, stay, hotelNom, slug) {
+  const guestNom = stay.nom || 'Cher(e) hôte';
+  const dateStr  = new Date(stay.checkout + 'T12:00:00').toLocaleDateString('fr-FR', {
+    weekday:'long', day:'numeric', month:'long'
+  });
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rappel check-out — ${hotelNom}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap');
+  body { margin:0; padding:0; background:#f4f6f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; }
+  .wrap { max-width:540px; margin:32px auto; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  .cover { background:linear-gradient(135deg,#1a3a5c 0%,#2c6ea1 100%); padding:36px 32px 28px; text-align:center; }
+  .cover-ico { font-size:48px; margin-bottom:10px; }
+  .cover-hotel { font-family:'Playfair Display',Georgia,serif; color:#fff; font-size:24px; font-weight:400; margin:0 0 6px; }
+  .cover-sub { color:rgba(255,255,255,.7); font-size:13px; }
+  .body { padding:32px; }
+  .greeting { font-size:17px; color:#1a3a5c; font-weight:600; margin-bottom:8px; }
+  .intro { font-size:15px; color:#555; line-height:1.6; margin-bottom:24px; }
+  .checklist-title { font-size:13px; font-weight:700; color:#1a3a5c; text-transform:uppercase; letter-spacing:.6px; margin-bottom:14px; }
+  .item { display:flex; align-items:flex-start; gap:12px; margin-bottom:13px; }
+  .item-num { width:28px; height:28px; border-radius:50%; background:#1a3a5c; color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .item-text { font-size:14px; color:#444; line-height:1.5; padding-top:5px; }
+  .checkout-box { background:#f0fdf4; border:1px solid #86efac; border-radius:14px; padding:18px 20px; margin:24px 0; text-align:center; }
+  .checkout-time { font-size:32px; font-weight:700; color:#15803d; }
+  .checkout-label { font-size:13px; color:#15803d; margin-top:4px; }
+  .footer { background:#1a3a5c; padding:22px 32px; text-align:center; }
+  .footer-thanks { font-family:'Playfair Display',Georgia,serif; color:#fff; font-size:18px; font-style:italic; margin-bottom:8px; }
+  .footer-sub { color:rgba(255,255,255,.6); font-size:12px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cover">
+    <div class="cover-ico">🌅</div>
+    <div class="cover-hotel">${hotelNom}</div>
+    <div class="cover-sub">Votre check-out est demain</div>
+  </div>
+  <div class="body">
+    <div class="greeting">Bonjour ${guestNom},</div>
+    <div class="intro">Votre séjour touche bientôt à sa fin. Nous avons été ravis de vous recevoir et espérons que vous avez passé un excellent moment parmi nous.<br><br>Voici nos derniers conseils pour un check-out réussi :</div>
+
+    <div class="checklist-title">✅ Checklist de départ</div>
+
+    <div class="item"><div class="item-num">1</div><div class="item-text">Vérifiez que vous n'avez rien oublié — armoires, tiroirs, salle de bain, chargeurs</div></div>
+    <div class="item"><div class="item-num">2</div><div class="item-text">Éteignez les lumières et la climatisation</div></div>
+    <div class="item"><div class="item-num">3</div><div class="item-text">Fermez toutes les fenêtres et portes</div></div>
+    <div class="item"><div class="item-num">4</div><div class="item-text">Déposez vos clés selon les instructions reçues à l'arrivée</div></div>
+    <div class="item"><div class="item-num">5</div><div class="item-text">N'hésitez pas à nous contacter si vous avez besoin de garder vos bagages</div></div>
+
+    <div class="checkout-box">
+      <div class="checkout-label">Heure limite de check-out</div>
+      <div class="checkout-time" id="co-time">demain matin</div>
+      <div class="checkout-label">Le ${dateStr}</div>
+    </div>
+
+    <div class="intro" style="margin-bottom:0">Un petit avis en ligne nous aiderait énormément à faire connaître notre établissement. Merci pour votre confiance, et à bientôt ! 🌟</div>
+  </div>
+  <div class="footer">
+    <div class="footer-thanks">Merci pour votre confiance.</div>
+    <div class="footer-sub">${hotelNom}<br>Ce message est automatique — merci de ne pas y répondre.</div>
+  </div>
+</div>
+</body>
+</html>`;
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: `${hotelNom} <noreply@assenka.com>`,
+      to: [stay.email],
+      subject: `Votre check-out demain — ${hotelNom}`,
+      html,
+    }),
+  });
+}
+
 async function fetchAsset(env, urlString) {
   try {
     return await env.ASSETS.fetch(new Request(urlString));

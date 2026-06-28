@@ -44,9 +44,12 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 .auth-logo { font-size:42px; margin-bottom:12px; }
 .auth-hotel { font-size:20px; letter-spacing:2px; text-transform:uppercase; color:#fff; margin-bottom:4px; font-family:'Playfair Display',Georgia,serif; }
 .auth-sub { font-size:12px; color:rgba(255,255,255,0.55); font-style:italic; letter-spacing:1px; margin-bottom:32px; }
-.auth-input { width:100%; padding:12px 16px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:12px; color:#fff; font-size:15px; text-align:center; letter-spacing:2px; outline:none; margin-bottom:12px; }
+.auth-pwd-wrap { position:relative; margin-bottom:12px; }
+.auth-input { width:100%; padding:12px 44px 12px 16px; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:12px; color:#fff; font-size:15px; text-align:center; letter-spacing:2px; outline:none; box-sizing:border-box; }
 .auth-input::placeholder { color:rgba(255,255,255,0.35); }
 .auth-input:focus { border-color:rgba(255,255,255,0.6); background:rgba(255,255,255,0.18); }
+.auth-eye { position:absolute; right:13px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.55); font-size:18px; padding:4px; line-height:1; }
+.auth-eye:hover { color:#fff; }
 .auth-btn { width:100%; padding:12px; background:#fff; border:none; color:var(--cover); border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; letter-spacing:0.3px; }
 .auth-btn:hover { background:#f0f0f0; }
 .auth-error { color:#ff9090; font-size:13px; margin-top:10px; display:none; }
@@ -67,6 +70,33 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0;
 }
 .back-btn.vis { display:flex; }
+
+/* ── Bouton retour bas (injecté dans chaque page) ── */
+.back-row-bottom {
+  text-align:center; padding:28px 16px 16px;
+}
+.back-row-bottom .back-btn-inline {
+  background:var(--cover); color:#fff; border:none;
+  border-radius:50px; padding:15px 56px;
+  font-size:16px; font-weight:600; letter-spacing:.3px;
+  cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.18);
+  width:100%; max-width:320px;
+  -webkit-user-select:none;
+}
+.back-row-bottom .back-btn-inline:active { opacity:0.85; }
+
+/* Appareils / Mode d'emploi cards */
+.appl-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; }
+.appl-card-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.appl-ico { width:46px; height:46px; border-radius:12px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+.appl-title { font-size:15px; font-weight:700; color:var(--text); }
+.appl-desc { font-size:13px; color:var(--text2); line-height:1.55; margin-bottom:10px; white-space:pre-line; }
+.appl-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.appl-btn { display:inline-flex; align-items:center; gap:5px; padding:7px 13px; border-radius:50px; font-size:12px; font-weight:600; text-decoration:none; border:none; cursor:pointer; }
+.appl-btn-doc { background:#f0f7ff; color:#1a56db; border:1px solid #bfdbfe; }
+.appl-btn-vid { background:#fff5f0; color:#c2410c; border:1px solid #fed7aa; }
+.appl-btn:hover { opacity:0.85; }
+
 .hotel-name { color:#fff; font-size:14px; letter-spacing:0.8px; font-family:'Playfair Display',Georgia,serif; }
 .hotel-sub  { color:rgba(255,255,255,0.55); font-size:10px; margin-top:1px; }
 
@@ -163,7 +193,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 .page-hdr-icon  { font-size:24px; }
 .page-hdr-title { font-size:17px; font-family:'Playfair Display',Georgia,serif; color:var(--text); font-weight:500; }
 .page-hdr-sub   { font-size:11px; color:var(--text2); margin-top:2px; }
-.page-body { padding:16px; padding-bottom:48px; background:var(--bg); }
+.page-body { padding:16px; padding-bottom:8px; background:var(--bg); }
 
 /* ══ CARDS ══ */
 .card {
@@ -404,7 +434,7 @@ body.lang-en .en-o { display:block; }
 }
 
 /* ══ SUB-LIST ══ */
-.sub-list { padding:14px; }
+.sub-list { padding:14px; padding-bottom:8px; }
 .sub-list-item {
   background:var(--card-bg); border-radius:16px; padding:16px;
   margin-bottom:11px; border:1px solid var(--border);
@@ -421,6 +451,23 @@ body.lang-en .en-o { display:block; }
 .sli-label { font-size:15px; font-weight:600; color:var(--text); }
 .sli-sub { font-size:12px; color:var(--text2); margin-top:3px; line-height:1.4; }
 .sli-arrow { margin-left:auto; color:#c8d4de; font-size:20px; flex-shrink:0; }
+
+/* ══ CONVERTISSEUR ══ */
+.conv-card { background:var(--card-bg); border-radius:18px; border:1px solid var(--border); padding:20px; margin-bottom:14px; }
+.conv-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:4px; }
+.conv-field { display:flex; flex-direction:column; gap:6px; }
+.conv-lbl { font-size:12px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+.conv-input { padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:20px; font-weight:600; color:var(--text); background:var(--bg); outline:none; width:100%; box-sizing:border-box; }
+.conv-input:focus { border-color:var(--cover); }
+.conv-select { padding:10px 8px; border:1.5px solid var(--border); border-radius:12px; font-size:14px; color:var(--text); background:var(--bg); outline:none; }
+.conv-result { padding:12px; border:1.5px solid var(--border); border-radius:12px; font-size:20px; font-weight:700; color:var(--cover); background:var(--bg); min-height:46px; display:flex; align-items:center; }
+.conv-swap-wrap { text-align:center; margin:8px 0; }
+.conv-swap { background:var(--cover); border:none; border-radius:50%; width:38px; height:38px; font-size:18px; color:#fff; cursor:pointer; }
+.conv-rate-info { text-align:center; font-size:12px; color:var(--text2); margin-bottom:12px; }
+.conv-tbl-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.conv-tbl-row:last-child { border-bottom:none; }
+.conv-tbl-cur { font-weight:600; color:var(--text); }
+.conv-tbl-val { color:var(--cover); font-weight:700; }
 </style>
 </head>
 <body class="lang-fr">
@@ -432,7 +479,10 @@ body.lang-en .en-o { display:block; }
     <div class="auth-hotel" id="auth-hotel-nom">Hôtel Teranga</div>
     <div class="auth-sub" id="auth-hotel-ville">Dakar · Sénégal</div>
     <div id="auth-form">
-      <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe / Password" onkeydown="if(event.key==='Enter') checkAuth()">
+      <div class="auth-pwd-wrap">
+        <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe / Password" onkeydown="if(event.key==='Enter') checkAuth()">
+        <button class="auth-eye" id="auth-eye-btn" onclick="toggleAuthPwd()" type="button" title="Afficher / Cacher">👁</button>
+      </div>
       <button class="auth-btn" onclick="checkAuth()">Accéder au livret · Enter</button>
       <div class="auth-error" id="auth-error">Mot de passe incorrect · Incorrect password</div>
     </div>
@@ -513,6 +563,8 @@ body.lang-en .en-o { display:block; }
       </div>
     </div>
 
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -556,6 +608,13 @@ body.lang-en .en-o { display:block; }
       <div><div class="sli-label fr-o">Paiement</div><div class="sli-label en-o">Payment</div><div class="sli-sub fr-o">Wave, Orange Money, virement</div><div class="sli-sub en-o">Wave, Orange Money, transfer</div></div>
       <div class="sli-arrow">›</div>
     </div>
+    <div class="sub-list-item" onclick="showPage('converter')">
+      <div class="sli-ico">💱</div>
+      <div><div class="sli-label fr-o">Convertisseur</div><div class="sli-label en-o">Currency converter</div><div class="sli-sub fr-o">Taux de change en temps réel</div><div class="sli-sub en-o">Live exchange rates</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -599,6 +658,8 @@ body.lang-en .en-o { display:block; }
       <div><div class="sli-label fr-o">Conseils locaux</div><div class="sli-label en-o">Local tips</div><div class="sli-sub fr-o">Bons plans et astuces</div><div class="sli-sub en-o">Tips and tricks</div></div>
       <div class="sli-arrow">›</div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -627,6 +688,8 @@ body.lang-en .en-o { display:block; }
       <div><div class="sli-label fr-o">Ambassades à Dakar</div><div class="sli-label en-o">Embassies in Dakar</div><div class="sli-sub">FR · BE · CH · US · UK</div></div>
       <div class="sli-arrow">›</div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -655,6 +718,8 @@ body.lang-en .en-o { display:block; }
       <div><div class="sli-label fr-o">Laisser un avis</div><div class="sli-label en-o">Leave a review</div><div class="sli-sub">Google · TripAdvisor · Booking</div></div>
       <div class="sli-arrow">›</div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -674,6 +739,8 @@ body.lang-en .en-o { display:block; }
       <div class="wt-en">Dear guests,<br><br><span id="bvn-en"></span></div>
       <div class="signature" id="bvn-sig"></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -712,7 +779,7 @@ body.lang-en .en-o { display:block; }
     </div>
     <div class="card">
       <div class="card-lbl">Contact</div>
-      <div class="row"><span class="ri">📱</span><div><div class="rf" id="contact-tel"></div></div></div>
+      <div id="contact-tels"></div>
       <div class="row"><span class="ri">📧</span><div><div class="rf" id="contact-email"></div></div></div>
     </div>
     <div class="card">
@@ -720,6 +787,8 @@ body.lang-en .en-o { display:block; }
       <div class="card-lbl en-o">Keys</div>
       <div class="row"><span class="ri">🔑</span><div><div class="rf" id="cles-fr"></div><div class="re" id="cles-en"></div></div></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -729,34 +798,15 @@ body.lang-en .en-o { display:block; }
     <div class="page-hdr-icon">🔌</div>
     <div>
       <div class="page-hdr-title fr-o">Mode d'Emploi</div>
-      <div class="page-hdr-title en-o">Appliances</div>
-      <div class="page-hdr-sub">Clim · TV · Chauffe-eau · Groupe</div>
+      <div class="page-hdr-title en-o">How it works</div>
+      <div class="page-hdr-sub">Équipements · Notices · Vidéos</div>
     </div>
   </div>
   <div class="page-body">
-    <div class="grid2">
-      <div class="gc">
-        <div class="gc-title">❄️ Climatisation</div>
-        <div class="gc-text fr-t" id="appl-clim-fr">—</div>
-        <div class="gc-text en-t" id="appl-clim-en">—</div>
-      </div>
-      <div class="gc">
-        <div class="gc-title">📺 Télévision</div>
-        <div class="gc-text fr-t" id="appl-tv-fr">—</div>
-        <div class="gc-text en-t" id="appl-tv-en">—</div>
-      </div>
-      <div class="gc">
-        <div class="gc-title">🚿 Chauffe-eau</div>
-        <div class="gc-text fr-t" id="appl-chauffe-fr">—</div>
-        <div class="gc-text en-t" id="appl-chauffe-en">—</div>
-      </div>
-      <div class="gc">
-        <div class="gc-title">⚡ Électricité</div>
-        <div class="gc-text fr-t" id="appl-groupe-fr">—</div>
-        <div class="gc-text en-t" id="appl-groupe-en">—</div>
-      </div>
-    </div>
+    <div id="appareils-list"></div>
     <div class="tip">💡 <span class="fr-o">En cas de problème, contactez-nous immédiatement.</span><span class="en-o">If any issue, contact us immediately.</span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -776,6 +826,8 @@ body.lang-en .en-o { display:block; }
       <div class="card-lbl en-o">Included in your stay</div>
       <div id="services-inclus"></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -796,6 +848,8 @@ body.lang-en .en-o { display:block; }
       <div id="services-demande"></div>
     </div>
     <div class="tip">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -812,8 +866,8 @@ body.lang-en .en-o { display:block; }
   </div>
   <div class="page-body">
     <div class="card">
-      <div class="card-lbl fr-o">Cuisine sénégalaise</div>
-      <div class="card-lbl en-o">Senegalese cuisine</div>
+      <div class="card-lbl fr-o">Cuisine locale</div>
+      <div class="card-lbl en-o">Local cuisine</div>
       <div id="resto-senegalais"></div>
     </div>
     <div class="card">
@@ -827,6 +881,8 @@ body.lang-en .en-o { display:block; }
       <div id="resto-gouter"></div>
     </div>
     <div class="tip">💡 <span class="fr-o">Pour les taxis, négociez le prix avant de monter.</span><span class="en-o">For taxis, negotiate the price before getting in.</span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -841,9 +897,19 @@ body.lang-en .en-o { display:block; }
     </div>
   </div>
   <div class="page-body">
+    <!-- Bouton Maps "Autour de l'hôtel" -->
+    <div id="maps-poi-wrap" style="display:none;margin-bottom:14px">
+      <a id="maps-poi-btn" href="#" target="_blank" rel="noopener"
+         onclick="event.preventDefault();event.stopPropagation();window.open(this.href,'_blank','noopener')"
+         style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--cover);color:#fff;border-radius:14px;padding:14px;font-size:14px;font-weight:600;text-decoration:none">
+        📍 <span class="fr-o">Explorer le quartier sur Google Maps</span><span class="en-o">Explore the neighbourhood on Google Maps</span>
+      </a>
+      <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:6px" class="fr-o">Restaurants, pharmacies, banques, commerces autour de l'hôtel</div>
+      <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:6px" class="en-o">Restaurants, pharmacies, banks, shops around the hotel</div>
+    </div>
     <div class="card">
-      <div class="card-lbl fr-o">À proximité</div>
-      <div class="card-lbl en-o">Nearby</div>
+      <div class="card-lbl fr-o">Recommandations de l'hôte</div>
+      <div class="card-lbl en-o">Host's picks nearby</div>
       <div id="quartier-points"></div>
     </div>
     <div class="card">
@@ -851,6 +917,8 @@ body.lang-en .en-o { display:block; }
       <div class="card-lbl en-o">Shops</div>
       <div id="quartier-commerces"></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -879,6 +947,8 @@ body.lang-en .en-o { display:block; }
       <div id="transport-location"></div>
     </div>
     <div class="tip">📍 <span id="transport-adresse"></span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -903,6 +973,8 @@ body.lang-en .en-o { display:block; }
       <div class="card-lbl en-o">Activities</div>
       <div id="activites-list"></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -923,6 +995,8 @@ body.lang-en .en-o { display:block; }
       <div id="marches-list"></div>
     </div>
     <div class="tip">💡 <span class="fr-o">Commencez à négocier à 50% du prix affiché. Payez en FCFA.</span><span class="en-o">Start at 50% of asking price. Pay in XOF (FCFA).</span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -948,25 +1022,27 @@ body.lang-en .en-o { display:block; }
       <div class="cc-text en-t">Dakar is generally safe. Avoid displaying jewellery and phones in public. At night, use Yango or a taxi rather than walking. Keep a copy of your passport.</div>
     </div>
     <div class="conseil-card">
-      <div class="cc-title">🕌 <span class="fr-o">Coutumes &amp; respect</span><span class="en-o">Customs &amp; respect</span></div>
-      <div class="cc-text fr-t">Le Sénégal est un pays à majorité musulmane. Couvrez épaules et genoux dans les mosquées et marchés. Enlever ses chaussures avant d'entrer dans une maison est apprécié.</div>
-      <div class="cc-text en-t">Senegal is a majority Muslim country. Cover shoulders and knees in mosques and markets. Removing shoes before entering a home is appreciated.</div>
+      <div class="cc-title">🤝 <span class="fr-o">Coutumes &amp; respect</span><span class="en-o">Customs &amp; respect</span></div>
+      <div class="cc-text fr-t">Renseignez-vous sur les usages locaux avant d'explorer. Le respect des traditions et des lieux de culte est toujours apprécié.</div>
+      <div class="cc-text en-t">Learn about local customs before exploring. Respecting traditions and places of worship is always appreciated.</div>
     </div>
     <div class="conseil-card">
-      <div class="cc-title">🤝 <span class="fr-o">Pourboires</span><span class="en-o">Tipping</span></div>
-      <div class="cc-text fr-t">Non obligatoire mais apprécié. Au restaurant : 5-10% si pas inclus. Guides, chauffeurs : 2 000–5 000 FCFA/jour selon satisfaction.</div>
-      <div class="cc-text en-t">Not mandatory but appreciated. Restaurants: 5-10% if not included. Guides, drivers: 2,000–5,000 XOF/day depending on satisfaction.</div>
+      <div class="cc-title">💰 <span class="fr-o">Pourboires</span><span class="en-o">Tipping</span></div>
+      <div class="cc-text fr-t">Non obligatoire mais apprécié. Au restaurant : 5-10% si non inclus. Pour les guides et chauffeurs, selon votre satisfaction.</div>
+      <div class="cc-text en-t">Not mandatory but appreciated. Restaurants: 5-10% if not included. For guides and drivers, according to your satisfaction.</div>
     </div>
     <div class="conseil-card">
       <div class="cc-title">📱 <span class="fr-o">Connectivité</span><span class="en-o">Connectivity</span></div>
-      <div class="cc-text fr-t">Cartes SIM locales disponibles (Orange, Free, Expresso) pour moins de 3 000 FCFA. Excellente couverture 4G à Dakar. Yango fonctionne sans SIM locale si vous avez le WiFi.</div>
-      <div class="cc-text en-t">Local SIM cards available (Orange, Free, Expresso) for under 3,000 XOF. Excellent 4G coverage in Dakar. Yango works without a local SIM if you have WiFi.</div>
+      <div class="cc-text fr-t">Des cartes SIM locales prépayées sont disponibles dans la plupart des boutiques. Vérifiez la couverture de votre opérateur dans la zone.</div>
+      <div class="cc-text en-t">Prepaid local SIM cards are available at most shops. Check your operator's coverage in the area.</div>
     </div>
     <div class="conseil-card">
       <div class="cc-title">☀️ <span class="fr-o">Soleil &amp; santé</span><span class="en-o">Sun &amp; health</span></div>
       <div class="cc-text fr-t">Crème solaire indispensable (SPF 50+). Buvez uniquement de l'eau en bouteille. Évitez les glaçons dans les restaurants de rue. Prenez vos médicaments antipaludéens si recommandés.</div>
       <div class="cc-text en-t">Sunscreen is essential (SPF 50+). Drink only bottled water. Avoid ice in street restaurants. Take antimalarial medication if advised by your doctor.</div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -988,6 +1064,8 @@ body.lang-en .en-o { display:block; }
       <div id="medical-cliniques"></div>
     </div>
     <div class="tip">⚠️ <span class="fr-o">Souscrivez une assurance voyage avant votre départ.</span><span class="en-o">Purchase travel insurance before departure.</span></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1020,6 +1098,8 @@ body.lang-en .en-o { display:block; }
       <div class="row"><span class="ri">💡</span><div><div class="rf">Yango ou taxi la nuit plutôt que marcher</div><div class="re">Use Yango or taxi at night, don't walk</div></div></div>
       <div class="row"><span class="ri">💡</span><div><div class="rf">Gardez une copie de votre passeport</div><div class="re">Keep a passport copy stored separately</div></div></div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1035,6 +1115,8 @@ body.lang-en .en-o { display:block; }
   </div>
   <div class="page-body">
     <div id="ambassades-list"></div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1073,6 +1155,8 @@ body.lang-en .en-o { display:block; }
     </div>
     <div class="tip fr-o">💡 Indiquez votre nom et numéro de chambre lors du paiement.</div>
     <div class="tip en-o">💡 Include your name and room number when making payment.</div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1105,6 +1189,8 @@ body.lang-en .en-o { display:block; }
       <div class="ft-contact" id="footer-contact"></div>
       <a href="admin.html" class="admin-lnk" onclick="event.stopPropagation();window.open('admin.html','_blank','noopener');return false;">⚙ Administration</a>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1177,6 +1263,8 @@ body.lang-en .en-o { display:block; }
         <span class="en-o">Track my ticket →</span>
       </a>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
   </div>
 </div>
 
@@ -1220,6 +1308,61 @@ body.lang-en .en-o { display:block; }
       </div>
       <div class="avis-arr">→</div>
     </div>
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
+
+  </div>
+</div>
+
+<!-- ══ CONVERTISSEUR DE MONNAIE ══ -->
+<div class="screen" id="screen-converter">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">💱</div>
+    <div>
+      <div class="page-hdr-title fr-o">Convertisseur</div>
+      <div class="page-hdr-title en-o">Currency Converter</div>
+      <div class="page-hdr-sub fr-o">Taux en temps réel</div>
+      <div class="page-hdr-sub en-o">Live exchange rates</div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="conv-card">
+      <div class="conv-row">
+        <div class="conv-field">
+          <label class="conv-lbl fr-o">Montant</label>
+          <label class="conv-lbl en-o">Amount</label>
+          <input type="number" id="conv-amount" class="conv-input" value="1000" min="0" step="any" oninput="convertCurrency()">
+        </div>
+        <div class="conv-field">
+          <label class="conv-lbl fr-o">De</label>
+          <label class="conv-lbl en-o">From</label>
+          <select id="conv-from" class="conv-select" onchange="convertCurrency()"></select>
+        </div>
+      </div>
+      <div class="conv-swap-wrap">
+        <button class="conv-swap" onclick="swapCurrencies()" title="Inverser">⇄</button>
+      </div>
+      <div class="conv-row">
+        <div class="conv-field">
+          <label class="conv-lbl fr-o">Vers</label>
+          <label class="conv-lbl en-o">To</label>
+          <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
+        </div>
+        <div class="conv-field">
+          <label class="conv-lbl fr-o">Résultat</label>
+          <label class="conv-lbl en-o">Result</label>
+          <div class="conv-result" id="conv-result">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="conv-rate-info" id="conv-rate-info"></div>
+    <div class="tip">ℹ️ <span class="fr-o">Taux indicatifs fournis par <strong>open.er-api.com</strong>. Vérifiez auprès de votre banque avant toute transaction.</span><span class="en-o">Indicative rates provided by <strong>open.er-api.com</strong>. Always check with your bank before any transaction.</span></div>
+
+    <!-- Tableau de référence rapide -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-lbl fr-o">Référence rapide</div>
+      <div class="card-lbl en-o">Quick reference</div>
+      <div id="conv-table"></div>
+    </div>
   </div>
 </div>
 
@@ -1235,12 +1378,35 @@ body.lang-en .en-o { display:block; }
 // ── NAVIGATION ──
 var _navHistory = []; // pile de navigation pour le bouton retour
 
+function _showBackBtns(visible) {
+  var cl1 = document.getElementById('back-btn').classList;
+  if (visible) cl1.add('vis'); else cl1.remove('vis');
+}
+
+// ── Injection bouton retour en bas de chaque page/catégorie ──
+function _injectBackButtons() {
+  var label = '<button onclick="goHome()" class="back-btn-inline"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button>';
+  // Toutes les page-body et sub-list SAUF l'accueil
+  document.querySelectorAll('.screen:not(#screen-home) .page-body, .screen:not(#screen-home) .sub-list').forEach(function(el) {
+    var row = document.createElement('div');
+    row.className = 'back-row-bottom';
+    row.innerHTML = label;
+    el.appendChild(row);
+  });
+}
+// Appeler après chargement du DOM
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _injectBackButtons);
+} else {
+  _injectBackButtons();
+}
+
 function showCat(cat) {
   _navHistory.push('home');
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   var el = document.getElementById('screen-cat-' + cat);
   if (el) el.classList.add('active');
-  document.getElementById('back-btn').classList.add('vis');
+  _showBackBtns(true);
   window.scrollTo(0, 0);
 }
 
@@ -1250,7 +1416,7 @@ function showPage(id) {
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   var el = document.getElementById('screen-' + id);
   if (el) el.classList.add('active');
-  document.getElementById('back-btn').classList.add('vis');
+  _showBackBtns(true);
   window.scrollTo(0, 0);
   if (id !== 'incident') resetIncident();
 }
@@ -1261,17 +1427,17 @@ function goHome() {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     if (prev === 'home') {
       document.getElementById('screen-home').classList.add('active');
-      document.getElementById('back-btn').classList.remove('vis');
+      _showBackBtns(false);
       _navHistory = [];
     } else {
       var el = document.getElementById('screen-' + prev);
       if (el) el.classList.add('active');
-      document.getElementById('back-btn').classList.add('vis');
+      _showBackBtns(true);
     }
   } else {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('screen-home').classList.add('active');
-    document.getElementById('back-btn').classList.remove('vis');
+    _showBackBtns(false);
   }
   window.scrollTo(0, 0);
 }
@@ -1394,6 +1560,20 @@ function initAuth() {
   document.getElementById('auth-screen').style.display = 'flex';
 }
 
+function toggleAuthPwd() {
+  var inp = document.getElementById('auth-pwd');
+  var btn = document.getElementById('auth-eye-btn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    inp.style.letterSpacing = '0';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    inp.style.letterSpacing = '2px';
+    btn.textContent = '👁';
+  }
+}
+
 function checkAuth() {
   if (typeof CONFIG === 'undefined' || !CONFIG.acces) return;
   var input = document.getElementById('auth-pwd').value;
@@ -1462,11 +1642,22 @@ function applyConfig() {
   var h = C.hotel;
 
   // Google Maps helper
-  var city = (h.ville || 'Dakar').split('·').pop().trim();
+  var city = (h.ville || '').split('·').pop().trim();
   function ml(name) {
-    var q = encodeURIComponent(name + ', ' + city + ', Sénégal');
+    var q = encodeURIComponent(name + (city ? ', ' + city : ''));
     var url = 'https://maps.google.com/?q=' + q;
     return '<a href="' + url + '" class="maps-btn" onclick="event.preventDefault();event.stopPropagation();window.open(\'' + url + '\',\'_blank\',\'noopener\');return false;">📍 Maps</a>';
+  }
+
+  // Bouton "Autour de l'hôtel" sur la page Quartier
+  var mapsWrap = document.getElementById('maps-poi-wrap');
+  var mapsBtn  = document.getElementById('maps-poi-btn');
+  if (mapsWrap && mapsBtn && (h.adresse || city)) {
+    var searchStr = [h.adresse, city].filter(Boolean).join(', ');
+    mapsBtn.href = 'https://www.google.com/maps/search/points+of+interest/@?api=1&query=' + encodeURIComponent(searchStr);
+    // Version plus simple : recherche Google Maps classique
+    mapsBtn.href = 'https://maps.google.com/?q=' + encodeURIComponent(searchStr) + '&z=15';
+    mapsWrap.style.display = 'block';
   }
 
   // Clickable phone helper
@@ -1510,23 +1701,60 @@ function applyConfig() {
   t('co-heure', C.pratique.checkout);
   t('cles-fr', C.pratique.cles);
   t('cles-en', C.pratique.cles_en);
-  r('contact-tel', tel(h.telephone) + (h.whatsapp ? ' (WhatsApp)' : ''));
+  // Numéros de téléphone (nouveau format tableau + compat ancien)
+  var telsContainer = document.getElementById('contact-tels');
+  if (telsContainer) {
+    var telsHtml = '';
+    var telsArr = h.telephones && h.telephones.length ? h.telephones
+      : h.telephone ? [{ dialcode:'', numero: h.telephone, label: h.whatsapp ? 'Réception' : '' },
+                       h.whatsapp && h.whatsapp !== h.telephone ? { dialcode:'', numero: h.whatsapp, label: 'WhatsApp' } : null].filter(Boolean)
+      : [];
+    telsArr.forEach(function(t_) {
+      if (!t_) return;
+      var fullNum = (t_.dialcode||'') + (t_.dialcode ? ' ' : '') + (t_.numero||'');
+      if (!fullNum.trim()) return;
+      var lbl = t_.label ? '<span style="font-size:11px;color:var(--text2);margin-left:6px">' + t_.label + '</span>' : '';
+      telsHtml += '<div class="row"><span class="ri">📱</span><div><div class="rf"><a href="tel:' + fullNum.replace(/\s/g,'') + '" style="color:inherit;text-decoration:none">' + fullNum + '</a>' + lbl + '</div></div></div>';
+    });
+    telsContainer.innerHTML = telsHtml || '<div class="row"><span class="ri">📱</span><div><div class="rf">—</div></div></div>';
+  }
   t('contact-email', h.email);
   r('regles-list', (C.pratique.regles || []).map(function(rg) {
     return '<div class="row"><span class="ri">' + rg.icon + '</span><div><div class="rf">' + rg.fr + '</div><div class="re">' + rg.en + '</div></div></div>';
   }).join(''));
 
   // Appareils
-  if (C.appareils) {
-    t('appl-clim-fr',    C.appareils.clim_fr);
-    t('appl-clim-en',    C.appareils.clim_en);
-    t('appl-tv-fr',      C.appareils.tv_fr);
-    t('appl-tv-en',      C.appareils.tv_en);
-    t('appl-chauffe-fr', C.appareils.chauffe_fr);
-    t('appl-chauffe-en', C.appareils.chauffe_en);
-    t('appl-groupe-fr',  C.appareils.groupe_fr);
-    t('appl-groupe-en',  C.appareils.groupe_en);
-  }
+  // Mode d'emploi — nouveau format dynamique (items[]) + rétro-compat ancien format
+  (function() {
+    var container = document.getElementById('appareils-list');
+    if (!container || !C.appareils) return;
+    var items = [];
+    var lang = document.body.classList.contains('lang-en') ? 'en' : 'fr';
+    if (C.appareils.items && C.appareils.items.length) {
+      items = C.appareils.items;
+    } else {
+      // Migration depuis l'ancien format
+      var old = C.appareils;
+      if (old.clim_fr || old.clim_en) items.push({ icon:'❄️', titre_fr:'Climatisation', titre_en:'Air conditioning', desc_fr: old.clim_fr||'', desc_en: old.clim_en||'' });
+      if (old.tv_fr || old.tv_en) items.push({ icon:'📺', titre_fr:'Télévision', titre_en:'Television', desc_fr: old.tv_fr||'', desc_en: old.tv_en||'' });
+      if (old.chauffe_fr || old.chauffe_en) items.push({ icon:'🚿', titre_fr:'Chauffe-eau', titre_en:'Water heater', desc_fr: old.chauffe_fr||'', desc_en: old.chauffe_en||'' });
+      if (old.groupe_fr || old.groupe_en) items.push({ icon:'⚡', titre_fr:'Électricité', titre_en:'Electricity', desc_fr: old.groupe_fr||'', desc_en: old.groupe_en||'' });
+    }
+    var html = '';
+    items.forEach(function(item) {
+      var titre = lang === 'en' ? (item.titre_en || item.titre_fr) : (item.titre_fr || item.titre_en);
+      var desc  = lang === 'en' ? (item.desc_en  || item.desc_fr)  : (item.desc_fr  || item.desc_en);
+      var btns  = '';
+      if (item.doc_url)   btns += '<a class="appl-btn appl-btn-doc" href="' + item.doc_url + '" target="_blank" rel="noopener">📄 <span>Notice</span></a>';
+      if (item.video_url) btns += '<a class="appl-btn appl-btn-vid" href="' + item.video_url + '" target="_blank" rel="noopener">🎬 <span class="fr-o">Vidéo</span><span class="en-o">Video</span></a>';
+      html += '<div class="appl-card">'
+            + '  <div class="appl-card-head"><div class="appl-ico">' + (item.icon||'🔌') + '</div><div class="appl-title">' + titre + '</div></div>'
+            + (desc ? '  <div class="appl-desc">' + desc + '</div>' : '')
+            + (btns ? '  <div class="appl-btns">' + btns + '</div>' : '')
+            + '</div>';
+    });
+    container.innerHTML = html || '<p style="color:var(--text2);padding:12px 0">—</p>';
+  })();
 
   // Services
   r('services-inclus', (C.services.inclus || []).map(function(s) {
@@ -1653,6 +1881,108 @@ function applyConfig() {
   // Auth
   initAuth();
 }
+
+// ── CONVERTISSEUR DE MONNAIE ──
+var _convRates = null;
+var _convBase = 'EUR';
+var _convUpdated = '';
+
+var CONV_CURRENCIES = [
+  { code:'XOF', label:'XOF – Franc CFA (UEMOA)' },
+  { code:'XAF', label:'XAF – Franc CFA (CEMAC)' },
+  { code:'MAD', label:'MAD – Dirham marocain' },
+  { code:'TND', label:'TND – Dinar tunisien' },
+  { code:'DZD', label:'DZD – Dinar algérien' },
+  { code:'GHS', label:'GHS – Cedi ghanéen' },
+  { code:'NGN', label:'NGN – Naira nigérian' },
+  { code:'KES', label:'KES – Shilling kényan' },
+  { code:'ZAR', label:'ZAR – Rand sud-africain' },
+  { code:'EUR', label:'EUR – Euro' },
+  { code:'USD', label:'USD – Dollar US' },
+  { code:'GBP', label:'GBP – Livre sterling' },
+  { code:'CHF', label:'CHF – Franc suisse' },
+  { code:'CAD', label:'CAD – Dollar canadien' },
+  { code:'MRU', label:'MRU – Ouguiya mauritanien' },
+  { code:'GMD', label:'GMD – Dalasi gambien' },
+];
+
+function initConverter() {
+  var from = document.getElementById('conv-from');
+  var to   = document.getElementById('conv-to');
+  if (!from || !to) return;
+  CONV_CURRENCIES.forEach(function(c) {
+    var o1 = document.createElement('option'); o1.value = c.code; o1.textContent = c.label; from.appendChild(o1);
+    var o2 = document.createElement('option'); o2.value = c.code; o2.textContent = c.label; to.appendChild(o2);
+  });
+  from.value = 'XOF';
+  to.value   = 'EUR';
+  loadRates();
+}
+
+function loadRates() {
+  // Taux de change indicatifs statiques (fallback si API indisponible)
+  var fallback = { EUR:1, USD:1.08, GBP:0.855, CHF:0.97, CAD:1.47, XOF:655.957, XAF:655.957, MAD:10.72, TND:3.38, DZD:145.2, GHS:15.8, NGN:1680, KES:141, ZAR:20.1, MRU:43.2, GMD:73.5 };
+  _convRates = fallback;
+  _convBase  = 'EUR';
+  _convUpdated = 'taux indicatifs';
+  convertCurrency();
+  // Tentative de chargement live
+  fetch('https://open.er-api.com/v6/latest/EUR')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d && d.rates) {
+        _convRates  = d.rates;
+        _convRates['EUR'] = 1;
+        _convBase   = 'EUR';
+        _convUpdated = d.time_last_update_utc ? d.time_last_update_utc.slice(0,16).replace('T',' ') + ' UTC' : 'en ligne';
+        convertCurrency();
+      }
+    }).catch(function(){});
+}
+
+function convertCurrency() {
+  if (!_convRates) return;
+  var amount = parseFloat(document.getElementById('conv-amount').value) || 0;
+  var from   = document.getElementById('conv-from').value;
+  var to     = document.getElementById('conv-to').value;
+  // Conversion via base EUR
+  var rFrom  = _convRates[from] || 1;
+  var rTo    = _convRates[to]   || 1;
+  var result = (amount / rFrom) * rTo;
+  var fmt    = result >= 100 ? result.toFixed(0) : result >= 10 ? result.toFixed(2) : result.toFixed(4);
+  document.getElementById('conv-result').textContent = fmt + ' ' + to;
+  document.getElementById('conv-rate-info').textContent = '1 ' + from + ' = ' + ((1 / rFrom * rTo)).toFixed(4) + ' ' + to + ' · ' + _convUpdated;
+  // Tableau de référence : montants courants
+  var tbl = document.getElementById('conv-table');
+  if (!tbl) return;
+  var refs = [1, 5, 10, 20, 50, 100, 500, 1000, 5000, 10000];
+  tbl.innerHTML = refs.map(function(v) {
+    var val = ((v / rFrom) * rTo);
+    var fval = val >= 100 ? val.toFixed(0) : val.toFixed(2);
+    return '<div class="conv-tbl-row"><span class="conv-tbl-cur">' + v + ' ' + from + '</span><span class="conv-tbl-val">' + fval + ' ' + to + '</span></div>';
+  }).join('');
+}
+
+function swapCurrencies() {
+  var from = document.getElementById('conv-from');
+  var to   = document.getElementById('conv-to');
+  var tmp  = from.value;
+  from.value = to.value;
+  to.value   = tmp;
+  convertCurrency();
+}
+
+// Initialiser le convertisseur quand on ouvre la page
+var _convInit = false;
+var _origShowPage = showPage;
+// Hook : init convertisseur à la première ouverture
+(function() {
+  var orig = showPage;
+  showPage = function(id) {
+    orig(id);
+    if (id === 'converter' && !_convInit) { _convInit = true; setTimeout(initConverter, 50); }
+  };
+})();
 </script>
 <script src="config.js"></script>
 </body>

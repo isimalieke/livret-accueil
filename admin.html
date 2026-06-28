@@ -65,6 +65,21 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .dyn-table .btn-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:16px; padding:4px; }
 .btn-add { background:none; border:1px dashed var(--gold); color:var(--gold); padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; margin-top:4px; }
 .btn-add:hover { background:rgba(201,168,76,.08); }
+/* Appareils cards */
+.appl-item { background:#f9fafb; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; position:relative; }
+.appl-item-head { display:grid; grid-template-columns:68px 1fr 1fr 32px; gap:8px; margin-bottom:10px; align-items:start; }
+.appl-item-head input { padding:7px 9px; border:1px solid var(--border); border-radius:8px; font-size:13px; width:100%; box-sizing:border-box; }
+.appl-item-head .ico-input { font-size:22px; text-align:center; }
+.appl-item-row2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.appl-item-row2 textarea { padding:7px 9px; border:1px solid var(--border); border-radius:8px; font-size:12px; width:100%; box-sizing:border-box; min-height:60px; resize:vertical; }
+.appl-item-links { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.appl-item-links input { padding:7px 9px; border:1px solid var(--border); border-radius:8px; font-size:12px; width:100%; box-sizing:border-box; }
+.appl-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:18px; padding:2px; }
+.appl-item label { font-size:11px; color:var(--muted); display:block; margin-bottom:3px; font-weight:500; }
+/* Tel rows */
+.tel-row { display:grid; grid-template-columns:120px 1fr 1fr 32px; gap:6px; margin-bottom:8px; align-items:center; }
+.tel-row select, .tel-row input { padding:8px 8px; border:1px solid var(--border); border-radius:8px; font-size:13px; color:var(--text); background:#fff; }
+.tel-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:18px; padding:2px; }
 
 /* TICKETS */
 .tkt-filter { background:transparent; border:1px solid var(--border); padding:5px 12px; border-radius:20px; font-size:12px; cursor:pointer; }
@@ -133,11 +148,21 @@ input:checked + .slider:before { transform:translateX(22px); }
         <div class="field"><label>Pays</label><input id="h-pays" value="Sénégal"></div>
       </div>
       <div class="field"><label>Adresse complète</label><input id="h-adresse" value="Rue des Almadies, Résidence Teranga, face à la pharmacie"></div>
-      <div class="row3">
-        <div class="field"><label>Téléphone</label><input id="h-tel" value="+221 77 123 45 67"></div>
-        <div class="field"><label>WhatsApp</label><input id="h-wa" value="+221 77 123 45 67"></div>
-        <div class="field"><label>Email</label><input id="h-email" value="contact@hotelteranga.sn"></div>
+      <div class="field">
+        <label>Numéros de téléphone <span style="color:#dc2626">*</span></label>
+        <div id="tel-rows"></div>
+        <button class="btn-add" onclick="addTelRow()" style="margin-top:8px">+ Ajouter un numéro</button>
+        <datalist id="tel-label-list">
+          <option value="Réception">
+          <option value="WhatsApp">
+          <option value="Portable">
+          <option value="Urgences">
+          <option value="Réservation">
+          <option value="Conciergerie">
+        </datalist>
+        <div class="hint">Au moins 1 numéro obligatoire. Chaque numéro sera affiché avec un lien d'appel dans le livret.</div>
       </div>
+      <div class="field"><label>Email</label><input id="h-email" value="contact@hotelteranga.sn"></div>
       <div class="field"><label>Nom de l'hôte / propriétaire</label><input id="h-hote" value="Fatou &amp; Mamadou Diallo"></div>
       <div class="field"><label>Photo de couverture (URL ou nom de fichier)</label><input id="h-photo" value="cover.jpg"><div class="hint">Laisser vide pour fond bleu. Ex : cover.jpg ou https://...</div></div>
     </div>
@@ -155,32 +180,52 @@ input:checked + .slider:before { transform:translateX(22px); }
     </div>
   </div>
 
-  <!-- 3. INFOS PRATIQUES -->
+  <!-- 3a. WIFI -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
-      <h2>ℹ️ Infos pratiques</h2><span class="chevron">▼</span>
+      <h2>📶 WiFi</h2><span class="chevron">▼</span>
     </div>
-    <div class="section-body">
+    <div class="section-body" style="display:block">
       <div class="row2">
-        <div class="field"><label>Réseau WiFi</label><input id="wifi-reseau" value="Teranga_Guest"></div>
+        <div class="field"><label>Nom du réseau (SSID)</label><input id="wifi-reseau" value="Teranga_Guest"></div>
         <div class="field"><label>Mot de passe WiFi</label><input id="wifi-mdp" value="Teranga2024!"></div>
       </div>
+      <div class="hint" style="margin-top:4px">Ces informations apparaissent dans la section "WiFi &amp; Infos" du livret. L'invité peut appuyer sur le mot de passe pour le copier.</div>
+    </div>
+  </div>
+
+  <!-- 3b. CHECK-IN / CHECK-OUT -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔑 Check-in · Check-out · Clés</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body" style="display:block">
       <div class="row2">
-        <div class="field"><label>Check-in (heure)</label><input id="ci-heure" value="14h00"></div>
-        <div class="field"><label>Check-out (heure)</label><input id="co-heure" value="11h00"></div>
+        <div class="field"><label>Heure de check-in</label><input id="ci-heure" value="14h00" placeholder="ex : 14h00"></div>
+        <div class="field"><label>Heure de check-out</label><input id="co-heure" value="11h00" placeholder="ex : 11h00"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Instructions clés (FR)</label><input id="cles-fr" value="Déposez les clés à la réception"></div>
-        <div class="field"><label>Instructions clés (EN)</label><input id="cles-en" value="Leave keys at reception"></div>
+        <div class="field"><label>Gestion des clés (FR)</label><input id="cles-fr" value="Déposez les clés à la réception" placeholder="Instructions remise des clés"></div>
+        <div class="field"><label>Key handover (EN)</label><input id="cles-en" value="Leave keys at reception"></div>
       </div>
+      <div class="hint">Ces informations apparaissent dans "WiFi &amp; Infos" et dans la procédure de check-out.</div>
+    </div>
+  </div>
+
+  <!-- 3c. RÈGLES DE LA MAISON -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>📋 Règles de la maison</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body" style="display:block">
       <div class="field">
-        <label>Règles de la maison</label>
         <table class="dyn-table" id="regles-table">
           <thead><tr><th style="width:42px">Icône</th><th>Règle FR</th><th>Rule EN</th><th style="width:30px"></th></tr></thead>
           <tbody id="regles-rows"></tbody>
         </table>
         <button class="btn-add" onclick="addRow('regles-rows', reglesTpl)">+ Ajouter une règle</button>
       </div>
+      <div class="hint">Ces règles sont affichées dans la section "WiFi &amp; Infos" du livret de l'invité.</div>
     </div>
   </div>
 
@@ -205,6 +250,29 @@ input:checked + .slider:before { transform:translateX(22px); }
         <input id="acc-pwd" value="Teranga2024">
         <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
       </div>
+    </div>
+  </div>
+
+  <!-- 4b. SÉJOUR ACTUEL (rappel check-out) -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🗓️ Séjour en cours</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body" style="display:block">
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:13px;color:#15803d;line-height:1.5">
+        <strong>Rappel automatique check-out</strong> — En renseignant l'email et la date de départ de votre invité, un message de rappel lui sera envoyé automatiquement la veille à 8h00.
+      </div>
+      <div class="row2">
+        <div class="field"><label>Prénom / Nom de l'invité</label><input id="guest-nom" placeholder="ex : Marie Dupont"></div>
+        <div class="field"><label>Email de l'invité</label><input id="guest-email" type="email" placeholder="ex : marie@email.com"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Date de check-out</label><input id="guest-checkout-date" type="date"><div class="hint">Le rappel sera envoyé la veille à 8h00.</div></div>
+        <div class="field" style="display:flex;align-items:flex-end">
+          <button class="btn-add" style="width:100%;justify-content:center;background:#15803d;color:#fff;border-color:#15803d" onclick="saveGuestStay()">💾 Enregistrer le séjour</button>
+        </div>
+      </div>
+      <div id="guest-save-msg" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d"></div>
     </div>
   </div>
 
@@ -261,26 +329,9 @@ input:checked + .slider:before { transform:translateX(22px); }
       <h2>🔌 Appareils & Mode d'emploi</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="sub-label">❄️ Climatisation</div>
-      <div class="row2">
-        <div class="field"><label>Instructions FR</label><textarea id="appl-clim-fr" style="min-height:60px">Télécommande sur la table de nuit. Temp. recommandée 22-24°C. Éteignez en quittant.</textarea></div>
-        <div class="field"><label>Instructions EN</label><textarea id="appl-clim-en" style="min-height:60px">Remote on bedside table. Recommended temp: 22-24°C. Switch off when leaving.</textarea></div>
-      </div>
-      <div class="sub-label">📺 Télévision</div>
-      <div class="row2">
-        <div class="field"><label>Instructions FR</label><textarea id="appl-tv-fr" style="min-height:60px">Télécommande sur le meuble TV. Netflix disponible — code à la réception.</textarea></div>
-        <div class="field"><label>Instructions EN</label><textarea id="appl-tv-en" style="min-height:60px">Remote on TV stand. Netflix available — code at reception.</textarea></div>
-      </div>
-      <div class="sub-label">🚿 Chauffe-eau</div>
-      <div class="row2">
-        <div class="field"><label>Instructions FR</label><textarea id="appl-chauffe-fr" style="min-height:60px">Allumez l'interrupteur 15 min avant utilisation. Eau chaude garantie.</textarea></div>
-        <div class="field"><label>Instructions EN</label><textarea id="appl-chauffe-en" style="min-height:60px">Switch on 15 min before. Hot water guaranteed.</textarea></div>
-      </div>
-      <div class="sub-label">⚡ Électricité / Groupe électrogène</div>
-      <div class="row2">
-        <div class="field"><label>Instructions FR</label><textarea id="appl-groupe-fr" style="min-height:60px">En cas de coupure, démarrage automatique en 1-2 min. Aucune action requise.</textarea></div>
-        <div class="field"><label>Instructions EN</label><textarea id="appl-groupe-en" style="min-height:60px">Power cut: auto-start in 1-2 min. No action required.</textarea></div>
-      </div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:12px">Ajoutez un appareil par carte. Pour chaque appareil, vous pouvez ajouter une description bilingue, un lien vers la notice PDF et/ou un lien vers une vidéo du fabricant.</p>
+      <div id="appl-items"></div>
+      <button class="btn-add" onclick="addApplItem()">+ Ajouter un appareil</button>
     </div>
   </div>
 
@@ -290,7 +341,7 @@ input:checked + .slider:before { transform:translateX(22px); }
       <h2>🍽️ Restaurants</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="sub-label">Cuisine sénégalaise</div>
+      <div class="sub-label">Cuisine locale</div>
       <div class="field">
         <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
         <tbody id="resto-sn-rows"></tbody></table>
@@ -606,6 +657,112 @@ function toggle(head) {
   head.nextElementSibling.classList.toggle('open');
 }
 
+// ── NUMÉROS DE TÉLÉPHONE ──
+var TEL_DIALS = [
+  ['+221','🇸🇳 +221'],['+225','🇨🇮 +225'],['+223','🇲🇱 +223'],['+224','🇬🇳 +224'],
+  ['+226','🇧🇫 +226'],['+227','🇳🇪 +227'],['+228','🇹🇬 +228'],['+237','🇨🇲 +237'],
+  ['+212','🇲🇦 +212'],['+216','🇹🇳 +216'],['+213','🇩🇿 +213'],['+20','🇪🇬 +20'],
+  ['+33','🇫🇷 +33'],['+32','🇧🇪 +32'],['+41','🇨🇭 +41'],['+1','🇺🇸 +1'],
+  ['+44','🇬🇧 +44'],['+49','🇩🇪 +49'],['+34','🇪🇸 +34'],['+39','🇮🇹 +39'],['+31','🇳🇱 +31'],
+];
+
+function telDialOptions(selected) {
+  return TEL_DIALS.map(function(d){
+    return '<option value="'+d[0]+'"'+(d[0]===selected?' selected':'')+'>'+d[1]+'</option>';
+  }).join('');
+}
+
+function addTelRow(data) {
+  data = data || {};
+  var container = document.getElementById('tel-rows');
+  var rows = container.querySelectorAll('.tel-row');
+  if (rows.length >= 3) { alert('Maximum 3 numéros.'); return; }
+  var div = document.createElement('div');
+  div.className = 'tel-row';
+  div.innerHTML =
+    '<select class="tel-dial">'+telDialOptions(data.dialcode||'+221')+'</select>'+
+    '<input class="tel-num" placeholder="77 123 45 67" value="'+(data.numero||'')+'">'+
+    '<input class="tel-lbl" placeholder="Réception / WhatsApp…" list="tel-label-list" value="'+(data.label||'')+'">'+
+    '<button class="tel-del" onclick="delTelRow(this)" title="Supprimer">✕</button>';
+  container.appendChild(div);
+}
+
+function delTelRow(btn) {
+  var rows = document.getElementById('tel-rows').querySelectorAll('.tel-row');
+  if (rows.length <= 1) { alert('Au moins 1 numéro est obligatoire.'); return; }
+  btn.closest('.tel-row').remove();
+}
+
+function readTelRows() {
+  var rows = document.getElementById('tel-rows').querySelectorAll('.tel-row');
+  var result = [];
+  rows.forEach(function(row) {
+    var dial = row.querySelector('.tel-dial').value;
+    var num  = row.querySelector('.tel-num').value.trim();
+    var lbl  = row.querySelector('.tel-lbl').value.trim();
+    if (num) result.push({ dialcode: dial, numero: num, label: lbl });
+  });
+  return result;
+}
+
+function loadTelRows(telephones) {
+  var container = document.getElementById('tel-rows');
+  container.innerHTML = '';
+  if (!telephones || !telephones.length) {
+    addTelRow({});
+    return;
+  }
+  telephones.forEach(function(t) { addTelRow(t); });
+}
+
+// ── APPAREILS (mode d'emploi) ──
+function addApplItem(data) {
+  data = data || {};
+  var container = document.getElementById('appl-items');
+  var div = document.createElement('div');
+  div.className = 'appl-item';
+  div.innerHTML =
+    '<div class="appl-item-head">' +
+      '<div><label>Icône</label><input class="ico-input appl-ico" value="' + esc(data.icon||'') + '" placeholder="🔌" maxlength="4"></div>' +
+      '<div><label>Titre FR</label><input class="appl-titre-fr" value="' + esc(data.titre_fr||'') + '" placeholder="Climatisation"></div>' +
+      '<div><label>Title EN</label><input class="appl-titre-en" value="' + esc(data.titre_en||'') + '" placeholder="Air conditioning"></div>' +
+      '<button class="appl-del" onclick="delApplItem(this)" title="Supprimer">✕</button>' +
+    '</div>' +
+    '<div class="appl-item-row2">' +
+      '<div><label>Description FR</label><textarea class="appl-desc-fr" placeholder="Comment utiliser cet appareil…">' + esc(data.desc_fr||'') + '</textarea></div>' +
+      '<div><label>Description EN</label><textarea class="appl-desc-en" placeholder="How to use this appliance…">' + esc(data.desc_en||'') + '</textarea></div>' +
+    '</div>' +
+    '<div class="appl-item-links">' +
+      '<div><label>📄 URL Notice / PDF</label><input class="appl-doc" value="' + esc(data.doc_url||'') + '" placeholder="https://…/notice.pdf"></div>' +
+      '<div><label>🎬 URL Vidéo (YouTube, etc.)</label><input class="appl-vid" value="' + esc(data.video_url||'') + '" placeholder="https://youtube.com/…"></div>' +
+    '</div>';
+  container.appendChild(div);
+}
+function delApplItem(btn) {
+  var container = document.getElementById('appl-items');
+  if (container.querySelectorAll('.appl-item').length <= 1) { alert('Au moins 1 appareil requis.'); return; }
+  btn.closest('.appl-item').remove();
+}
+function readApplItems() {
+  var items = [];
+  document.getElementById('appl-items').querySelectorAll('.appl-item').forEach(function(div) {
+    items.push({
+      icon:      div.querySelector('.appl-ico').value.trim(),
+      titre_fr:  div.querySelector('.appl-titre-fr').value.trim(),
+      titre_en:  div.querySelector('.appl-titre-en').value.trim(),
+      desc_fr:   div.querySelector('.appl-desc-fr').value.trim(),
+      desc_en:   div.querySelector('.appl-desc-en').value.trim(),
+      doc_url:   div.querySelector('.appl-doc').value.trim(),
+      video_url: div.querySelector('.appl-vid').value.trim()
+    });
+  });
+  return items;
+}
+function loadApplItems(items) {
+  document.getElementById('appl-items').innerHTML = '';
+  items.forEach(function(it) { addApplItem(it); });
+}
+
 // ── DYNAMIC ROWS ──
 function addRow(tbodyId, tplFn, data) {
   var tbody = document.getElementById(tbodyId);
@@ -723,9 +880,20 @@ function initForm() {
   // Établissement
   sv('h-nom', h.nom); sv('h-nom-court', h.nom_court);
   sv('h-ville', h.ville); sv('h-pays', h.pays);
-  sv('h-adresse', h.adresse); sv('h-tel', h.telephone);
-  sv('h-wa', h.whatsapp); sv('h-email', h.email);
+  sv('h-adresse', h.adresse); sv('h-email', h.email);
   sv('h-hote', h.hote_nom); sv('h-photo', h.cover_photo);
+  // Numéros de téléphone (nouveau format tableau + compat ancienne structure)
+  if (h.telephones && h.telephones.length) {
+    loadTelRows(h.telephones);
+  } else if (h.telephone) {
+    // Migration depuis l'ancien format
+    var tels = [];
+    if (h.telephone) tels.push({ dialcode: h.telephone.match(/^\+\d+/)?.[0]||'+221', numero: h.telephone.replace(/^\+\d+\s?/,''), label: 'Réception' });
+    if (h.whatsapp && h.whatsapp !== h.telephone) tels.push({ dialcode: h.whatsapp.match(/^\+\d+/)?.[0]||'+221', numero: h.whatsapp.replace(/^\+\d+\s?/,''), label: 'WhatsApp' });
+    loadTelRows(tels);
+  } else {
+    loadTelRows([]);
+  }
 
   // Bienvenue
   sv('bvn-fr', C.bienvenue.texte_fr); sv('bvn-en', C.bienvenue.texte_en);
@@ -757,17 +925,22 @@ function initForm() {
   C.services.inclus.forEach(function(s){ addRow('inclus-rows', servicesTpl, s); });
   C.services.sur_demande.forEach(function(s){ addRow('demande-rows', serviceDemandeTpl, s); });
 
-  // Appareils
+  // Appareils — nouveau format dynamique
   if (C.appareils) {
-    sv('appl-clim-fr',    C.appareils.clim_fr);
-    sv('appl-clim-en',    C.appareils.clim_en);
-    sv('appl-tv-fr',      C.appareils.tv_fr);
-    sv('appl-tv-en',      C.appareils.tv_en);
-    sv('appl-chauffe-fr', C.appareils.chauffe_fr);
-    sv('appl-chauffe-en', C.appareils.chauffe_en);
-    sv('appl-groupe-fr',  C.appareils.groupe_fr);
-    sv('appl-groupe-en',  C.appareils.groupe_en);
-  }
+    var applItems = [];
+    if (C.appareils.items && C.appareils.items.length) {
+      applItems = C.appareils.items;
+    } else {
+      // Migration ancien format
+      var old = C.appareils;
+      if (old.clim_fr || old.clim_en) applItems.push({ icon:'❄️', titre_fr:'Climatisation', titre_en:'Air conditioning', desc_fr: old.clim_fr||'', desc_en: old.clim_en||'', doc_url:'', video_url:'' });
+      if (old.tv_fr || old.tv_en) applItems.push({ icon:'📺', titre_fr:'Télévision', titre_en:'Television', desc_fr: old.tv_fr||'', desc_en: old.tv_en||'', doc_url:'', video_url:'' });
+      if (old.chauffe_fr || old.chauffe_en) applItems.push({ icon:'🚿', titre_fr:'Chauffe-eau', titre_en:'Water heater', desc_fr: old.chauffe_fr||'', desc_en: old.chauffe_en||'', doc_url:'', video_url:'' });
+      if (old.groupe_fr || old.groupe_en) applItems.push({ icon:'⚡', titre_fr:'Électricité', titre_en:'Electricity', desc_fr: old.groupe_fr||'', desc_en: old.groupe_en||'', doc_url:'', video_url:'' });
+    }
+    if (applItems.length) { loadApplItems(applItems); }
+    else { addApplItem(); }
+  } else { addApplItem(); }
 
   // Restaurants
   C.restaurants.senegalais.forEach(function(r){ addRow('resto-sn-rows', restoTpl, r); });
@@ -871,8 +1044,11 @@ function buildConfigContent(adminPwd) {
   js += '    ville:       ' + JSON.stringify(gv('h-ville')) + ',\n';
   js += '    pays:        ' + JSON.stringify(gv('h-pays')) + ',\n';
   js += '    adresse:     ' + JSON.stringify(gv('h-adresse')) + ',\n';
-  js += '    telephone:   ' + JSON.stringify(gv('h-tel')) + ',\n';
-  js += '    whatsapp:    ' + JSON.stringify(gv('h-wa')) + ',\n';
+  var tels = readTelRows();
+  if (!tels.length) { alert('⚠️ Veuillez saisir au moins 1 numéro de téléphone.'); return null; }
+  js += '    telephones:  ' + JSON.stringify(tels) + ',\n';
+  // Compat : premier numéro comme champ telephone
+  js += '    telephone:   ' + JSON.stringify((tels[0].dialcode||'') + ' ' + (tels[0].numero||'')) + ',\n';
   js += '    email:       ' + JSON.stringify(gv('h-email')) + ',\n';
   js += '    hote_nom:    ' + JSON.stringify(gv('h-hote')) + ',\n';
   js += '    cover_photo: ' + JSON.stringify(gv('h-photo')) + ',\n';
@@ -921,17 +1097,9 @@ function buildConfigContent(adminPwd) {
   js += '    sur_demande: ' + j(demande) + ',\n';
   js += '  },\n\n';
 
-  // Appareils
-  js += '  appareils: {\n';
-  js += '    clim_fr:    ' + JSON.stringify(gv('appl-clim-fr')) + ',\n';
-  js += '    clim_en:    ' + JSON.stringify(gv('appl-clim-en')) + ',\n';
-  js += '    tv_fr:      ' + JSON.stringify(gv('appl-tv-fr')) + ',\n';
-  js += '    tv_en:      ' + JSON.stringify(gv('appl-tv-en')) + ',\n';
-  js += '    chauffe_fr: ' + JSON.stringify(gv('appl-chauffe-fr')) + ',\n';
-  js += '    chauffe_en: ' + JSON.stringify(gv('appl-chauffe-en')) + ',\n';
-  js += '    groupe_fr:  ' + JSON.stringify(gv('appl-groupe-fr')) + ',\n';
-  js += '    groupe_en:  ' + JSON.stringify(gv('appl-groupe-en')) + ',\n';
-  js += '  },\n\n';
+  // Appareils — format dynamique
+  var applData = readApplItems();
+  js += '  appareils: { items: ' + JSON.stringify(applData) + ' },\n\n';
 
   // Restaurants
   js += '  restaurants: {\n';
@@ -1051,6 +1219,39 @@ async function saveOnline() {
 
   btn.disabled = false;
   btn.textContent = '☁️ Enregistrer en ligne';
+}
+
+async function saveGuestStay() {
+  var nom    = (document.getElementById('guest-nom') || {}).value || '';
+  var email  = (document.getElementById('guest-email') || {}).value || '';
+  var date   = (document.getElementById('guest-checkout-date') || {}).value || '';
+  var msg    = document.getElementById('guest-save-msg');
+  if (!email || !date) {
+    msg.textContent = '⚠️ Veuillez renseigner l\'email et la date de check-out.';
+    msg.style.background = '#fdecea'; msg.style.color = '#b71c1c';
+    msg.style.display = 'block'; return;
+  }
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  try {
+    var resp = await fetch('/' + slug + '/guest-stay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Secret': SAVE_SECRET },
+      body: JSON.stringify({ nom: nom.trim(), email: email.trim(), checkout: date })
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      msg.textContent = '✅ Séjour enregistré. Le rappel sera envoyé le ' + new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'long' }) + ' à 8h00.';
+      msg.style.background = '#f0fdf4'; msg.style.color = '#15803d';
+    } else {
+      msg.textContent = '❌ Erreur : ' + (data.error || 'Impossible d\'enregistrer le séjour.');
+      msg.style.background = '#fdecea'; msg.style.color = '#b71c1c';
+    }
+  } catch(e) {
+    msg.textContent = '❌ Erreur de connexion. Vérifiez votre connexion internet.';
+    msg.style.background = '#fdecea'; msg.style.color = '#b71c1c';
+  }
+  msg.style.display = 'block';
+  setTimeout(function(){ msg.style.display = 'none'; }, 8000);
 }
 
 function showMsg(id, text, isError) {

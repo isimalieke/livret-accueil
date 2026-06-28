@@ -1,0 +1,6 @@
+name = "livret-pwa"
+compatibility_date = "2024-01-01"
+
+# Cron : rappel check-out envoyé chaque matin à 7h00 UTC (8h00 Paris en hiver, 9h00 en été)
+[triggers]
+crons = ["0 7 * * *"]

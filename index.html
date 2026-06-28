@@ -1383,23 +1383,7 @@ function _showBackBtns(visible) {
   if (visible) cl1.add('vis'); else cl1.remove('vis');
 }
 
-// ── Injection bouton retour en bas de chaque page/catégorie ──
-function _injectBackButtons() {
-  var label = '<button onclick="goHome()" class="back-btn-inline"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button>';
-  // Toutes les page-body et sub-list SAUF l'accueil
-  document.querySelectorAll('.screen:not(#screen-home) .page-body, .screen:not(#screen-home) .sub-list').forEach(function(el) {
-    var row = document.createElement('div');
-    row.className = 'back-row-bottom';
-    row.innerHTML = label;
-    el.appendChild(row);
-  });
-}
-// Appeler après chargement du DOM
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', _injectBackButtons);
-} else {
-  _injectBackButtons();
-}
+// Boutons retour intégrés directement dans le HTML de chaque écran
 
 function showCat(cat) {
   _navHistory.push('home');

@@ -84,6 +84,11 @@ export default {
       return fetchAsset(env, url.origin + '/admin.html');
     }
 
+    // ── /{slug}/carte → carte d'accueil imprimable ──
+    if (sub === 'carte' || sub === 'carte.html') {
+      return fetchAsset(env, url.origin + '/carte.html');
+    }
+
     // ── /{slug}/incident → créer ticket ──
     if (sub === 'incident' && request.method === 'POST') {
       return handleCreateTicket(request, env, slug);

@@ -82,8 +82,11 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .tel-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:18px; padding:2px; }
 
 /* TICKETS */
-.tkt-filter { background:transparent; border:1px solid var(--border); padding:5px 12px; border-radius:20px; font-size:12px; cursor:pointer; }
-.tkt-filter.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.tkt-hdr-pill { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; transition:background .15s; }
+.tkt-hdr-pill:hover { background:rgba(255,255,255,.25); }
+.tkt-hdr-pill.pill-active { background:#fff; color:var(--blue); border-color:#fff; }
+.tkt-hdr-pill span { background:rgba(0,0,0,.12); border-radius:8px; padding:0 5px; font-size:10px; }
+.tkt-hdr-pill.pill-active span { background:var(--blue); color:#fff; }
 .tkt-row { padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:4px; cursor:pointer; transition:background .15s; }
 .tkt-row:hover { background:#f8fafc; }
 .tkt-row-active { background:#eff6ff; border-color:#93c5fd; border-bottom-left-radius:0; border-bottom-right-radius:0; margin-bottom:0; }
@@ -542,18 +545,20 @@ input:checked + .slider:before { transform:translateX(22px); }
   <!-- TICKETS D'INCIDENT -->
   <div class="section" id="tickets-section">
     <div class="section-head" onclick="toggle(this); loadTicketsIfNeeded()">
-      <h2>🎫 Tickets d'incident <span id="tickets-badge" style="display:none;background:#dc2626;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:8px">0</span></h2>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">🎫 Tickets d'incident</h2>
+        <span id="pill-all"    class="tkt-hdr-pill pill-active" onclick="event.stopPropagation();filterTickets('all')">Tous <span id="cnt-all">0</span></span>
+        <span id="pill-received"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('received')">🟡 Nouveaux <span id="cnt-received">0</span></span>
+        <span id="pill-in_progress" class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('in_progress')">🔵 En cours <span id="cnt-in_progress">0</span></span>
+        <span id="pill-resolved"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('resolved')">✅ Résolus <span id="cnt-resolved">0</span></span>
+      </div>
       <span class="chevron">▼</span>
     </div>
     <div class="section-body" id="tickets-body">
 
-      <!-- Filtres -->
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <button class="tkt-filter active" data-f="all" onclick="filterTickets('all')">Tous</button>
-        <button class="tkt-filter" data-f="received" onclick="filterTickets('received')">🟡 Reçus</button>
-        <button class="tkt-filter" data-f="in_progress" onclick="filterTickets('in_progress')">🔵 En traitement</button>
-        <button class="tkt-filter" data-f="resolved" onclick="filterTickets('resolved')">✅ Résolus</button>
-        <button style="margin-left:auto;background:transparent;border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer" onclick="loadTickets()">↻ Actualiser</button>
+      <!-- Actualiser -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button style="background:transparent;border:1px solid var(--border);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer" onclick="loadTickets()">↻ Actualiser</button>
       </div>
 
       <div id="tickets-list"><div style="color:#999;font-size:13px;padding:20px 0;text-align:center">Chargement…</div></div>
@@ -568,7 +573,7 @@ input:checked + .slider:before { transform:translateX(22px); }
           <div style="display:flex;gap:6px">
             <select id="td-status-sel" onchange="updateTicketStatus()" style="padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer">
               <option value="received">🟡 Reçu</option>
-              <option value="in_progress">🔵 En traitement</option>
+              <option value="in_progress">🔵 En cours</option>
               <option value="resolved">✅ Résolu</option>
             </select>
             <button onclick="document.getElementById('ticket-detail').style.display='none'" style="background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">✕</button>
@@ -1302,26 +1307,32 @@ async function loadTickets() {
     }
     _allTickets    = data.tickets || [];
     _ticketsLoaded = true;
-    // Badge non résolus
-    var open = _allTickets.filter(function(t) { return t.status !== 'resolved'; }).length;
-    var badge = document.getElementById('tickets-badge');
-    if (open > 0) { badge.textContent = open; badge.style.display = 'inline'; }
-    else           { badge.style.display = 'none'; }
+    updateTicketCounts();
     renderTickets();
   } catch(e) {
     document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#dc2626;padding:20px 0;text-align:center">Erreur de connexion.</div>';
   }
 }
 
+function updateTicketCounts() {
+  var counts = { all: _allTickets.length, received: 0, in_progress: 0, resolved: 0 };
+  _allTickets.forEach(function(t) { if (counts[t.status] !== undefined) counts[t.status]++; });
+  ['all','received','in_progress','resolved'].forEach(function(k) {
+    var el = document.getElementById('cnt-' + k);
+    if (el) el.textContent = counts[k];
+  });
+}
+
 function filterTickets(f) {
   _currentFilter = f;
-  document.querySelectorAll('.tkt-filter').forEach(function(b) {
-    b.classList.toggle('active', b.dataset.f === f);
+  ['all','received','in_progress','resolved'].forEach(function(k) {
+    var el = document.getElementById('pill-' + k);
+    if (el) el.classList.toggle('pill-active', k === f);
   });
   renderTickets();
 }
 
-var STATUS_LABEL = { received: '🟡 Reçu', in_progress: '🔵 En traitement', resolved: '✅ Résolu' };
+var STATUS_LABEL = { received: '🟡 Nouveau', in_progress: '🔵 En cours', resolved: '✅ Résolu' };
 var STATUS_CSS   = { received: 'tkt-s-received', in_progress: 'tkt-s-in_progress', resolved: 'tkt-s-resolved' };
 
 function renderTickets() {

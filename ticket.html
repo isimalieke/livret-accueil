@@ -168,6 +168,11 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   ✅ Ce ticket est résolu — merci de votre patience.
 </div>
 
+<!-- BOUTON RETOUR bas de page -->
+<div id="back-bottom" style="display:none;text-align:center;padding:18px 16px 24px;background:var(--bg);">
+  <a id="back-bottom-link" href="#" style="display:inline-block;background:var(--cover);color:#fff;border-radius:50px;padding:14px 48px;font-size:15px;font-weight:600;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.18);">← Retour au livret</a>
+</div>
+
 <!-- BARRE DE RÉPONSE -->
 <div class="reply-wrap" id="reply-wrap" style="display:none">
   <textarea class="reply-input" id="reply-input" placeholder="Votre message…" rows="1"
@@ -319,6 +324,14 @@ function render() {
     document.getElementById('reply-wrap').style.display = 'flex';
     setTimeout(function(){ var el=document.getElementById('reply-input'); if(el) el.focus(); }, 100);
   }
+
+  // Bouton retour bas de page
+  var bb = document.getElementById('back-bottom');
+  var bl = document.getElementById('back-bottom-link');
+  if (bb && bl) {
+    bl.href = _slug ? '/' + _slug : '/';
+    bb.style.display = 'block';
+  }
 }
 
 // ── ENVOYER UN MESSAGE ──
@@ -333,10 +346,13 @@ async function sendReply() {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ from:'guest', text: text })
     });
-    var data = await resp.json();
+    var rawText = await resp.text();
+    var data;
+    try { data = JSON.parse(rawText); }
+    catch(je) { alert('Erreur serveur (' + resp.status + ') : ' + rawText.substring(0, 120)); btn.disabled = false; input.disabled = false; return; }
     if (data.ok) { _ticket = data.ticket; input.value = ''; input.style.height = 'auto'; render(); }
     else alert(data.error || (fr?'Erreur lors de l\'envoi.':'Send error.'));
-  } catch(e) { alert(fr?'Erreur de connexion.':'Connection error.'); }
+  } catch(e) { alert('Erreur réseau : ' + e.message); }
   btn.disabled = false; input.disabled = false;
   if (input) input.focus();
 }

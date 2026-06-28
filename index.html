@@ -362,6 +362,65 @@ body.lang-en .pz-text.en-t { display:block; }
 .en-o { display:none; }
 body.lang-en .fr-o { display:none; }
 body.lang-en .en-o { display:block; }
+
+/* ══ HOME — 4 GRANDES TUILES ══ */
+.cat-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:12px; margin-bottom:14px;
+}
+.cat-tile {
+  background:var(--card-bg); border-radius:18px;
+  border:1px solid var(--border); box-shadow:var(--shadow);
+  padding:28px 14px 22px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  cursor:pointer; -webkit-user-select:none; user-select:none;
+  transition:transform .1s, box-shadow .1s;
+}
+.cat-tile:active { transform:scale(0.95); box-shadow:none; }
+.cat-tile-ico { font-size:38px; margin-bottom:12px; }
+.cat-tile-label { font-size:16px; font-weight:700; color:var(--text); margin-bottom:5px; line-height:1.2; }
+.cat-tile-sub { font-size:11px; color:var(--text2); line-height:1.45; }
+
+/* Incident banner sur accueil */
+.incident-home {
+  background:#fff5f5; border:1px solid #fecaca; border-radius:14px;
+  padding:15px 16px; display:flex; align-items:center; gap:14px;
+  cursor:pointer; -webkit-user-select:none; transition:transform .1s;
+}
+.incident-home:active { transform:scale(0.98); }
+.incident-home-ico { font-size:26px; }
+.incident-home-title { font-size:15px; font-weight:600; color:#dc2626; margin-bottom:2px; }
+.incident-home-sub { font-size:12px; color:#e57373; }
+
+/* ══ CATEGORY PAGE ══ */
+.cat-page-hdr {
+  background:var(--cover); padding:22px 18px 18px;
+  display:flex; align-items:center; gap:14px;
+}
+.cat-page-hdr-ico { font-size:30px; }
+.cat-page-hdr-title {
+  font-size:21px; color:#fff;
+  font-family:'Playfair Display',Georgia,serif; font-weight:500;
+}
+
+/* ══ SUB-LIST ══ */
+.sub-list { padding:14px; }
+.sub-list-item {
+  background:var(--card-bg); border-radius:16px; padding:16px;
+  margin-bottom:11px; border:1px solid var(--border);
+  display:flex; align-items:center; gap:14px;
+  cursor:pointer; box-shadow:var(--shadow-sm);
+  -webkit-user-select:none; transition:transform .1s;
+}
+.sub-list-item:active { transform:scale(0.98); }
+.sli-ico {
+  width:46px; height:46px; border-radius:13px; background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+}
+.sli-label { font-size:15px; font-weight:600; color:var(--text); }
+.sli-sub { font-size:12px; color:var(--text2); margin-top:3px; line-height:1.4; }
+.sli-arrow { margin-left:auto; color:#c8d4de; font-size:20px; flex-shrink:0; }
 </style>
 </head>
 <body class="lang-fr">
@@ -413,118 +472,189 @@ body.lang-en .en-o { display:block; }
 
   <div class="grid-wrap">
 
-    <!-- Votre séjour -->
-    <div class="grid-lbl">Votre séjour</div>
-    <div class="tile-grid">
-      <div class="tile" onclick="showPage('bienvenue')">
-        <div class="t-icon ti-b">👋</div>
-        <div class="t-lbl fr-o">Bienvenue</div>
-        <div class="t-lbl en-o">Welcome</div>
+    <div class="cat-grid">
+      <div class="cat-tile" onclick="showCat('sejour')">
+        <div class="cat-tile-ico">🏠</div>
+        <div class="cat-tile-label fr-o">Votre séjour</div>
+        <div class="cat-tile-label en-o">Your stay</div>
+        <div class="cat-tile-sub fr-o">WiFi, équipements, règles</div>
+        <div class="cat-tile-sub en-o">WiFi, amenities, rules</div>
       </div>
-      <div class="tile" onclick="showPage('pratique')">
-        <div class="t-icon ti-b">📶</div>
-        <div class="t-lbl fr-o">WiFi &amp; Infos</div>
-        <div class="t-lbl en-o">WiFi &amp; Info</div>
+      <div class="cat-tile" onclick="showCat('decouvrir')">
+        <div class="cat-tile-ico">🌍</div>
+        <div class="cat-tile-label fr-o">Découvrir</div>
+        <div class="cat-tile-label en-o">Explore</div>
+        <div class="cat-tile-sub fr-o">Restaurants, plages, activités</div>
+        <div class="cat-tile-sub en-o">Restaurants, beaches, activities</div>
       </div>
-      <div class="tile" onclick="showPage('appareils')">
-        <div class="t-icon ti-t">🔌</div>
-        <div class="t-lbl fr-o">Mode d'emploi</div>
-        <div class="t-lbl en-o">Appliances</div>
+      <div class="cat-tile" onclick="showCat('urgences')">
+        <div class="cat-tile-ico">🚨</div>
+        <div class="cat-tile-label fr-o">Urgences</div>
+        <div class="cat-tile-label en-o">Emergencies</div>
+        <div class="cat-tile-sub fr-o">Médecin, police, ambassades</div>
+        <div class="cat-tile-sub en-o">Medical, police, embassies</div>
       </div>
-      <div class="tile" onclick="showPage('services')">
-        <div class="t-icon ti-g">✅</div>
-        <div class="t-lbl fr-o">Services inclus</div>
-        <div class="t-lbl en-o">Included</div>
-      </div>
-      <div class="tile" onclick="showPage('sur-demande')">
-        <div class="t-icon ti-a">🛎️</div>
-        <div class="t-lbl fr-o">Sur demande</div>
-        <div class="t-lbl en-o">On request</div>
-      </div>
-      <div class="tile" onclick="showPage('paiement')">
-        <div class="t-icon ti-g">💳</div>
-        <div class="t-lbl fr-o">Paiement</div>
-        <div class="t-lbl en-o">Payment</div>
+      <div class="cat-tile" onclick="showCat('depart')">
+        <div class="cat-tile-ico">🧳</div>
+        <div class="cat-tile-label fr-o">Départ</div>
+        <div class="cat-tile-label en-o">Departure</div>
+        <div class="cat-tile-sub fr-o">Check-out, transports, avis</div>
+        <div class="cat-tile-sub en-o">Check-out, transport, review</div>
       </div>
     </div>
 
-    <!-- Découvrir -->
-    <div class="grid-lbl">Découvrir</div>
-    <div class="tile-grid">
-      <div class="tile" onclick="showPage('restaurants')">
-        <div class="t-icon ti-c">🍽️</div>
-        <div class="t-lbl fr-o">Restaurants</div>
-        <div class="t-lbl en-o">Restaurants</div>
-      </div>
-      <div class="tile" onclick="showPage('quartier')">
-        <div class="t-icon ti-p">📍</div>
-        <div class="t-lbl fr-o">Quartier</div>
-        <div class="t-lbl en-o">Neighbourhood</div>
-      </div>
-      <div class="tile" onclick="showPage('transport')">
-        <div class="t-icon ti-t">🚗</div>
-        <div class="t-lbl fr-o">Transports</div>
-        <div class="t-lbl en-o">Transport</div>
-      </div>
-      <div class="tile" onclick="showPage('plages')">
-        <div class="t-icon ti-b">🏖️</div>
-        <div class="t-lbl fr-o">Plages &amp; activités</div>
-        <div class="t-lbl en-o">Beaches</div>
-      </div>
-      <div class="tile" onclick="showPage('shopping')">
-        <div class="t-icon ti-p">🛍️</div>
-        <div class="t-lbl fr-o">Shopping</div>
-        <div class="t-lbl en-o">Shopping</div>
-      </div>
-      <div class="tile" onclick="showPage('conseils')">
-        <div class="t-icon ti-a">🌍</div>
-        <div class="t-lbl fr-o">Conseils locaux</div>
-        <div class="t-lbl en-o">Local tips</div>
+    <div class="incident-home" onclick="showPage('incident')">
+      <div class="incident-home-ico">⚠️</div>
+      <div>
+        <div class="incident-home-title fr-o">Signaler un problème</div>
+        <div class="incident-home-title en-o">Report an issue</div>
+        <div class="incident-home-sub fr-o">Panne, incident — l'hôte est notifié immédiatement</div>
+        <div class="incident-home-sub en-o">Breakdown, incident — host notified immediately</div>
       </div>
     </div>
 
-    <!-- Urgences & Départ -->
-    <div class="grid-lbl">Urgences &amp; Départ</div>
-    <div class="tile-grid">
-      <div class="tile" onclick="showPage('medical')">
-        <div class="t-icon ti-r">🏥</div>
-        <div class="t-lbl fr-o">Urgences médicales</div>
-        <div class="t-lbl en-o">Medical</div>
-      </div>
-      <div class="tile" onclick="showPage('securite')">
-        <div class="t-icon ti-r">🚔</div>
-        <div class="t-lbl fr-o">Sécurité</div>
-        <div class="t-lbl en-o">Safety</div>
-      </div>
-      <div class="tile" onclick="showPage('ambassades')">
-        <div class="t-icon ti-gr">🏛️</div>
-        <div class="t-lbl fr-o">Ambassades</div>
-        <div class="t-lbl en-o">Embassies</div>
-      </div>
-      <div class="tile" onclick="showPage('checkout')">
-        <div class="t-icon ti-gr">🔑</div>
-        <div class="t-lbl fr-o">Check-out</div>
-        <div class="t-lbl en-o">Check-out</div>
-      </div>
-      <div class="tile-wide tile-avis" onclick="showPage('avis')" style="grid-column:span 2">
-        <div class="t-icon ti-a">⭐</div>
-        <div class="tw-info">
-          <div class="tw-title fr-o">Laisser un avis</div>
-          <div class="tw-title en-o">Leave a review</div>
-          <div class="tw-sub">Google · TripAdvisor · Booking</div>
-        </div>
-      </div>
-      <div class="tile-wide tile-incident" onclick="showPage('incident')" style="grid-column:span 3">
-        <div class="t-icon ti-r">⚠️</div>
-        <div class="tw-info">
-          <div class="tw-title fr-o">Signaler un problème</div>
-          <div class="tw-title en-o">Report an issue</div>
-          <div class="tw-sub fr-o">Panne, incident — l'hôte est notifié immédiatement</div>
-          <div class="tw-sub en-o">Issue, breakdown — host notified immediately</div>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
 
+<!-- ══ CAT: VOTRE SÉJOUR ══ -->
+<div class="screen" id="screen-cat-sejour">
+  <div class="cat-page-hdr">
+    <div class="cat-page-hdr-ico">🏠</div>
+    <div>
+      <div class="cat-page-hdr-title fr-o">Votre séjour</div>
+      <div class="cat-page-hdr-title en-o">Your stay</div>
+    </div>
+  </div>
+  <div class="sub-list">
+    <div class="sub-list-item" onclick="showPage('bienvenue')">
+      <div class="sli-ico">👋</div>
+      <div><div class="sli-label fr-o">Bienvenue</div><div class="sli-label en-o">Welcome</div><div class="sli-sub fr-o">Mot de bienvenue de l'hôte</div><div class="sli-sub en-o">Host welcome message</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('pratique')">
+      <div class="sli-ico">📶</div>
+      <div><div class="sli-label fr-o">WiFi &amp; Infos</div><div class="sli-label en-o">WiFi &amp; Info</div><div class="sli-sub fr-o">Réseau, horaires, règles</div><div class="sli-sub en-o">Network, hours, rules</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('appareils')">
+      <div class="sli-ico">🔌</div>
+      <div><div class="sli-label fr-o">Mode d'emploi</div><div class="sli-label en-o">Appliances</div><div class="sli-sub fr-o">Clim, TV, équipements</div><div class="sli-sub en-o">AC, TV, appliances</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('services')">
+      <div class="sli-ico">✅</div>
+      <div><div class="sli-label fr-o">Services inclus</div><div class="sli-label en-o">Included services</div><div class="sli-sub fr-o">Ce qui est compris dans votre séjour</div><div class="sli-sub en-o">What's included in your stay</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('sur-demande')">
+      <div class="sli-ico">🛎️</div>
+      <div><div class="sli-label fr-o">Sur demande</div><div class="sli-label en-o">On request</div><div class="sli-sub fr-o">Services disponibles en supplément</div><div class="sli-sub en-o">Additional services available</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('paiement')">
+      <div class="sli-ico">💳</div>
+      <div><div class="sli-label fr-o">Paiement</div><div class="sli-label en-o">Payment</div><div class="sli-sub fr-o">Wave, Orange Money, virement</div><div class="sli-sub en-o">Wave, Orange Money, transfer</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAT: DÉCOUVRIR ══ -->
+<div class="screen" id="screen-cat-decouvrir">
+  <div class="cat-page-hdr">
+    <div class="cat-page-hdr-ico">🌍</div>
+    <div>
+      <div class="cat-page-hdr-title fr-o">Découvrir</div>
+      <div class="cat-page-hdr-title en-o">Explore</div>
+    </div>
+  </div>
+  <div class="sub-list">
+    <div class="sub-list-item" onclick="showPage('restaurants')">
+      <div class="sli-ico">🍽️</div>
+      <div><div class="sli-label fr-o">Restaurants</div><div class="sli-label en-o">Restaurants</div><div class="sli-sub fr-o">Nos adresses préférées</div><div class="sli-sub en-o">Our favourite spots</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('quartier')">
+      <div class="sli-ico">📍</div>
+      <div><div class="sli-label fr-o">Quartier</div><div class="sli-label en-o">Neighbourhood</div><div class="sli-sub fr-o">À découvrir à proximité</div><div class="sli-sub en-o">Nearby places</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('transport')">
+      <div class="sli-ico">🚗</div>
+      <div><div class="sli-label fr-o">Transports</div><div class="sli-label en-o">Transport</div><div class="sli-sub fr-o">Bus, taxi, Yango, aéroport</div><div class="sli-sub en-o">Bus, taxi, Yango, airport</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('plages')">
+      <div class="sli-ico">🏖️</div>
+      <div><div class="sli-label fr-o">Plages &amp; activités</div><div class="sli-label en-o">Beaches &amp; activities</div><div class="sli-sub fr-o">Les plus belles de Dakar</div><div class="sli-sub en-o">Dakar's best beaches</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('shopping')">
+      <div class="sli-ico">🛍️</div>
+      <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div><div class="sli-sub fr-o">Marchés, boutiques, artisanat</div><div class="sli-sub en-o">Markets, shops, crafts</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('conseils')">
+      <div class="sli-ico">🌟</div>
+      <div><div class="sli-label fr-o">Conseils locaux</div><div class="sli-label en-o">Local tips</div><div class="sli-sub fr-o">Bons plans et astuces</div><div class="sli-sub en-o">Tips and tricks</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAT: URGENCES ══ -->
+<div class="screen" id="screen-cat-urgences">
+  <div class="cat-page-hdr" style="background:#b91c1c">
+    <div class="cat-page-hdr-ico">🚨</div>
+    <div>
+      <div class="cat-page-hdr-title fr-o">Urgences</div>
+      <div class="cat-page-hdr-title en-o">Emergencies</div>
+    </div>
+  </div>
+  <div class="sub-list">
+    <div class="sub-list-item" onclick="showPage('medical')">
+      <div class="sli-ico" style="background:#fee2e2">🏥</div>
+      <div><div class="sli-label fr-o">Urgences médicales</div><div class="sli-label en-o">Medical emergency</div><div class="sli-sub fr-o">SAMU, cliniques, pharmacies</div><div class="sli-sub en-o">SAMU, clinics, pharmacies</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('securite')">
+      <div class="sli-ico" style="background:#fee2e2">🚔</div>
+      <div><div class="sli-label fr-o">Sécurité &amp; vol</div><div class="sli-label en-o">Safety &amp; theft</div><div class="sli-sub fr-o">Police, démarches en cas de vol</div><div class="sli-sub en-o">Police, what to do if robbed</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('ambassades')">
+      <div class="sli-ico">🏛️</div>
+      <div><div class="sli-label fr-o">Ambassades à Dakar</div><div class="sli-label en-o">Embassies in Dakar</div><div class="sli-sub">FR · BE · CH · US · UK</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CAT: DÉPART ══ -->
+<div class="screen" id="screen-cat-depart">
+  <div class="cat-page-hdr">
+    <div class="cat-page-hdr-ico">🧳</div>
+    <div>
+      <div class="cat-page-hdr-title fr-o">Départ</div>
+      <div class="cat-page-hdr-title en-o">Departure</div>
+    </div>
+  </div>
+  <div class="sub-list">
+    <div class="sub-list-item" onclick="showPage('checkout')">
+      <div class="sli-ico">🔑</div>
+      <div><div class="sli-label fr-o">Check-out</div><div class="sli-label en-o">Check-out</div><div class="sli-sub fr-o">Procédure de départ, horaires</div><div class="sli-sub en-o">Departure procedure, times</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('transport')">
+      <div class="sli-ico">✈️</div>
+      <div><div class="sli-label fr-o">Transports &amp; Aéroport</div><div class="sli-label en-o">Transport &amp; Airport</div><div class="sli-sub fr-o">Taxi, Yango, navettes</div><div class="sli-sub en-o">Taxi, Yango, shuttles</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('avis')">
+      <div class="sli-ico" style="background:#fef3c7">⭐</div>
+      <div><div class="sli-label fr-o">Laisser un avis</div><div class="sli-label en-o">Leave a review</div><div class="sli-sub">Google · TripAdvisor · Booking</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
   </div>
 </div>
 
@@ -1103,7 +1233,20 @@ body.lang-en .en-o { display:block; }
 
 <script>
 // ── NAVIGATION ──
+var _navHistory = []; // pile de navigation pour le bouton retour
+
+function showCat(cat) {
+  _navHistory.push('home');
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.getElementById('screen-cat-' + cat);
+  if (el) el.classList.add('active');
+  document.getElementById('back-btn').classList.add('vis');
+  window.scrollTo(0, 0);
+}
+
 function showPage(id) {
+  var active = document.querySelector('.screen.active');
+  if (active) _navHistory.push(active.id.replace('screen-', ''));
   document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   var el = document.getElementById('screen-' + id);
   if (el) el.classList.add('active');
@@ -1113,14 +1256,28 @@ function showPage(id) {
 }
 
 function goHome() {
-  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('screen-home').classList.add('active');
-  document.getElementById('back-btn').classList.remove('vis');
+  if (_navHistory.length > 0) {
+    var prev = _navHistory.pop();
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    if (prev === 'home') {
+      document.getElementById('screen-home').classList.add('active');
+      document.getElementById('back-btn').classList.remove('vis');
+      _navHistory = [];
+    } else {
+      var el = document.getElementById('screen-' + prev);
+      if (el) el.classList.add('active');
+      document.getElementById('back-btn').classList.add('vis');
+    }
+  } else {
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('screen-home').classList.add('active');
+    document.getElementById('back-btn').classList.remove('vis');
+  }
   window.scrollTo(0, 0);
 }
 
 function goTo(subId) { showPage(subId); }
-function switchTab() { goHome(); }
+function switchTab() { _navHistory = []; goHome(); }
 
 // ── WIFI COPY ──
 function copyWifi() {

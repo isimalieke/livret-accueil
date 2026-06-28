@@ -2067,6 +2067,14 @@ document.addEventListener('DOMContentLoaded', function() {
   };
 })();
 </script>
-<script src="config.js"></script>
+<script>
+// Charge config.js depuis le bon slug (URL absolue)
+(function() {
+  var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+  var s = document.createElement('script');
+  s.src = slug ? '/' + slug + '/config.js' : '/config.js';
+  document.head.appendChild(s);
+})();
+</script>
 </body>
 </html>

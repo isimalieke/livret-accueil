@@ -121,9 +121,10 @@ input:checked + .slider:before { transform:translateX(22px); }
     <div class="login-logo">🏨</div>
     <div class="login-title">Administration</div>
     <div class="login-sub">Livret d'Accueil Digital</div>
-    <input type="password" id="pwd-input" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkPwd()">
+    <input type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()">
+    <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()">
     <button onclick="checkPwd()">Connexion</button>
-    <div class="login-error" id="login-error">Mot de passe incorrect</div>
+    <div class="login-error" id="login-error">Email ou mot de passe incorrect</div>
   </div>
 </div>
 
@@ -623,12 +624,8 @@ var _slug = (function() {
   return null;
 })();
 
-// ── MOT DE PASSE ──
-// Multi-hôtel : mot de passe stocké dans localStorage par register.html
-// Fallback : mot de passe statique pour l'ancien hôtel unique
-var _hotelPwd = _slug ? (localStorage.getItem('livret_hotel_pwd_' + _slug) || '') : '';
-var ADMIN_PWD  = _hotelPwd || 'Admin2024!';
-var SAVE_SECRET = _hotelPwd || 'Livret2024!xK';  // mot de passe hôtel = secret de sauvegarde
+// ── JWT ──
+var _jwt = _slug ? (localStorage.getItem('livret_jwt_' + _slug) || '') : '';
 
 // ── ENDPOINT CONFIG ──
 var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
@@ -639,29 +636,62 @@ var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
   if (el && _slug) el.href = '/' + _slug + '/gestion';
 })();
 
-function checkPwd() {
-  var v = document.getElementById('pwd-input').value;
-  // Si mot de passe hôtel disponible en localStorage, on valide contre lui
-  // Sinon, fallback sur ADMIN_PWD statique
-  var expected = _hotelPwd || ADMIN_PWD;
-  if (v === expected) {
-    // Sauvegarder le mot de passe pour la session
-    if (_slug && !_hotelPwd) {
-      localStorage.setItem('livret_hotel_pwd_' + _slug, v);
-      SAVE_SECRET = v;
-      _hotelPwd   = v;
-    }
+// Connexion automatique si JWT valide
+(function() {
+  if (_jwt && _slug) {
+    // Tenter de charger les données (le serveur validera le token)
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     initForm();
-  } else {
+  }
+})();
+
+async function checkPwd() {
+  var email = (document.getElementById('email-input').value || '').trim();
+  var pwd   = document.getElementById('pwd-input').value;
+  if (!email || !pwd) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+
+  try {
+    var r = await fetch('/' + _slug + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
+    });
+    var data = await r.json();
+    if (data.ok && data.token) {
+      _jwt = data.token;
+      localStorage.setItem('livret_jwt_' + _slug, _jwt);
+      if (data.role !== 'hotelier') {
+        // Les gestionnaires ne peuvent pas accéder à l'admin
+        document.getElementById('login-error').textContent = 'Accès admin réservé à l\'hôtelier.';
+        document.getElementById('login-error').style.display = 'block';
+        _jwt = '';
+        return;
+      }
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      initForm();
+    } else {
+      document.getElementById('login-error').textContent = data.error || 'Email ou mot de passe incorrect';
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'Erreur de connexion';
     document.getElementById('login-error').style.display = 'block';
   }
 }
+
 function logout() {
+  _jwt = '';
+  localStorage.removeItem('livret_jwt_' + _slug);
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('pwd-input').value = '';
+  document.getElementById('email-input').value = '';
 }
 
 // ── ACCORDION ──
@@ -1199,13 +1229,7 @@ function generateConfig() {
 }
 
 async function saveOnline() {
-  var adminPwd = resolveAdminPwd();
-  if (adminPwd === null) return;
-
-  if (SAVE_SECRET === 'CHANGER_CETTE_VALEUR') {
-    alert('⚠️ SAVE_SECRET n\'est pas configuré.\nOuvrez admin.html et remplacez CHANGER_CETTE_VALEUR par votre AUTH_SECRET Cloudflare.');
-    return;
-  }
+  if (!_jwt) { alert('Vous devez être connecté pour sauvegarder.'); return; }
 
   var btn = document.getElementById('save-online-btn');
   btn.disabled = true;
@@ -1216,7 +1240,7 @@ async function saveOnline() {
   try {
     var resp = await fetch(_configEndpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/javascript', 'X-Auth-Secret': SAVE_SECRET },
+      headers: { 'Content-Type': 'text/javascript', 'Authorization': 'Bearer ' + _jwt },
       body: js
     });
     var data = await resp.json();
@@ -1248,7 +1272,7 @@ async function saveGuestStay() {
   try {
     var resp = await fetch('/' + slug + '/guest-stay', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Auth-Secret': SAVE_SECRET },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
       body: JSON.stringify({ nom: nom.trim(), email: email.trim(), checkout: date })
     });
     var data = await resp.json();
@@ -1305,7 +1329,7 @@ async function loadTickets() {
   document.getElementById('tickets-list').innerHTML = '<div style="font-size:13px;color:#999;padding:20px 0;text-align:center">⏳ Chargement…</div>';
   try {
     var resp = await fetch('/' + _slug + '/tickets', {
-      headers: { 'X-Auth-Secret': SAVE_SECRET }
+      headers: { 'Authorization': 'Bearer ' + _jwt }
     });
     var data = await resp.json();
     if (!data.ok) {
@@ -1427,8 +1451,8 @@ async function updateTicketStatus() {
   var status = document.getElementById('td-status-sel').value;
   var resp = await fetch('/' + _slug + '/ticket/' + _currentTicket + '/status', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: status, auth: SAVE_SECRET }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+    body: JSON.stringify({ status: status }),
   });
   var data = await resp.json();
   if (data.ok) {
@@ -1453,8 +1477,8 @@ async function sendTicketReply() {
 
   var resp = await fetch('/' + _slug + '/ticket/' + _currentTicket + '/message', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'hotel', text: text, auth: SAVE_SECRET }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+    body: JSON.stringify({ from: 'hotel', text: text }),
   });
   var data = await resp.json();
   if (data.ok) {

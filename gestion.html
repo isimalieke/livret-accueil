@@ -194,6 +194,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="auth-icon">🎫</div>
     <div class="auth-title">Gestion incidents</div>
     <div class="auth-sub" id="auth-hotel-name">Chargement…</div>
+    <input class="auth-input" type="email" id="auth-email" placeholder="Email" autocomplete="username" style="margin-bottom:8px;letter-spacing:0;" onkeydown="if(event.key==='Enter')document.getElementById('auth-pwd').focus()"/>
     <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe" autocomplete="current-password"/>
     <button class="auth-submit" onclick="doAuth()">Connexion</button>
     <div class="auth-err" id="auth-err">Mot de passe incorrect.</div>
@@ -237,7 +238,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 // ─────────────────────────────────────────────
 var _slug = '';
-var _pwd  = '';
+var _jwt  = '';
+var _role = '';
 var _all  = [];
 var _filter = 'all';
 var _openId = null;
@@ -250,10 +252,10 @@ var _openId = null;
   _slug = parts[0] || '';
   if (!_slug) { document.getElementById('auth-hotel-name').textContent = 'Slug introuvable'; return; }
 
-  // Mémoriser le mot de passe
-  var saved = localStorage.getItem('livret_hotel_pwd_' + _slug);
+  // JWT en localStorage
+  var saved = localStorage.getItem('livret_jwt_' + _slug);
   if (saved) {
-    _pwd = saved;
+    _jwt = saved;
     showMain();
     loadHotelName();
     loadTickets();
@@ -277,28 +279,31 @@ function loadHotelNameForAuth() {
 }
 
 async function doAuth() {
-  var pwd = document.getElementById('auth-pwd').value.trim();
-  if (!pwd) return;
-  // Vérifier via l'API tickets (auth incluse)
-  var r = await fetch('/' + _slug + '/tickets', {
-    headers: { 'X-Hotel-Password': pwd }
+  var email = (document.getElementById('auth-email').value || '').trim();
+  var pwd   = document.getElementById('auth-pwd').value.trim();
+  if (!email || !pwd) return;
+  document.getElementById('auth-err').style.display = 'none';
+
+  var r = await fetch('/' + _slug + '/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: pwd }),
   });
-  if (r.ok) {
-    _pwd = pwd;
-    localStorage.setItem('livret_hotel_pwd_' + _slug, pwd);
-    var data = await r.json();
+  var data = await r.json();
+  if (data.ok && data.token) {
+    _jwt  = data.token;
+    _role = data.role;
+    localStorage.setItem('livret_jwt_' + _slug, _jwt);
     showMain();
-    applyTickets(data.tickets || []);
     loadHotelName();
+    loadTickets();
   } else {
     document.getElementById('auth-err').style.display = 'block';
     document.getElementById('auth-pwd').focus();
   }
 }
 
-document.getElementById('auth-pwd').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doAuth();
-});
+document.getElementById('auth-pwd').addEventListener('keydown', function(e) { if (e.key === 'Enter') doAuth(); });
 
 // ─────────────────────────────────────────────
 // Show main UI
@@ -343,7 +348,7 @@ async function loadTickets() {
 
   try {
     var r = await fetch('/' + _slug + '/tickets', {
-      headers: { 'X-Hotel-Password': _pwd }
+      headers: { 'Authorization': 'Bearer ' + _jwt }
     });
     if (r.status === 401) { logout(); return; }
     var data = await r.json();
@@ -552,7 +557,7 @@ async function sendReply(id) {
   try {
     var r = await fetch('/' + _slug + '/ticket/' + id + '/message', {
       method:'POST',
-      headers:{'Content-Type':'application/json','X-Hotel-Password':_pwd},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer ' + _jwt},
       body: JSON.stringify({ text, from:'hotel' })
     });
     var data = await r.json();
@@ -580,7 +585,7 @@ async function changeStatus(id, status) {
   try {
     var r = await fetch('/' + _slug + '/ticket/' + id + '/status', {
       method:'POST',
-      headers:{'Content-Type':'application/json','X-Hotel-Password':_pwd},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer ' + _jwt},
       body: JSON.stringify({ status })
     });
     var data = await r.json();
@@ -633,7 +638,8 @@ function autoResize(el) {
 // Déconnexion
 // ─────────────────────────────────────────────
 function logout() {
-  localStorage.removeItem('livret_hotel_pwd_' + _slug);
+  _jwt = '';
+  localStorage.removeItem('livret_jwt_' + _slug);
   location.reload();
 }
 

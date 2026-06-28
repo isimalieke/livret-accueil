@@ -543,6 +543,41 @@ input:checked + .slider:before { transform:translateX(22px); }
     </div>
   </div>
 
+  <!-- ÉQUIPE — GESTIONNAIRES -->
+  <div class="section" id="equipe-section">
+    <div class="section-head" onclick="toggle(this); loadGestionnaires()">
+      <h2>👥 Équipe — Gestionnaires</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body" id="equipe-body">
+
+      <!-- Formulaire ajout -->
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px">
+        <div class="sub-label" style="margin-top:0">Ajouter un gestionnaire</div>
+        <div class="row3">
+          <div class="field" style="margin-bottom:8px">
+            <label>Nom</label>
+            <input type="text" id="g-nom" placeholder="Marie Sow">
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Email</label>
+            <input type="email" id="g-email" placeholder="marie@hotel.com">
+          </div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Mot de passe</label>
+            <input type="text" id="g-pwd" placeholder="Choisir un mot de passe">
+          </div>
+        </div>
+        <button onclick="addGestionnaire()" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:13px;cursor:pointer;font-weight:600">+ Ajouter</button>
+        <span id="g-msg" style="font-size:12px;margin-left:10px;color:green;display:none"></span>
+      </div>
+
+      <!-- Liste -->
+      <div id="g-list"><div style="font-size:13px;color:#999;text-align:center;padding:16px 0">⏳ Chargement…</div></div>
+
+    </div>
+  </div>
+
   <!-- TICKETS D'INCIDENT -->
   <div class="section" id="tickets-section">
     <div class="section-head" onclick="toggle(this); loadTicketsIfNeeded()">
@@ -1305,6 +1340,116 @@ function download(filename, content) {
   a.href = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(content);
   a.download = filename;
   a.click();
+}
+
+// ─────────────────────────────────────────────
+// ÉQUIPE — GESTIONNAIRES
+// ─────────────────────────────────────────────
+var _gestionnairesLoaded = false;
+
+async function loadGestionnaires() {
+  if (_gestionnairesLoaded) return;
+  if (!document.getElementById('equipe-body').classList.contains('open')) return;
+  _gestionnairesLoaded = true;
+  await refreshGestionnaires();
+}
+
+async function refreshGestionnaires() {
+  var el = document.getElementById('g-list');
+  el.innerHTML = '<div style="font-size:13px;color:#999;text-align:center;padding:16px 0">⏳ Chargement…</div>';
+  try {
+    var r = await fetch('/' + _slug + '/gestionnaire', {
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    var data = await r.json();
+    if (!data.ok) { el.innerHTML = '<div style="color:red;font-size:13px;padding:8px">Erreur : ' + (data.error||'') + '</div>'; return; }
+    var list = data.gestionnaires || [];
+    if (!list.length) {
+      el.innerHTML = '<div style="font-size:13px;color:#999;text-align:center;padding:16px 0">Aucun gestionnaire ajouté.</div>';
+      return;
+    }
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:13px">'
+      + '<thead><tr style="border-bottom:2px solid var(--border);color:var(--muted);font-size:11px;text-transform:uppercase">'
+      + '<th style="text-align:left;padding:6px 8px">Nom</th><th style="text-align:left;padding:6px 8px">Email</th>'
+      + '<th style="text-align:left;padding:6px 8px">Depuis</th><th style="text-align:left;padding:6px 8px">Statut</th><th></th>'
+      + '</tr></thead><tbody>';
+    list.forEach(function(g) {
+      var date = new Date(g.created_at).toLocaleDateString('fr-FR');
+      var actif = g.active === 1;
+      html += '<tr style="border-bottom:1px solid var(--border)">'
+        + '<td style="padding:8px">' + esc(g.nom) + '</td>'
+        + '<td style="padding:8px;color:var(--muted)">' + esc(g.email) + '</td>'
+        + '<td style="padding:8px;color:var(--muted)">' + date + '</td>'
+        + '<td style="padding:8px">' + (actif ? '<span style="color:green;font-weight:600">✅ Actif</span>' : '<span style="color:#999">Révoqué</span>') + '</td>'
+        + '<td style="padding:8px;text-align:right">'
+        + (actif ? '<button onclick="revokeGestionnaire(\'' + g.id + '\')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-weight:600">Révoquer</button>' : '')
+        + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:red;font-size:13px;padding:8px">Erreur réseau</div>';
+  }
+}
+
+async function addGestionnaire() {
+  var nom   = document.getElementById('g-nom').value.trim();
+  var email = document.getElementById('g-email').value.trim();
+  var pwd   = document.getElementById('g-pwd').value.trim();
+  var msg   = document.getElementById('g-msg');
+  if (!nom || !email || !pwd) { showMsg('g-msg', '⚠️ Tous les champs sont requis.', 'red'); return; }
+
+  try {
+    var r = await fetch('/' + _slug + '/gestionnaire', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ nom, email, password: pwd })
+    });
+    var data = await r.json();
+    if (data.ok) {
+      document.getElementById('g-nom').value = '';
+      document.getElementById('g-email').value = '';
+      document.getElementById('g-pwd').value = '';
+      showMsg('g-msg', '✅ Gestionnaire ajouté.', 'green');
+      await refreshGestionnaires();
+    } else {
+      showMsg('g-msg', '⚠️ ' + (data.error || 'Erreur'), 'red');
+    }
+  } catch(e) {
+    showMsg('g-msg', '⚠️ Erreur réseau', 'red');
+  }
+}
+
+async function revokeGestionnaire(id) {
+  if (!confirm('Révoquer cet accès ? Le gestionnaire ne pourra plus se connecter.')) return;
+  try {
+    var r = await fetch('/' + _slug + '/gestionnaire/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    var data = await r.json();
+    if (data.ok) {
+      await refreshGestionnaires();
+    } else {
+      alert('Erreur : ' + (data.error || ''));
+    }
+  } catch(e) {
+    alert('Erreur réseau');
+  }
+}
+
+function showMsg(id, text, color) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color || 'green';
+  el.style.display = 'inline';
+  setTimeout(function() { el.style.display = 'none'; }, 4000);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ─────────────────────────────────────────────

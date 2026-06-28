@@ -84,6 +84,11 @@ export default {
       return fetchAsset(env, url.origin + '/admin.html');
     }
 
+    // ── /{slug}/gestion → page dédiée gestion des incidents ──
+    if (sub === 'gestion' || sub === 'gestion.html') {
+      return fetchAsset(env, url.origin + '/gestion.html');
+    }
+
     // ── /{slug}/carte → carte d'accueil imprimable ──
     if (sub === 'carte' || sub === 'carte.html') {
       return fetchAsset(env, url.origin + '/carte.html');

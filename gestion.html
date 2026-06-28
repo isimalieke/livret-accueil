@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Incidents</title>
+<style>
+:root {
+  --blue:#2563eb; --blue-l:#dbeafe;
+  --green:#16a34a; --green-l:#dcfce7;
+  --yellow:#d97706; --yellow-l:#fef3c7;
+  --red:#dc2626; --red-l:#fee2e2;
+  --bg:#f8fafc; --card:#fff;
+  --border:#e2e8f0; --text:#1e293b; --text2:#64748b;
+  --radius:12px; --shadow:0 1px 4px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── HEADER ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--blue);
+  padding:14px 16px 12px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 8px rgba(37,99,235,.3);
+}
+.topbar-hotel{flex:1;min-width:0;}
+.topbar-nom{color:#fff;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.topbar-sub{color:rgba(255,255,255,.65);font-size:12px;margin-top:1px;}
+.topbar-btn{
+  background:rgba(255,255,255,.18);border:none;border-radius:8px;
+  color:#fff;font-size:13px;font-weight:600;padding:6px 10px;cursor:pointer;white-space:nowrap;
+}
+.topbar-btn:active{background:rgba(255,255,255,.28);}
+.refresh-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.18);border:none;cursor:pointer;color:#fff;font-size:18px;}
+
+/* ── FILTRE PILLS ── */
+.pills-bar{
+  display:flex;gap:6px;padding:12px 16px 8px;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.pills-bar::-webkit-scrollbar{display:none;}
+.pill{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:5px;
+  border:1.5px solid var(--border);border-radius:20px;
+  padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;
+  background:#fff;color:var(--text2);transition:all .15s;white-space:nowrap;
+}
+.pill:active{transform:scale(.97);}
+.pill.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.pill .cnt{
+  background:rgba(0,0,0,.12);border-radius:10px;
+  padding:1px 6px;font-size:10px;min-width:18px;text-align:center;
+}
+.pill.active .cnt{background:rgba(255,255,255,.28);}
+.pill-new.active{background:var(--yellow);border-color:var(--yellow);}
+.pill-prog.active{background:var(--blue);border-color:var(--blue);}
+.pill-done.active{background:var(--green);border-color:var(--green);}
+
+/* ── LISTE ── */
+.list-wrap{padding:0 12px 80px;}
+
+.tkt-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);
+  margin-bottom:6px;cursor:pointer;overflow:hidden;
+  transition:border-color .15s, box-shadow .15s;
+}
+.tkt-card:active{box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+.tkt-card.active{border-color:var(--blue);border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0;}
+.tkt-row{padding:12px 14px;display:flex;align-items:flex-start;gap:10px;}
+.tkt-ico{font-size:20px;line-height:1;padding-top:1px;flex-shrink:0;}
+.tkt-body{flex:1;min-width:0;}
+.tkt-subj{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tkt-meta{font-size:11px;color:var(--text2);margin-top:3px;}
+.tkt-badge{
+  flex-shrink:0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:2px;
+}
+.badge-received{background:var(--yellow-l);color:var(--yellow);}
+.badge-in_progress{background:var(--blue-l);color:var(--blue);}
+.badge-resolved{background:var(--green-l);color:var(--green);}
+
+/* ── DETAIL INLINE ── */
+.tkt-detail{
+  display:none;
+  background:#f1f5f9;
+  border:1.5px solid var(--blue);
+  border-top:none;
+  border-bottom-left-radius:var(--radius);
+  border-bottom-right-radius:var(--radius);
+  margin-bottom:6px;
+  overflow:hidden;
+}
+.tkt-detail.open{display:block;}
+.detail-head{padding:10px 14px 8px;border-bottom:1px solid var(--border);background:#fff;}
+.detail-head-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.detail-id{font-size:11px;color:var(--text2);font-weight:600;}
+.detail-date{font-size:11px;color:var(--text2);}
+.detail-guest{font-size:13px;font-weight:600;margin-top:4px;}
+
+/* status selector */
+.status-sel{
+  margin-left:auto;flex-shrink:0;
+  border:1.5px solid var(--border);border-radius:8px;
+  padding:4px 8px;font-size:12px;font-weight:600;background:#fff;cursor:pointer;
+}
+
+/* ── TIMELINE ── */
+.timeline{
+  padding:10px 12px;display:flex;flex-direction:column;gap:8px;
+  max-height:320px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.msg-wrap{display:flex;flex-direction:column;}
+.msg-time{font-size:10px;color:#999;margin-bottom:3px;}
+.msg-bubble{
+  display:inline-block;max-width:85%;padding:8px 12px;
+  border-radius:12px;font-size:13px;line-height:1.45;word-break:break-word;
+}
+.msg-hotel .msg-time{text-align:right;}
+.msg-hotel .msg-bubble{background:var(--blue);color:#fff;border-bottom-right-radius:3px;align-self:flex-end;}
+.msg-hotel{align-items:flex-end;}
+.msg-guest .msg-bubble{background:#fff;border:1px solid var(--border);border-bottom-left-radius:3px;align-self:flex-start;color:var(--text);}
+.msg-guest{align-items:flex-start;}
+
+/* ── REPLY BAR ── */
+.reply-bar{
+  padding:10px 12px 12px;background:#fff;border-top:1px solid var(--border);
+  display:flex;gap:8px;align-items:flex-end;
+}
+.reply-bar textarea{
+  flex:1;border:1.5px solid var(--border);border-radius:10px;
+  padding:9px 12px;font-size:14px;resize:none;
+  min-height:42px;max-height:120px;
+  font-family:inherit;color:var(--text);background:#fff;
+}
+.reply-bar textarea:focus{outline:none;border-color:var(--blue);}
+.send-btn{
+  flex-shrink:0;width:42px;height:42px;border-radius:10px;
+  background:var(--blue);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;
+}
+.send-btn:active{background:#1d4ed8;}
+
+/* ── AUTH ── */
+#auth-screen{
+  position:fixed;inset:0;background:var(--blue);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  z-index:200;
+}
+.auth-card{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:360px;text-align:center;}
+.auth-icon{font-size:42px;margin-bottom:12px;}
+.auth-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.auth-input{
+  width:100%;border:1.5px solid var(--border);border-radius:12px;
+  padding:13px 14px;font-size:16px;text-align:center;letter-spacing:2px;
+  margin-bottom:12px;font-family:inherit;
+}
+.auth-input:focus{outline:none;border-color:var(--blue);}
+.auth-submit{
+  width:100%;background:var(--blue);color:#fff;border:none;
+  border-radius:12px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;
+}
+.auth-submit:active{background:#1d4ed8;}
+.auth-err{color:var(--red);font-size:13px;margin-top:8px;display:none;}
+
+/* ── EMPTY / LOADING ── */
+.state-msg{padding:40px 20px;text-align:center;color:var(--text2);font-size:14px;}
+
+/* ── FAB retour admin ── */
+.fab-admin{
+  position:fixed;bottom:20px;right:16px;z-index:40;
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:20px;padding:8px 14px;
+  font-size:12px;font-weight:600;color:var(--text2);
+  box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;gap:5px;
+  text-decoration:none;
+}
+
+/* spinner */
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:sp .6s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- ── ÉCRAN AUTH ── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-icon">🎫</div>
+    <div class="auth-title">Gestion incidents</div>
+    <div class="auth-sub" id="auth-hotel-name">Chargement…</div>
+    <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe" autocomplete="current-password"/>
+    <button class="auth-submit" onclick="doAuth()">Connexion</button>
+    <div class="auth-err" id="auth-err">Mot de passe incorrect.</div>
+  </div>
+</div>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar" id="main-topbar" style="display:none">
+  <div class="topbar-hotel">
+    <div class="topbar-nom" id="tb-nom">–</div>
+    <div class="topbar-sub" id="tb-sub">Gestion des incidents</div>
+  </div>
+  <button class="refresh-btn" onclick="loadTickets()" title="Actualiser">↻</button>
+</div>
+
+<!-- ── PILLS ── -->
+<div class="pills-bar" id="pills-bar" style="display:none">
+  <span class="pill active" id="pill-all" onclick="filterTickets('all')">
+    Tous <span class="cnt" id="cnt-all">0</span>
+  </span>
+  <span class="pill pill-new" id="pill-received" onclick="filterTickets('received')">
+    🟡 Nouveaux <span class="cnt" id="cnt-received">0</span>
+  </span>
+  <span class="pill pill-prog" id="pill-in_progress" onclick="filterTickets('in_progress')">
+    🔵 En cours <span class="cnt" id="cnt-in_progress">0</span>
+  </span>
+  <span class="pill pill-done" id="pill-resolved" onclick="filterTickets('resolved')">
+    ✅ Résolus <span class="cnt" id="cnt-resolved">0</span>
+  </span>
+</div>
+
+<!-- ── LISTE TICKETS ── -->
+<div class="list-wrap" id="list-wrap" style="display:none">
+  <div class="state-msg" id="list-state"><span class="spin"></span></div>
+  <div id="tickets-list"></div>
+</div>
+
+<!-- ── FAB ADMIN ── -->
+<a class="fab-admin" id="fab-admin" href="#" style="display:none">⚙️ Admin</a>
+
+<script>
+// ─────────────────────────────────────────────
+var _slug = '';
+var _pwd  = '';
+var _all  = [];
+var _filter = 'all';
+var _openId = null;
+
+// ─────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────
+(function(){
+  var parts = location.pathname.split('/').filter(Boolean);
+  _slug = parts[0] || '';
+  if (!_slug) { document.getElementById('auth-hotel-name').textContent = 'Slug introuvable'; return; }
+
+  // Mémoriser le mot de passe
+  var saved = localStorage.getItem('livret_hotel_pwd_' + _slug);
+  if (saved) {
+    _pwd = saved;
+    showMain();
+    loadHotelName();
+    loadTickets();
+  } else {
+    loadHotelNameForAuth();
+  }
+})();
+
+// ─────────────────────────────────────────────
+// Auth
+// ─────────────────────────────────────────────
+function loadHotelNameForAuth() {
+  var s = document.createElement('script');
+  s.src = '/' + _slug + '/config.js';
+  s.onload = function() {
+    if (typeof CONFIG !== 'undefined') {
+      document.getElementById('auth-hotel-name').textContent = CONFIG.NOM || _slug;
+    }
+  };
+  document.head.appendChild(s);
+}
+
+async function doAuth() {
+  var pwd = document.getElementById('auth-pwd').value.trim();
+  if (!pwd) return;
+  // Vérifier via l'API tickets (auth incluse)
+  var r = await fetch('/' + _slug + '/tickets', {
+    headers: { 'X-Hotel-Password': pwd }
+  });
+  if (r.ok) {
+    _pwd = pwd;
+    localStorage.setItem('livret_hotel_pwd_' + _slug, pwd);
+    var data = await r.json();
+    showMain();
+    applyTickets(data.tickets || []);
+    loadHotelName();
+  } else {
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('auth-pwd').focus();
+  }
+}
+
+document.getElementById('auth-pwd').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doAuth();
+});
+
+// ─────────────────────────────────────────────
+// Show main UI
+// ─────────────────────────────────────────────
+function showMain() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-topbar').style.display = 'flex';
+  document.getElementById('pills-bar').style.display   = 'flex';
+  document.getElementById('list-wrap').style.display   = 'block';
+  document.getElementById('fab-admin').style.display   = 'flex';
+  document.getElementById('fab-admin').href = '/' + _slug + '/admin';
+}
+
+// ─────────────────────────────────────────────
+// Charger nom hôtel
+// ─────────────────────────────────────────────
+function loadHotelName() {
+  fetch('/' + _slug + '/config.js')
+    .then(r => r.text())
+    .then(text => {
+      // Extraire NOM depuis le JS retourné
+      var m = text.match(/NOM\s*:\s*['"]([^'"]+)['"]/);
+      if (m) {
+        document.getElementById('tb-nom').textContent = m[1];
+        document.title = m[1] + ' — Incidents';
+      } else {
+        document.getElementById('tb-nom').textContent = _slug;
+      }
+      var loc = text.match(/VILLE\s*:\s*['"]([^'"]+)['"]/);
+      if (loc) document.getElementById('tb-sub').textContent = loc[1];
+    });
+}
+
+// ─────────────────────────────────────────────
+// Charger tickets
+// ─────────────────────────────────────────────
+async function loadTickets() {
+  document.getElementById('tickets-list').innerHTML = '';
+  document.getElementById('list-state').innerHTML = '<span class="spin"></span>';
+  document.getElementById('list-state').style.display = 'block';
+  _openId = null;
+
+  try {
+    var r = await fetch('/' + _slug + '/tickets', {
+      headers: { 'X-Hotel-Password': _pwd }
+    });
+    if (r.status === 401) { logout(); return; }
+    var data = await r.json();
+    applyTickets(data.tickets || []);
+  } catch(e) {
+    document.getElementById('list-state').textContent = 'Erreur de connexion.';
+  }
+}
+
+function applyTickets(tickets) {
+  _all = tickets;
+  updateCounts();
+  renderList();
+}
+
+// ─────────────────────────────────────────────
+// Counts
+// ─────────────────────────────────────────────
+function updateCounts() {
+  var c = { all: _all.length, received: 0, in_progress: 0, resolved: 0 };
+  _all.forEach(function(t) { if (c[t.status] !== undefined) c[t.status]++; });
+  ['all','received','in_progress','resolved'].forEach(function(k) {
+    var el = document.getElementById('cnt-' + k);
+    if (el) el.textContent = c[k];
+  });
+}
+
+// ─────────────────────────────────────────────
+// Filter
+// ─────────────────────────────────────────────
+function filterTickets(f) {
+  _filter = f;
+  _openId = null;
+  ['all','received','in_progress','resolved'].forEach(function(k) {
+    var el = document.getElementById('pill-' + k);
+    if (el) el.classList.toggle('active', k === f);
+  });
+  renderList();
+}
+
+// ─────────────────────────────────────────────
+// Render list
+// ─────────────────────────────────────────────
+var STATUS_BADGE = {
+  received:    '<span class="tkt-badge badge-received">🟡 Nouveau</span>',
+  in_progress: '<span class="tkt-badge badge-in_progress">🔵 En cours</span>',
+  resolved:    '<span class="tkt-badge badge-resolved">✅ Résolu</span>',
+};
+
+function renderList() {
+  var list = _filter === 'all' ? _all : _all.filter(function(t){ return t.status === _filter; });
+  var wrap = document.getElementById('tickets-list');
+  var state = document.getElementById('list-state');
+
+  if (!list.length) {
+    wrap.innerHTML = '';
+    state.textContent = _filter === 'all' ? 'Aucun ticket pour l\'instant.' : 'Aucun ticket dans cette catégorie.';
+    state.style.display = 'block';
+    return;
+  }
+  state.style.display = 'none';
+
+  var html = '';
+  list.forEach(function(t) {
+    var d = new Date(t.created);
+    var dateStr = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    var isOpen = _openId === t.id;
+    html += '<div class="tkt-card' + (isOpen ? ' active' : '') + '" id="card-' + t.id + '" onclick="toggleTicket(\'' + t.id + '\')">';
+    html += '<div class="tkt-row">';
+    html += '<div class="tkt-ico">🎫</div>';
+    html += '<div class="tkt-body">';
+    html += '<div class="tkt-subj">' + esc(t.subject) + '</div>';
+    html += '<div class="tkt-meta">👤 ' + esc(t.guestName) + (t.guestPhone ? ' · ' + esc(t.guestPhone) : '') + ' · ' + dateStr + ' · #' + t.id + '</div>';
+    html += '</div>';
+    html += STATUS_BADGE[t.status] || '';
+    html += '</div>';
+    // Detail container (hidden by default)
+    html += '<div class="tkt-detail" id="detail-' + t.id + '">';
+    html += '<div class="detail-load" style="padding:20px;text-align:center;color:#999;font-size:13px"><span class="spin"></span></div>';
+    html += '</div>';
+    html += '</div>';
+  });
+
+  wrap.innerHTML = html;
+
+  // Réouvrir le ticket actif si nécessaire
+  if (_openId) openDetailPanel(_openId);
+}
+
+// ─────────────────────────────────────────────
+// Toggle ticket
+// ─────────────────────────────────────────────
+function toggleTicket(id) {
+  if (_openId === id) {
+    _openId = null;
+    var card = document.getElementById('card-' + id);
+    var detail = document.getElementById('detail-' + id);
+    if (card) card.classList.remove('active');
+    if (detail) detail.classList.remove('open');
+    return;
+  }
+  // Fermer l'actuel
+  if (_openId) {
+    var oldCard = document.getElementById('card-' + _openId);
+    var oldDetail = document.getElementById('detail-' + _openId);
+    if (oldCard) oldCard.classList.remove('active');
+    if (oldDetail) oldDetail.classList.remove('open');
+  }
+  _openId = id;
+  var card = document.getElementById('card-' + id);
+  if (card) card.classList.add('active');
+  openDetailPanel(id);
+  // Scroll vers la carte
+  setTimeout(function() {
+    if (card) card.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 80);
+}
+
+// ─────────────────────────────────────────────
+// Ouvrir le panneau détail
+// ─────────────────────────────────────────────
+async function openDetailPanel(id) {
+  var panel = document.getElementById('detail-' + id);
+  if (!panel) return;
+  panel.classList.add('open');
+
+  // Charger les données
+  try {
+    var r = await fetch('/' + _slug + '/ticket/' + id + '/data');
+    var data = await r.json();
+    if (!data.ok) { panel.innerHTML = '<div class="state-msg">Ticket introuvable.</div>'; return; }
+    renderDetail(panel, data.ticket);
+  } catch(e) {
+    panel.innerHTML = '<div class="state-msg">Erreur de chargement.</div>';
+  }
+}
+
+// ─────────────────────────────────────────────
+// Render detail
+// ─────────────────────────────────────────────
+function renderDetail(panel, t) {
+  var d = new Date(t.created);
+  var dateStr = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  var html = '';
+  // Head
+  html += '<div class="detail-head">';
+  html += '<div class="detail-head-row">';
+  html += '<span class="detail-id">#' + t.id + '</span>';
+  html += '<span class="detail-date">· ' + dateStr + '</span>';
+  html += '<select class="status-sel" onchange="changeStatus(\'' + t.id + '\',this.value)">';
+  html += '<option value="received"'    + (t.status==='received'?'    selected':'') + '>🟡 Nouveau</option>';
+  html += '<option value="in_progress"' + (t.status==='in_progress'?' selected':'') + '>🔵 En cours</option>';
+  html += '<option value="resolved"'    + (t.status==='resolved'?'   selected':'') + '>✅ Résolu</option>';
+  html += '</select>';
+  html += '</div>';
+  html += '<div class="detail-guest">👤 ' + esc(t.guestName) + (t.guestPhone ? ' · 📞 ' + esc(t.guestPhone) : '') + (t.guestEmail ? ' · ✉️ ' + esc(t.guestEmail) : '') + '</div>';
+  if (t.guestRoom) html += '<div style="font-size:12px;color:#64748b;margin-top:2px">🛏️ Chambre ' + esc(t.guestRoom) + '</div>';
+  html += '</div>';
+
+  // Timeline
+  html += '<div class="timeline" id="tl-' + t.id + '">';
+  var msgs = t.messages || [];
+  if (!msgs.length) {
+    html += '<div style="text-align:center;font-size:13px;color:#999;padding:12px 0">Aucun message.</div>';
+  } else {
+    msgs.forEach(function(m) {
+      var isHotel = m.from === 'hotel';
+      var time = new Date(m.timestamp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+               + ' · ' + new Date(m.timestamp).toLocaleDateString('fr-FR');
+      html += '<div class="msg-wrap ' + (isHotel ? 'msg-hotel' : 'msg-guest') + '">';
+      html += '<div class="msg-time">' + (isHotel ? '🏨 Hôtel' : '👤 Client') + ' · ' + time + '</div>';
+      html += '<div class="msg-bubble">' + esc(m.text) + '</div>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+
+  // Reply bar
+  html += '<div class="reply-bar">';
+  html += '<textarea id="rep-' + t.id + '" placeholder="Votre réponse…" rows="1" oninput="autoResize(this)" onkeydown="replyKeydown(event,\'' + t.id + '\')"></textarea>';
+  html += '<button class="send-btn" onclick="sendReply(\'' + t.id + '\')">➤</button>';
+  html += '</div>';
+
+  panel.innerHTML = html;
+
+  // Scroll timeline to bottom
+  var tl = document.getElementById('tl-' + t.id);
+  if (tl) tl.scrollTop = tl.scrollHeight;
+}
+
+// ─────────────────────────────────────────────
+// Reply
+// ─────────────────────────────────────────────
+function replyKeydown(e, id) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendReply(id); }
+}
+
+async function sendReply(id) {
+  var ta = document.getElementById('rep-' + id);
+  if (!ta) return;
+  var text = ta.value.trim();
+  if (!text) return;
+  ta.disabled = true;
+
+  try {
+    var r = await fetch('/' + _slug + '/ticket/' + id + '/message', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Hotel-Password':_pwd},
+      body: JSON.stringify({ text, from:'hotel' })
+    });
+    var data = await r.json();
+    if (data.ok) {
+      ta.value = '';
+      ta.style.height = '';
+      // Recharger le panel
+      await reloadDetail(id);
+      // Rafraîchir la liste pour avoir les statuts à jour
+      await loadTickets();
+    } else {
+      alert('Erreur : ' + (data.error || 'Envoi impossible'));
+      ta.disabled = false;
+    }
+  } catch(e) {
+    alert('Erreur réseau.');
+    ta.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Change statut
+// ─────────────────────────────────────────────
+async function changeStatus(id, status) {
+  try {
+    var r = await fetch('/' + _slug + '/ticket/' + id + '/status', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Hotel-Password':_pwd},
+      body: JSON.stringify({ status })
+    });
+    var data = await r.json();
+    if (data.ok) {
+      // Mettre à jour localement
+      var t = _all.find(function(x){ return x.id === id; });
+      if (t) t.status = status;
+      updateCounts();
+      // Mettre à jour le badge sur la carte
+      var badge = document.querySelector('#card-' + id + ' .tkt-badge');
+      if (badge) {
+        badge.className = 'tkt-badge badge-' + status;
+        badge.innerHTML = STATUS_BADGE[status].replace(/<[^>]+>/g,'').trim();
+        // Recréer proprement
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = STATUS_BADGE[status];
+        badge.outerHTML = tempDiv.innerHTML;
+      }
+    } else {
+      alert('Erreur : ' + (data.error || 'Mise à jour impossible'));
+    }
+  } catch(e) {
+    alert('Erreur réseau.');
+  }
+}
+
+// ─────────────────────────────────────────────
+// Reload detail
+// ─────────────────────────────────────────────
+async function reloadDetail(id) {
+  try {
+    var r = await fetch('/' + _slug + '/ticket/' + id + '/data');
+    var data = await r.json();
+    if (data.ok) {
+      var panel = document.getElementById('detail-' + id);
+      if (panel) renderDetail(panel, data.ticket);
+    }
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────
+// Auto resize textarea
+// ─────────────────────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ─────────────────────────────────────────────
+// Déconnexion
+// ─────────────────────────────────────────────
+function logout() {
+  localStorage.removeItem('livret_hotel_pwd_' + _slug);
+  location.reload();
+}
+
+// ─────────────────────────────────────────────
+// Escape HTML
+// ─────────────────────────────────────────────
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

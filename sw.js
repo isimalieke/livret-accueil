@@ -1,6 +1,6 @@
-const CACHE = 'livret-v32';
+const CACHE = 'livret-v33';
 // config.js exclu du pré-cache — contenu dynamique (KV)
-const FILES = ['./index.html', './manifest.json', './admin.html'];
+const FILES = ['./index.html', './manifest.json', './admin.html', './gestion.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));

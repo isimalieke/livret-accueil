@@ -82,11 +82,11 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .tel-del { background:none; border:none; color:#c0392b; cursor:pointer; font-size:18px; padding:2px; }
 
 /* TICKETS */
-.tkt-hdr-pill { display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.85); padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; transition:background .15s; }
-.tkt-hdr-pill:hover { background:rgba(255,255,255,.25); }
-.tkt-hdr-pill.pill-active { background:#fff; color:var(--blue); border-color:#fff; }
-.tkt-hdr-pill span { background:rgba(0,0,0,.12); border-radius:8px; padding:0 5px; font-size:10px; }
-.tkt-hdr-pill.pill-active span { background:var(--blue); color:#fff; }
+.tkt-hdr-pill { display:inline-flex; align-items:center; gap:5px; background:#f1f5f9; border:1px solid var(--border); color:#444; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; transition:background .15s; white-space:nowrap; }
+.tkt-hdr-pill:hover { background:#e2e8f0; }
+.tkt-hdr-pill.pill-active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.tkt-hdr-pill .pill-cnt { background:rgba(0,0,0,.15); border-radius:8px; padding:1px 6px; font-size:10px; min-width:16px; text-align:center; }
+.tkt-hdr-pill.pill-active .pill-cnt { background:rgba(255,255,255,.3); }
 .tkt-row { padding:12px 14px; border:1px solid var(--border); border-radius:8px; margin-bottom:4px; cursor:pointer; transition:background .15s; }
 .tkt-row:hover { background:#f8fafc; }
 .tkt-row-active { background:#eff6ff; border-color:#93c5fd; border-bottom-left-radius:0; border-bottom-right-radius:0; margin-bottom:0; }
@@ -547,10 +547,11 @@ input:checked + .slider:before { transform:translateX(22px); }
     <div class="section-head" onclick="toggle(this); loadTicketsIfNeeded()">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <h2 style="margin:0">🎫 Tickets d'incident</h2>
-        <span id="pill-all"    class="tkt-hdr-pill pill-active" onclick="event.stopPropagation();filterTickets('all')">Tous <span id="cnt-all">0</span></span>
-        <span id="pill-received"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('received')">🟡 Nouveaux <span id="cnt-received">0</span></span>
-        <span id="pill-in_progress" class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('in_progress')">🔵 En cours <span id="cnt-in_progress">0</span></span>
-        <span id="pill-resolved"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('resolved')">✅ Résolus <span id="cnt-resolved">0</span></span>
+        <a id="link-gestion" href="#" onclick="event.stopPropagation()" style="margin-left:4px;background:var(--blue);color:#fff;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap" title="Ouvrir la vue dédiée">↗ Vue dédiée</a>
+        <span id="pill-all"    class="tkt-hdr-pill pill-active" onclick="event.stopPropagation();filterTickets('all')">Tous <span class="pill-cnt" id="cnt-all">0</span></span>
+        <span id="pill-received"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('received')">🟡 Nouveaux <span class="pill-cnt" id="cnt-received">0</span></span>
+        <span id="pill-in_progress" class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('in_progress')">🔵 En cours <span class="pill-cnt" id="cnt-in_progress">0</span></span>
+        <span id="pill-resolved"    class="tkt-hdr-pill" onclick="event.stopPropagation();filterTickets('resolved')">✅ Résolus <span class="pill-cnt" id="cnt-resolved">0</span></span>
       </div>
       <span class="chevron">▼</span>
     </div>
@@ -631,6 +632,12 @@ var SAVE_SECRET = _hotelPwd || 'Livret2024!xK';  // mot de passe hôtel = secret
 
 // ── ENDPOINT CONFIG ──
 var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
+
+// ── LIEN VUE GESTION ──
+(function() {
+  var el = document.getElementById('link-gestion');
+  if (el && _slug) el.href = '/' + _slug + '/gestion';
+})();
 
 function checkPwd() {
   var v = document.getElementById('pwd-input').value;

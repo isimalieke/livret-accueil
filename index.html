@@ -1828,16 +1828,19 @@ function applyConfig() {
     return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf">' + p.fr + ml(p.fr.split('—')[0].trim()) + '</div><div class="re">' + p.en + ml(p.en.split('—')[0].trim()) + '</div></div></div>';
   }).join(''));
 
-  // Transport
-  r('transport-vtc', (C.transport.vtc || []).map(function(tt) {
-    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
-  }).join(''));
-  r('transport-commun', (C.transport.commun || []).map(function(tt) {
-    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
-  }).join(''));
-  r('transport-location', (C.transport.location || []).map(function(tt) {
-    return '<div class="row"><span class="ri">' + tt.icon + '</span><div><div class="rf">' + tt.fr + '</div><div class="re">' + tt.en + '</div></div></div>';
-  }).join(''));
+  // Transport (nouveau modèle : icon, nom, tel, url)
+  function transportRow(tt) {
+    var telLink = tt.tel ? ' — ' + tel(tt.tel) : '';
+    var urlLink = tt.url ? ' — <a href="' + tt.url + '" class="maps-btn" target="_blank" rel="noopener">🌐 Site</a>' : '';
+    // Compat ancien modèle fr/en
+    var label = tt.nom || tt.fr || '';
+    return '<div class="row"><span class="ri">' + tt.icon + '</span><div>'
+         + '<div class="rf"><strong>' + label + '</strong>' + telLink + urlLink + '</div>'
+         + '</div></div>';
+  }
+  r('transport-vtc',      (C.transport.vtc      || []).map(transportRow).join(''));
+  r('transport-commun',   (C.transport.commun   || []).map(transportRow).join(''));
+  r('transport-location', (C.transport.location || []).map(transportRow).join(''));
   r('transport-adresse', 'Notre adresse / Our address : <strong>' + h.adresse + '</strong>' + ml(h.adresse));
 
   // Restaurants

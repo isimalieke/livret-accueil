@@ -5,7 +5,7 @@
  * Bindings requis :
  *   CONFIG_KV  → KV namespace (config.js par hôtel + séjours en cours)
  *   DB         → D1 database (hôtels, utilisateurs, tickets, messages)
- *   RESEND_API_KEY → secret Resend
+ *   BREVO_API_KEY  → secret Brevo (envoi emails transactionnels)
  *   JWT_SECRET     → secret de signature JWT (min 32 caractères)
  *   AUTH_SECRET    → secret superadmin (inchangé)
  *
@@ -311,7 +311,7 @@ async function handleForgotPassword(request, env, slug, url) {
     );
 
     // Envoyer l'email
-    if (env.RESEND_API_KEY) {
+    if (env.BREVO_API_KEY) {
       const resetUrl = `${url.origin}/${slug}/auth/reset?token=${token}`;
       await sendPasswordResetEmail(env, user, resetUrl);
     }
@@ -462,8 +462,11 @@ async function handleRegister(request, env, url) {
     }, env);
 
     // Email de bienvenue (non bloquant)
-    if (env.RESEND_API_KEY) {
-      sendWelcomeEmail(env, { nom, email: email.toLowerCase().trim(), slug }, url.origin).catch(() => {});
+    if (env.BREVO_API_KEY) {
+      sendWelcomeEmail(env, { nom, email: email.toLowerCase().trim(), slug }, url.origin)
+        .catch(e => console.error('[Welkomeo] sendWelcomeEmail failed:', String(e)));
+    } else {
+      console.warn('[Welkomeo] BREVO_API_KEY absent — email de bienvenue non envoyé pour', slug);
     }
 
     return json({ ok: true, slug, livretUrl: url.origin + '/' + slug, token });
@@ -599,11 +602,11 @@ async function handleCreateTicket(request, env, slug) {
     };
 
     let emailSent = false;
-    if (guestEmail && env.RESEND_API_KEY) {
+    if (guestEmail && env.BREVO_API_KEY) {
       const r = await sendTicketConfirmationToGuest(env, ticketForEmail, hotelNom, slug);
       emailSent = r && r.status === 200;
     }
-    if (hotelEmail && env.RESEND_API_KEY) {
+    if (hotelEmail && env.BREVO_API_KEY) {
       await sendTicketNotificationToHotel(env, ticketForEmail, hotelNom, hotelEmail, message, slug);
     }
 
@@ -688,7 +691,7 @@ async function handleAddMessage(request, env, slug, ticketId) {
     const ticketData = (await updatedTicket.json()).ticket;
 
     // Notifications
-    if (env.RESEND_API_KEY) {
+    if (env.BREVO_API_KEY) {
       const hotel = await env.DB.prepare('SELECT nom FROM hotels WHERE slug = ?').bind(slug).first();
       const hotelNom = hotel ? hotel.nom : slug;
       const configRaw = await env.CONFIG_KV.get('hotel:' + slug + ':config') || '';
@@ -871,7 +874,7 @@ async function handleMigrateToD1(request, env) {
 // ═════════════════════════════════════════════
 
 async function runCheckoutReminders(env) {
-  if (!env.RESEND_API_KEY) return;
+  if (!env.BREVO_API_KEY) return;
   const tomorrow    = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().slice(0, 10);
@@ -928,11 +931,7 @@ body{margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSys
 <div class="footer"><div class="footer-thanks">Merci pour votre confiance.</div><div class="footer-sub">${hotelNom} — Ce message est automatique.</div></div>
 </div></body></html>`;
 
-  await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: `${hotelNom} <onboarding@resend.dev>`, to: [stay.email], subject: `Votre check-out demain — ${hotelNom}`, html }),
-  });
+  await resendEmail(env, stay.email, `Votre check-out demain — ${hotelNom}`, html, `Welkomeo <noreply@welkomeo.com>`);
 }
 
 // ═════════════════════════════════════════════
@@ -961,14 +960,25 @@ function emailFooter(hotelNom) {
   return `</div><div class="footer"><div class="footer-thanks">Merci de votre confiance — ${hotelNom}</div></div></div></body></html>`;
 }
 
+function parseEmailFrom(from) {
+  const m = (from || '').match(/^(.+?)\s*<([^>]+)>$/);
+  return m ? { name: m[1].trim(), email: m[2].trim() } : { name: 'Welkomeo', email: 'noreply@welkomeo.com' };
+}
+
 async function resendEmail(env, to, subject, html, from) {
-  if (!env.RESEND_API_KEY) return { error: 'RESEND_API_KEY manquante' };
+  const apiKey = env.BREVO_API_KEY;
+  if (!apiKey) return { error: 'BREVO_API_KEY manquante' };
   try {
-    const r = await fetch('https://api.resend.com/emails', {
+    const sender = parseEmailFrom(from);
+    const r = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: [to], subject, html }),
+      headers: { 'api-key': apiKey, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ sender, to: [{ email: to }], subject, htmlContent: html }),
     });
+    if (!r.ok) {
+      const body = await r.text();
+      console.error('[Brevo] send error', r.status, body);
+    }
     return { status: r.status };
   } catch (e) { return { error: String(e) }; }
 }
@@ -981,7 +991,7 @@ async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
     + `<div class="ticket-box"><div class="ticket-label">Numéro de ticket</div><div class="ticket-id">#${ticket.id}</div><div class="ticket-subject">${ticket.subject}</div></div>`
     + `<a class="cta" href="${ticketUrl}">Suivre mon ticket →</a>`
     + emailFooter(hotelNom);
-  return resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <onboarding@resend.dev>`);
+  return resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <noreply@welkomeo.com>`);
 }
 
 async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, newMessage, slug) {
@@ -992,7 +1002,7 @@ async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, 
     + `<div class="msg-box">${newMessage}</div>`
     + `<a class="cta" href="${adminUrl}">Répondre depuis la gestion →</a>`
     + emailFooter(hotelNom);
-  return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Welkomeo <onboarding@resend.dev>`);
+  return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Welkomeo <noreply@welkomeo.com>`);
 }
 
 async function sendWelcomeEmail(env, hotel, origin) {
@@ -1005,7 +1015,8 @@ async function sendWelcomeEmail(env, hotel, origin) {
     + `<a class="cta" href="${adminUrl}">Configurer mon livret →</a>`
     + `<div class="intro" style="text-align:center;font-size:13px;color:#64748b">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" style="color:#0f766e;font-weight:600">${livretUrl}</a></div>`
     + emailFooter('Welkomeo · par Assenka');
-  return resendEmail(env, hotel.email, "🏨 Votre Welkomeo est prêt !", html, 'Welkomeo <onboarding@resend.dev>');
+  const from = env.BREVO_FROM || 'Welkomeo <noreply@welkomeo.com>';
+  return resendEmail(env, hotel.email, "🏨 Votre Welkomeo est prêt !", html, from);
 }
 
 async function sendPasswordResetEmail(env, user, resetUrl) {
@@ -1015,7 +1026,7 @@ async function sendPasswordResetEmail(env, user, resetUrl) {
     + `<a class="cta" href="${resetUrl}">Réinitialiser mon mot de passe →</a>`
     + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Ce lien est valable <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email.</div>`
     + emailFooter('Welkomeo · par Assenka');
-  return resendEmail(env, user.email, '🔑 Réinitialisation de votre mot de passe — Welkomeo', html, 'Welkomeo <onboarding@resend.dev>');
+  return resendEmail(env, user.email, '🔑 Réinitialisation de votre mot de passe — Welkomeo', html, 'Welkomeo <noreply@welkomeo.com>');
 }
 
 async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
@@ -1026,7 +1037,7 @@ async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
     + `<div class="msg-box">${replyText}</div>`
     + `<a class="cta" href="${ticketUrl}">Voir la conversation →</a>`
     + emailFooter(hotelNom);
-  return resendEmail(env, ticket.guestEmail, `Réponse à votre ticket #${ticket.id} — ${hotelNom}`, html, `${hotelNom} <onboarding@resend.dev>`);
+  return resendEmail(env, ticket.guestEmail, `Réponse à votre ticket #${ticket.id} — ${hotelNom}`, html, `${hotelNom} <noreply@welkomeo.com>`);
 }
 
 // ═════════════════════════════════════════════

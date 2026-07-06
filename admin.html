@@ -121,6 +121,21 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
 input:checked + .slider { background:#053372; }
 input:checked + .slider:before { transform:translateX(22px); }
+
+/* ── Fix iOS/iPad : supprime le flash bleu + autorise la sélection dans les champs ── */
+input, textarea, select {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.field input, .field textarea, .field select,
+.dyn-table input,
+.appl-item-head input,
+.appl-item-row2 textarea,
+.appl-item-links input,
+.tel-row input, .tel-row select {
+  touch-action: manipulation;
+}
 </style>
 </head>
 <body>
@@ -195,7 +210,7 @@ input:checked + .slider:before { transform:translateX(22px); }
       <h2>👋 Message de bienvenue</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="field"><label>Texte français (HTML accepté : &lt;strong&gt;, &lt;em&gt;)</label><textarea id="bvn-fr">C'est avec une immense joie que nous vous accueillons à l'&lt;strong&gt;Hôtel Teranga&lt;/strong&gt;.</textarea></div>
+      <div class="field"><label>Texte français</label><textarea id="bvn-fr">C'est avec une immense joie que nous vous accueillons à l'&lt;strong&gt;Hôtel Teranga&lt;/strong&gt;.</textarea></div>
       <div class="field"><label>Texte anglais</label><textarea id="bvn-en">It is with great joy that we welcome you to &lt;strong&gt;Hôtel Teranga&lt;/strong&gt;.</textarea></div>
       <div class="field"><label>Formule de signature</label><input id="bvn-sig" value="Avec toute notre cordialité"></div>
     </div>
@@ -408,19 +423,19 @@ input:checked + .slider:before { transform:translateX(22px); }
     <div class="section-body">
       <div class="sub-label">VTC & Taxis</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-vtc-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('transport-vtc-rows', transportTpl)">+ Ajouter</button>
       </div>
       <div class="sub-label">Transport commun</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-commun-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('transport-commun-rows', transportTpl)">+ Ajouter</button>
       </div>
       <div class="sub-label">Location (voiture, scooter…)</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Description FR</th><th>Description EN</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-location-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('transport-location-rows', transportTpl)">+ Ajouter</button>
       </div>
@@ -945,8 +960,9 @@ function commerceTpl(d) {
 }
 function transportTpl(d) {
   return '<td><input value="' + esc(d.icon||'🚗') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td><input value="' + esc(d.nom||d.fr||'') + '" placeholder="Ex : Yango"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" placeholder="+221 …" style="width:120px"></td>'
+       + '<td><input value="' + esc(d.url||'') + '" placeholder="https://…"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function plageTpl(d) {
@@ -1143,9 +1159,9 @@ function buildConfigContent() {
   var gouter        = readRows('gouter-rows',          ['icon','fr','en']);
   var quartierPts   = readRows('quartier-rows',        ['icon','fr','en','distance']);
   var commerces     = readRows('commerces-rows',       ['icon','fr','en']);
-  var vtc           = readRows('transport-vtc-rows',   ['icon','fr','en']);
-  var commun        = readRows('transport-commun-rows',['icon','fr','en']);
-  var location      = readRows('transport-location-rows',['icon','fr','en']);
+  var vtc           = readRows('transport-vtc-rows',   ['icon','nom','tel','url']);
+  var commun        = readRows('transport-commun-rows',['icon','nom','tel','url']);
+  var location      = readRows('transport-location-rows',['icon','nom','tel','url']);
   var plages        = readRows('plages-rows',          ['icon','fr','en','distance']);
   var activites     = readRows('activites-rows',       ['icon','fr','en','prix']);
   var marches       = readRows('marches-rows',         ['icon','nom','desc_fr','desc_en','horaires']);

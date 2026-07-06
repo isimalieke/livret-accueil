@@ -391,7 +391,10 @@ async function handleListGestionnaires(request, env, slug) {
 async function handleRegister(request, env, url) {
   try {
     const data = await request.json();
-    const { nom, email, password, ville, pays, adresse, telephone, whatsapp } = data;
+    const {
+      nom, email, password, ville, pays, adresse, telephone, whatsapp,
+      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr,
+    } = data;
 
     if (!nom || !email || !password)
       return json({ ok: false, error: 'Champs obligatoires manquants (nom, email, password).' }, 400);
@@ -417,10 +420,10 @@ async function handleRegister(request, env, url) {
       'INSERT INTO users (id, hotel_slug, nom, email, password_hash, role, active, created_at) VALUES (?,?,?,?,?,?,1,?)'
     ).bind(userId, slug, nom, email.toLowerCase().trim(), passwordHash, 'hotelier', now).run();
 
-    // Config initiale dans KV (inchangé)
+    // Config initiale dans KV — inclut toutes les données saisies à l'inscription
     await env.CONFIG_KV.put(
       'hotel:' + slug + ':config',
-      buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email })
+      buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr })
     );
 
     // Générer un token directement après inscription
@@ -1008,8 +1011,9 @@ function enc(s) { return new TextEncoder().encode(s); }
 function hex(buf) { return [...buf].map(b => b.toString(16).padStart(2,'0')).join(''); }
 function unhex(s) { return Uint8Array.from(s.match(/.{2}/g), b => parseInt(b, 16)); }
 
-function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email }) {
+function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr }) {
   const esc = (s) => JSON.stringify(s || '');
+  const bvnFr = bienvenue_fr || 'Bienvenue dans notre établissement.';
   return `const CONFIG = {
   hotel: {
     nom:         ${esc(nom)},
@@ -1020,17 +1024,17 @@ function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, em
     telephone:   ${esc(telephone || '')},
     whatsapp:    ${esc(whatsapp || telephone || '')},
     email:       ${esc(email || '')},
-    hote_nom:    "",
+    hote_nom:    ${esc(hote_nom || '')},
     logo_url:    "",
     cover_photo: "",
   },
   bienvenue: {
-    texte_fr:  "Bienvenue dans notre établissement.",
+    texte_fr:  ${esc(bvnFr)},
     texte_en:  "Welcome to our establishment.",
     signature: "L'équipe",
   },
   pratique: {
-    wifi_reseau: "", wifi_mdp: "",
+    wifi_reseau: ${esc(wifi_reseau || '')}, wifi_mdp: ${esc(wifi_mdp || '')},
     checkin: "14h00", checkout: "11h00",
     cles:    "Déposez les clés à la réception",
     cles_en: "Leave keys at reception",

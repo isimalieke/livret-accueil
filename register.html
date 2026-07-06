@@ -584,6 +584,7 @@ async function submitForm() {
   var password    = document.getElementById('f-password').value;
   var wifi        = document.getElementById('f-wifi').value.trim();
   var wifimdp     = document.getElementById('f-wifimdp').value.trim();
+  var bienvenue   = document.getElementById('f-bienvenue').value.trim();
 
   // WhatsApp : même numéro ou différent
   var waSame = document.getElementById('f-wa-same').checked;
@@ -603,6 +604,7 @@ async function submitForm() {
         telephone: tel, whatsapp: whatsapp,
         hote_nom: responsable,
         wifi_reseau: wifi, wifi_mdp: wifimdp,
+        bienvenue_fr: bienvenue,
       }),
     });
 

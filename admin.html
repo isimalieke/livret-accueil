@@ -320,12 +320,8 @@ input:checked + .slider:before { transform:translateX(22px); }
         <tbody id="inclus-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('inclus-rows', servicesTpl)">+ Ajouter</button>
       </div>
-      <div class="sub-label">Services sur demande</div>
-      <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Service FR</th><th>Service EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
-        <tbody id="demande-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('demande-rows', serviceDemandeTpl)">+ Ajouter</button>
-      </div>
+      <!-- Services sur demande supprimés : le client s'adresse à l'accueil -->
+      <tbody id="demande-rows" style="display:none"></tbody>
     </div>
   </div>
 
@@ -1073,7 +1069,9 @@ function initForm() {
 
 // ── LECTURE LIGNES DYNAMIQUES ──
 function readRows(tbodyId, fields) {
-  var rows = document.getElementById(tbodyId).querySelectorAll('tr');
+  var el = document.getElementById(tbodyId);
+  if (!el) return [];
+  var rows = el.querySelectorAll('tr');
   return Array.from(rows).map(function(tr) {
     var inputs = tr.querySelectorAll('input');
     var obj = {};

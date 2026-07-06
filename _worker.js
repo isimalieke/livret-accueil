@@ -67,9 +67,9 @@ export default {
       return fetchAsset(env, url.origin + '/register.html');
     }
 
-    // ── Racine → page d'inscription ──
+    // ── Racine → landing page ──
     if (path === '/' || path === '') {
-      return fetchAsset(env, url.origin + '/register.html');
+      return fetchAsset(env, url.origin + '/landing.html');
     }
 
     // ── Extraire le slug ──

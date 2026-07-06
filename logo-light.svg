@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 268 56" fill="none">
+  <!-- Icône losange -->
+  <path d="M28 3 L53 28 L28 53 L3 28 Z" stroke="#C9A84C" stroke-width="1.6" fill="none"/>
+  <path d="M28 11 L45 28 L28 45 L11 28 Z" fill="#053372" fill-opacity="0.08"/>
+  <text x="28" y="34" text-anchor="middle"
+        font-family="'Cormorant Garamond', Georgia, serif"
+        font-size="20" font-weight="600" fill="#053372">W</text>
+
+  <!-- Wordmark -->
+  <text x="68" y="31"
+        font-family="'Cormorant Garamond', Georgia, serif"
+        font-size="26" font-weight="500" letter-spacing="1.5"
+        fill="#053372">Welkomeo</text>
+  <!-- Tagline -->
+  <text x="69" y="45"
+        font-family="'Inter', Arial, sans-serif"
+        font-size="8.5" font-weight="400" letter-spacing="2.5"
+        fill="#8898a8"
+        style="text-transform:uppercase">LIVRET D'ACCUEIL DIGITAL</text>
+</svg>

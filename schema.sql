@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────
--- Livret Digital — Cloudflare D1 Schema
+-- Welkomeo · par Assenka — Cloudflare D1 Schema
 -- Base : livret-db
 -- ─────────────────────────────────────────────
 

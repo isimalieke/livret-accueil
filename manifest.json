@@ -1,7 +1,7 @@
 {
-  "name": "Livret d'Accueil · Hôtel Teranga",
-  "short_name": "Teranga",
-  "description": "Livret d'accueil digital de l'Hôtel Teranga Dakar",
+  "name": "Welkomeo",
+  "short_name": "Welkomeo",
+  "description": "Votre livret d'accueil digital — par Welkomeo · Assenka",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#053372",

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Livret d'Accueil</title>
+<title>Admin — Welkomeo</title>
 <style>
 :root {
   --blue: #053372;
@@ -129,7 +129,7 @@ input:checked + .slider:before { transform:translateX(22px); }
   <div class="login-box">
     <div class="login-logo">🏨</div>
     <div class="login-title">Administration</div>
-    <div class="login-sub">Livret d'Accueil Digital</div>
+    <div class="login-sub">Welkomeo · par Assenka</div>
     <input type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()">
     <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()">
     <button onclick="checkPwd()">Connexion</button>
@@ -707,7 +707,7 @@ async function loadSubscriptionBanner() {
       banner.style.display = 'flex';
     } else if (d.status === 'expired') {
       ico.textContent = '⚠️';
-      txt.innerHTML = '<strong>Abonnement expiré.</strong> La sauvegarde de vos données est suspendue. Contactez-nous à <a href="mailto:contact@assenka.com" style="color:inherit">contact@assenka.com</a> pour renouveler.';
+      txt.innerHTML = '<strong>Abonnement expiré.</strong> La sauvegarde de vos données est suspendue. Contactez-nous à <a href="mailto:contact@welkomeo.com" style="color:inherit">contact@welkomeo.com</a> pour renouveler.';
       banner.className = 'sub-banner expired';
       banner.style.display = 'flex';
     }

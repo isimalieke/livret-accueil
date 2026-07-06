@@ -974,7 +974,7 @@ async function resendEmail(env, to, subject, html, from) {
 }
 
 async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
-  const ticketUrl = `https://livret-accueil-2wc.pages.dev/${slug}/ticket/${ticket.id}`;
+  const ticketUrl = `https://welkomeo.com/${slug}/ticket/${ticket.id}`;
   const html = emailBase(hotelNom, '#2c3e50', '🎫', 'Votre signalement a bien été reçu')
     + `<div class="greeting">Bonjour ${ticket.guestName},</div>`
     + `<div class="intro">Nous avons bien reçu votre signalement. Notre équipe va le traiter dans les meilleurs délais.</div>`
@@ -985,41 +985,41 @@ async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
 }
 
 async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, newMessage, slug) {
-  const adminUrl = `https://livret-accueil-2wc.pages.dev/${slug}/gestion`;
+  const adminUrl = `https://welkomeo.com/${slug}/gestion`;
   const html = emailBase(hotelNom, '#dc2626', '⚠️', 'Nouveau signalement reçu')
     + `<div class="greeting">Nouveau message sur le ticket #${ticket.id}</div>`
     + `<div class="intro"><strong>De :</strong> ${ticket.guestName}${ticket.guestPhone ? ' · ' + ticket.guestPhone : ''}<br><strong>Objet :</strong> ${ticket.subject}</div>`
     + `<div class="msg-box">${newMessage}</div>`
     + `<a class="cta" href="${adminUrl}">Répondre depuis la gestion →</a>`
     + emailFooter(hotelNom);
-  return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Livret Digital <onboarding@resend.dev>`);
+  return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Welkomeo <onboarding@resend.dev>`);
 }
 
 async function sendWelcomeEmail(env, hotel, origin) {
   const adminUrl  = `${origin}/${hotel.slug}/admin`;
   const livretUrl = `${origin}/${hotel.slug}`;
-  const html = emailBase('Livret Digital', '#0f766e', '🏨', 'Bienvenue sur Livret Digital !')
+  const html = emailBase('Welkomeo', '#0f766e', '🏨', 'Bienvenue sur Welkomeo !')
     + `<div class="greeting">Bonjour ${hotel.nom},</div>`
     + `<div class="intro">Votre livret d'accueil numérique est prêt. Vos vacanciers peuvent dès maintenant y accéder depuis leur smartphone.</div>`
     + `<div class="ticket-box"><div class="ticket-label">Votre identifiant de connexion</div><div class="ticket-id" style="font-size:16px;letter-spacing:0">${hotel.email}</div><div class="ticket-subject">Utilisez ce mail + votre mot de passe pour accéder à l'espace admin</div></div>`
     + `<a class="cta" href="${adminUrl}">Configurer mon livret →</a>`
     + `<div class="intro" style="text-align:center;font-size:13px;color:#64748b">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" style="color:#0f766e;font-weight:600">${livretUrl}</a></div>`
-    + emailFooter('Livret Digital');
-  return resendEmail(env, hotel.email, "🏨 Votre livret d'accueil est prêt !", html, 'Livret Digital <onboarding@resend.dev>');
+    + emailFooter('Welkomeo · par Assenka');
+  return resendEmail(env, hotel.email, "🏨 Votre Welkomeo est prêt !", html, 'Welkomeo <onboarding@resend.dev>');
 }
 
 async function sendPasswordResetEmail(env, user, resetUrl) {
-  const html = emailBase('Livret Digital', '#7c3aed', '🔑', 'Réinitialisation de mot de passe')
+  const html = emailBase('Welkomeo', '#7c3aed', '🔑', 'Réinitialisation de mot de passe')
     + `<div class="greeting">Bonjour ${user.nom},</div>`
     + `<div class="intro">Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.</div>`
     + `<a class="cta" href="${resetUrl}">Réinitialiser mon mot de passe →</a>`
     + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Ce lien est valable <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email.</div>`
-    + emailFooter('Livret Digital');
-  return resendEmail(env, user.email, '🔑 Réinitialisation de votre mot de passe — Livret Digital', html, 'Livret Digital <onboarding@resend.dev>');
+    + emailFooter('Welkomeo · par Assenka');
+  return resendEmail(env, user.email, '🔑 Réinitialisation de votre mot de passe — Welkomeo', html, 'Welkomeo <onboarding@resend.dev>');
 }
 
 async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
-  const ticketUrl = `https://livret-accueil-2wc.pages.dev/${slug}/ticket/${ticket.id}`;
+  const ticketUrl = `https://welkomeo.com/${slug}/ticket/${ticket.id}`;
   const html = emailBase(hotelNom, '#2c3e50', '💬', 'Réponse à votre signalement')
     + `<div class="greeting">Bonjour ${ticket.guestName},</div>`
     + `<div class="intro"><strong>${hotelNom}</strong> a répondu à votre ticket <strong>#${ticket.id}</strong> :</div>`

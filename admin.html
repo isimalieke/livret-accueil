@@ -1627,6 +1627,11 @@ function openCarte() {
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ── Appelé par config.js dès qu'il est chargé ──
+// Ceci permet à l'auto-login de peupler le formulaire même quand
+// config.js se charge après l'exécution du bloc inline.
+window.applyConfig = function() { initForm(); };
 </script>
 <script src="config.js"></script>
 </body>

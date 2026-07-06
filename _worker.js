@@ -352,6 +352,11 @@ async function handleRegister(request, env, url) {
       sub: userId, slug, role: 'hotelier', nom, exp: Math.floor(Date.now()/1000) + 86400*30,
     }, env);
 
+    // Email de bienvenue (non bloquant)
+    if (env.RESEND_API_KEY) {
+      sendWelcomeEmail(env, { nom, email: email.toLowerCase().trim(), slug }, url.origin).catch(() => {});
+    }
+
     return json({ ok: true, slug, livretUrl: url.origin + '/' + slug, token });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
@@ -867,6 +872,19 @@ async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, 
     + `<a class="cta" href="${adminUrl}">Répondre depuis la gestion →</a>`
     + emailFooter(hotelNom);
   return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Livret Digital <onboarding@resend.dev>`);
+}
+
+async function sendWelcomeEmail(env, hotel, origin) {
+  const adminUrl  = `${origin}/${hotel.slug}/admin`;
+  const livretUrl = `${origin}/${hotel.slug}`;
+  const html = emailBase('Livret Digital', '#0f766e', '🏨', 'Bienvenue sur Livret Digital !')
+    + `<div class="greeting">Bonjour ${hotel.nom},</div>`
+    + `<div class="intro">Votre livret d'accueil numérique est prêt. Vos vacanciers peuvent dès maintenant y accéder depuis leur smartphone.</div>`
+    + `<div class="ticket-box"><div class="ticket-label">Votre identifiant de connexion</div><div class="ticket-id" style="font-size:16px;letter-spacing:0">${hotel.email}</div><div class="ticket-subject">Utilisez ce mail + votre mot de passe pour accéder à l'espace admin</div></div>`
+    + `<a class="cta" href="${adminUrl}">Configurer mon livret →</a>`
+    + `<div class="intro" style="text-align:center;font-size:13px;color:#64748b">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" style="color:#0f766e;font-weight:600">${livretUrl}</a></div>`
+    + emailFooter('Livret Digital');
+  return resendEmail(env, hotel.email, "🏨 Votre livret d'accueil est prêt !", html, 'Livret Digital <onboarding@resend.dev>');
 }
 
 async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {

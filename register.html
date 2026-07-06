@@ -609,9 +609,9 @@ async function submitForm() {
     var data = await res.json();
 
     if (data.ok) {
-      // Stocker les identifiants dans localStorage pour pré-remplir l'admin
+      // Stocker le JWT et le slug pour auto-login dans l'admin
       localStorage.setItem('livret_slug', data.slug);
-      localStorage.setItem('livret_hotel_pwd_' + data.slug, password);
+      localStorage.setItem('livret_jwt_' + data.slug, data.token);
 
       // Afficher le succès avec l'URL du livret
       document.getElementById('livret-url').textContent = data.livretUrl;

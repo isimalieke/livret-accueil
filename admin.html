@@ -531,17 +531,6 @@ input:checked + .slider:before { transform:translateX(22px); }
     </div>
   </div>
 
-  <!-- MOT DE PASSE ADMIN -->
-  <div class="section">
-    <div class="section-head" onclick="toggle(this)">
-      <h2>🔒 Mot de passe admin</h2><span class="chevron">▼</span>
-    </div>
-    <div class="section-body">
-      <div class="field"><label>Nouveau mot de passe</label><input type="password" id="new-pwd" placeholder="Nouveau mot de passe"></div>
-      <div class="field"><label>Confirmer</label><input type="password" id="confirm-pwd" placeholder="Confirmer le mot de passe"></div>
-      <div class="hint" style="margin-top:4px">⚠️ Le nouveau mot de passe sera inclus dans config.js. Redéployez après téléchargement.</div>
-    </div>
-  </div>
 
   <!-- ÉQUIPE — GESTIONNAIRES -->
   <div class="section" id="equipe-section">
@@ -1087,7 +1076,7 @@ function readRows(tbodyId, fields) {
 }
 
 // ── GÉNÉRATION CONFIG.JS ──
-function buildConfigContent(adminPwd) {
+function buildConfigContent() {
   var regles        = readRows('regles-rows',          ['icon','fr','en']);
   var inclus        = readRows('inclus-rows',          ['icon','fr','en']);
   var demande       = readRows('demande-rows',         ['icon','fr','en','prix']);
@@ -1111,8 +1100,6 @@ function buildConfigContent(adminPwd) {
   function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
 
   var js = '/**\n * CONFIGURATION DU LIVRET D\'ACCUEIL\n * Généré par le panneau admin\n */\n\n';
-  js += '// Mot de passe admin (ne pas partager ce fichier)\n';
-  js += 'var ADMIN_PASSWORD = ' + JSON.stringify(adminPwd) + ';\n\n';
   js += 'const CONFIG = {\n\n';
 
   // Hôtel
@@ -1244,21 +1231,8 @@ function buildConfigContent(adminPwd) {
   return js;
 }
 
-function resolveAdminPwd() {
-  var newPwd   = document.getElementById('new-pwd').value;
-  var confirmP = document.getElementById('confirm-pwd').value;
-  if (newPwd) {
-    if (newPwd !== confirmP) { alert('Les mots de passe ne correspondent pas.'); return null; }
-    return newPwd;
-  }
-  return ADMIN_PWD;
-}
-
 function generateConfig() {
-  var adminPwd = resolveAdminPwd();
-  if (adminPwd === null) return;
-  var js = buildConfigContent(adminPwd);
-  if (adminPwd !== ADMIN_PWD) ADMIN_PWD = adminPwd;
+  var js = buildConfigContent();
   download('config.js', js);
   showMsg('dl-msg', '✅ config.js téléchargé.');
 }
@@ -1270,7 +1244,7 @@ async function saveOnline() {
   btn.disabled = true;
   btn.textContent = '⏳ Enregistrement…';
 
-  var js = buildConfigContent(adminPwd);
+  var js = buildConfigContent();
 
   try {
     var resp = await fetch(_configEndpoint, {
@@ -1280,7 +1254,6 @@ async function saveOnline() {
     });
     var data = await resp.json();
     if (data.ok) {
-      if (adminPwd !== ADMIN_PWD) ADMIN_PWD = adminPwd;
       showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
     } else {
       showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);

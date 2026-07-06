@@ -247,7 +247,7 @@
     /* ═══════════════════════════════
        FEATURES
     ═══════════════════════════════ */
-    .features { background: var(--white); }
+    .features { background: var(--cream); }
     .features-head { text-align: center; margin-bottom: 60px; }
     .features-head .s-sub { margin: 0 auto; }
     .features-grid {
@@ -338,7 +338,7 @@
     /* ═══════════════════════════════
        DEVICES SECTION
     ═══════════════════════════════ */
-    .devices { background: var(--white); overflow: hidden; }
+    .devices { background: var(--white); overflow: hidden; } /* blanc entre deux sections crème = respiration */
     .devices-head { text-align: center; margin-bottom: 60px; }
     .devices-head .s-sub { margin: 0 auto; }
     .devices-row {
@@ -452,20 +452,23 @@
        CTA FINAL
     ═══════════════════════════════ */
     .cta-final {
-      background: linear-gradient(135deg, var(--navy2) 0%, var(--navy) 60%, #0a4080 100%);
+      background: var(--cream2);
+      border-top: 1px solid #e0d8cc;
       padding: 100px 0; text-align: center; position: relative; overflow: hidden;
     }
-    .cta-final::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
     .cta-final .s-eyebrow { color: var(--gold); margin-bottom: 14px; }
-    .cta-final .s-title { color: var(--white); max-width: 600px; margin: 0 auto 16px; }
-    .cta-final .s-sub { color: rgba(255,255,255,0.65); margin: 0 auto 40px; text-align: center; }
+    .cta-final .s-title { color: var(--navy); max-width: 600px; margin: 0 auto 16px; }
+    .cta-final .s-sub { color: var(--mid); margin: 0 auto 40px; text-align: center; }
     .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .cta-note { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.4); }
+    .cta-note { margin-top: 16px; font-size: 13px; color: #9a9080; }
+    .btn-primary-navy {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--navy); color: var(--white);
+      padding: 16px 32px; border-radius: 8px;
+      font-size: 16px; font-weight: 600;
+      transition: background .2s, transform .15s;
+    }
+    .btn-primary-navy:hover { background: var(--navy2); transform: translateY(-1px); }
 
     /* ═══════════════════════════════
        FOOTER
@@ -514,15 +517,14 @@
     <div class="hero-inner">
       <div class="hero-content">
         <div class="hero-tag">Livret d'accueil digital</div>
-        <h1>Vos clients ont tout<br>à <em>portée de clic.</em></h1>
+        <h1>Le livret d'accueil qui<br><em>accompagne vos clients</em><br>partout.</h1>
         <p class="hero-sub">
-          Welkomeo remplace votre livret d'accueil papier par une expérience digitale élégante, personnalisée et accessible depuis n'importe quel appareil — sans téléchargement.
+          Guidez vos clients pour une expérience personnalisée — bonnes adresses, informations pratiques, WiFi, règles de la maison. Tout est disponible depuis leur smartphone, à tout moment, sans rien télécharger.
         </p>
         <div class="hero-btns">
-          <a href="/register" class="btn-primary">Commencer gratuitement →</a>
+          <a href="/register" class="btn-primary">Essayer gratuitement 15 jours →</a>
           <a href="#comment" class="btn-secondary">Voir comment ça marche</a>
         </div>
-        <p class="hero-note">✦ Essai gratuit 15 jours · Sans carte bancaire</p>
       </div>
       <div class="hero-visual">
         <div class="phone-mock">
@@ -703,13 +705,13 @@
     <div class="pricing-head">
       <div class="s-eyebrow">Tarifs</div>
       <h2 class="s-title">Simple, <em>transparent,</em> sans surprise.</h2>
-      <p class="s-sub">Essayez gratuitement pendant 15 jours. Aucune carte bancaire requise.</p>
+      <p class="s-sub">Essayez gratuitement pendant 15 jours, sans engagement.</p>
     </div>
     <div class="trial-banner">
       <div class="trial-left">
         <div class="trial-badge">✦ Offre de lancement</div>
         <div class="trial-title">15 jours d'essai gratuit</div>
-        <p class="trial-sub">Accès complet, sans engagement, sans carte bancaire. Annulation en un clic.</p>
+        <p class="trial-sub">Accès complet à toutes les fonctionnalités. Sans engagement.</p>
       </div>
       <a href="/register" class="btn-primary">Commencer l'essai →</a>
     </div>
@@ -732,7 +734,7 @@
           <li>Accessible sur tous les appareils</li>
           <li>Mises à jour illimitées</li>
         </ul>
-        <a href="/register" class="plan-cta plan-cta-outline">Commencer gratuitement</a>
+        <a href="/register" class="plan-cta plan-cta-outline">Essayer gratuitement 15 jours</a>
       </div>
       <div class="plan-card featured">
         <div class="plan-badge-featured">✦ Grands établissements</div>
@@ -751,7 +753,7 @@
           <li>Accompagnement à la configuration</li>
           <li>Mises à jour en avant-première</li>
         </ul>
-        <a href="/register" class="plan-cta plan-cta-filled">Commencer gratuitement</a>
+        <a href="/register" class="plan-cta plan-cta-filled">Essayer gratuitement 15 jours</a>
       </div>
     </div>
   </div>
@@ -761,12 +763,12 @@
 <section class="cta-final">
   <div class="container">
     <div class="s-eyebrow">Prêt à démarrer ?</div>
-    <h2 class="s-title">Offrez à vos clients<br>une expérience <em>inoubliable.</em></h2>
-    <p class="s-sub">Rejoignez les établissements qui ont fait confiance à Welkomeo pour accompagner leurs hôtes à tout instant.</p>
+    <h2 class="s-title">Offrez à vos clients<br>une expérience <em>inoubliable</em> —<br>et soyez à leurs côtés à chaque instant.</h2>
+    <p class="s-sub">Rejoignez les établissements qui ont fait confiance à Welkomeo pour guider et accompagner leurs hôtes tout au long de leur séjour.</p>
     <div class="cta-btns">
-      <a href="/register" class="btn-primary" style="font-size:16px;padding:16px 32px">Créer mon livret gratuitement →</a>
+      <a href="/register" class="btn-primary-navy">Créer mon livret gratuitement →</a>
     </div>
-    <p class="cta-note">Essai 15 jours · Sans engagement · Sans carte bancaire</p>
+    <p class="cta-note">Essai gratuit 15 jours · Sans engagement</p>
   </div>
 </section>
 

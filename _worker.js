@@ -35,8 +35,27 @@ export default {
       const secret = request.headers.get('X-Auth-Secret') || '';
       if (!env.AUTH_SECRET || secret !== env.AUTH_SECRET)
         return json({ ok: false, error: 'Non autorisé' }, 401);
-      const hotels = await env.DB.prepare('SELECT slug, nom, ville, created_at FROM hotels ORDER BY created_at DESC').all();
+      const hotels = await env.DB.prepare(
+        `SELECT h.slug, h.nom, h.ville, h.created_at, h.plan, h.subscription_status,
+                h.subscription_ends_at, h.billing_period, h.chambres, u.email
+         FROM hotels h
+         LEFT JOIN users u ON u.hotel_slug = h.slug AND u.role = 'hotelier'
+         ORDER BY h.created_at DESC`
+      ).all();
       return json({ ok: true, hotels: hotels.results });
+    }
+    if (path.startsWith('/superadmin/hotel/') && path.endsWith('/subscription') && request.method === 'POST') {
+      const secret = request.headers.get('X-Auth-Secret') || '';
+      if (!env.AUTH_SECRET || secret !== env.AUTH_SECRET)
+        return json({ ok: false, error: 'Non autorisé' }, 401);
+      const slugTarget = path.split('/')[3];
+      return handleAdminSetSubscription(request, env, slugTarget);
+    }
+    if (path === '/superadmin/migrate-subscription' && request.method === 'POST') {
+      const secret = request.headers.get('X-Auth-Secret') || '';
+      if (!env.AUTH_SECRET || secret !== env.AUTH_SECRET)
+        return json({ ok: false, error: 'Non autorisé' }, 401);
+      return handleMigrateSubscription(env);
     }
     if (path === '/superadmin/migrate-to-d1' && request.method === 'POST') {
       return handleMigrateToD1(request, env);
@@ -62,6 +81,10 @@ export default {
 
     // ── /{slug}/config.js ──
     if (sub === 'config.js') return handleConfig(request, env, slug);
+
+    // ── /{slug}/subscription ──
+    if (sub === 'subscription' && request.method === 'GET')
+      return handleGetSubscription(request, env, slug);
 
     // ── /{slug}/manifest.json ──
     if (sub === 'manifest.json') return handleManifest(env, slug, url);
@@ -393,8 +416,12 @@ async function handleRegister(request, env, url) {
     const data = await request.json();
     const {
       nom, email, password, ville, pays, adresse, telephone, whatsapp,
-      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr,
+      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, chambres,
     } = data;
+
+    // Déterminer le plan selon la taille de l'établissement
+    const plan = (chambres === '16-30' || chambres === '30+') ? 'large' : 'small';
+    const trialEndsAt = new Date(Date.now() + 15 * 86400000).toISOString();
 
     if (!nom || !email || !password)
       return json({ ok: false, error: 'Champs obligatoires manquants (nom, email, password).' }, 400);
@@ -410,10 +437,13 @@ async function handleRegister(request, env, url) {
     const passwordHash = await hashPassword(password);
     const userId       = crypto.randomUUID();
 
-    // Créer l'hôtel
+    // Créer l'hôtel avec abonnement trial
     await env.DB.prepare(
-      'INSERT INTO hotels (slug, nom, ville, pays, adresse, telephone, whatsapp, created_at) VALUES (?,?,?,?,?,?,?,?)'
-    ).bind(slug, nom, ville||'', pays||'', adresse||'', telephone||'', whatsapp||'', now).run();
+      `INSERT INTO hotels (slug, nom, ville, pays, adresse, telephone, whatsapp, created_at,
+        plan, subscription_status, subscription_ends_at, chambres)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+    ).bind(slug, nom, ville||'', pays||'', adresse||'', telephone||'', whatsapp||'', now,
+           plan, 'trial', trialEndsAt, chambres||'1-5').run();
 
     // Créer l'utilisateur hôtelier
     await env.DB.prepare(
@@ -464,6 +494,18 @@ async function handleConfig(request, env, slug) {
     // Seul l'hôtelier peut modifier la config
     const auth = await requireAuth(request, env, slug, ['hotelier']);
     if (!auth.ok) return auth.response;
+
+    // Vérifier l'abonnement (sauf superadmin)
+    if (auth.payload.role !== 'superadmin') {
+      const hotel = await env.DB.prepare(
+        'SELECT subscription_status, subscription_ends_at FROM hotels WHERE slug = ?'
+      ).bind(slug).first();
+      if (hotel) {
+        const { status } = computeSubscriptionStatus(hotel);
+        if (status === 'expired')
+          return json({ ok: false, error: 'Abonnement expiré. Renouvelez pour sauvegarder.', code: 'SUBSCRIPTION_EXPIRED' }, 402);
+      }
+    }
 
     const body = await request.text();
     if (!body || !body.includes('const CONFIG'))
@@ -1010,6 +1052,82 @@ function toSlug(nom) {
 function enc(s) { return new TextEncoder().encode(s); }
 function hex(buf) { return [...buf].map(b => b.toString(16).padStart(2,'0')).join(''); }
 function unhex(s) { return Uint8Array.from(s.match(/.{2}/g), b => parseInt(b, 16)); }
+
+// ═════════════════════════════════════════════
+// ABONNEMENTS
+// ═════════════════════════════════════════════
+
+// Tarification (FCFA)
+const PLANS = {
+  small: { monthly: 7500,  annual: 75000  },
+  large: { monthly: 15000, annual: 150000 },
+};
+
+function computeSubscriptionStatus(hotel) {
+  const now    = Date.now();
+  const endsAt = hotel.subscription_ends_at ? new Date(hotel.subscription_ends_at).getTime() : null;
+  let status   = hotel.subscription_status || 'trial';
+  const daysLeft = endsAt ? Math.ceil((endsAt - now) / 86400000) : null;
+  if (daysLeft !== null && daysLeft <= 0) status = 'expired';
+  return { status, daysLeft, endsAt: hotel.subscription_ends_at };
+}
+
+async function handleGetSubscription(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+  const hotel = await env.DB.prepare(
+    'SELECT plan, subscription_status, subscription_ends_at, billing_period, chambres FROM hotels WHERE slug = ?'
+  ).bind(slug).first();
+  if (!hotel) return json({ ok: false, error: 'Hôtel introuvable' }, 404);
+  const { status, daysLeft, endsAt } = computeSubscriptionStatus(hotel);
+  return json({
+    ok: true,
+    plan:          hotel.plan || 'small',
+    status,
+    daysLeft,
+    endsAt,
+    billingPeriod: hotel.billing_period,
+    prices:        PLANS,
+  });
+}
+
+async function handleAdminSetSubscription(request, env, slug) {
+  const { plan, billing_period, action } = await request.json();
+  if (action === 'expire') {
+    await env.DB.prepare(
+      `UPDATE hotels SET subscription_status = 'expired' WHERE slug = ?`
+    ).bind(slug).run();
+    return json({ ok: true });
+  }
+  const days    = billing_period === 'annual' ? 365 : 30;
+  const endsAt  = new Date(Date.now() + days * 86400000).toISOString();
+  await env.DB.prepare(
+    `UPDATE hotels SET plan = ?, subscription_status = 'active', subscription_ends_at = ?, billing_period = ? WHERE slug = ?`
+  ).bind(plan || 'small', endsAt, billing_period || 'monthly', slug).run();
+  return json({ ok: true, endsAt });
+}
+
+async function handleMigrateSubscription(env) {
+  const migrations = [
+    `ALTER TABLE hotels ADD COLUMN plan TEXT DEFAULT 'small'`,
+    `ALTER TABLE hotels ADD COLUMN subscription_status TEXT DEFAULT 'trial'`,
+    `ALTER TABLE hotels ADD COLUMN subscription_ends_at TEXT`,
+    `ALTER TABLE hotels ADD COLUMN billing_period TEXT`,
+    `ALTER TABLE hotels ADD COLUMN chambres TEXT DEFAULT '1-5'`,
+  ];
+  const results = [];
+  for (const sql of migrations) {
+    try { await env.DB.prepare(sql).run(); results.push({ ok: true, sql }); }
+    catch (e) { results.push({ ok: false, sql, error: String(e) }); } // colonne déjà présente
+  }
+  // Initialiser les hôtels existants sans abonnement
+  await env.DB.prepare(
+    `UPDATE hotels SET subscription_status = 'trial',
+      subscription_ends_at = datetime('now', '+15 days')
+     WHERE subscription_status IS NULL OR subscription_status = ''`
+  ).run();
+  return json({ ok: true, results });
+}
 
 function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr }) {
   const esc = (s) => JSON.stringify(s || '');

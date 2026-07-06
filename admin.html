@@ -35,6 +35,15 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .admin-header span { font-size:12px; opacity:.7; }
 .btn-logout { background:transparent; border:1px solid rgba(255,255,255,.4); color:white; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
 
+/* BANNIÈRE ABONNEMENT */
+.sub-banner { border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:13px; display:none; align-items:center; gap:10px; }
+.sub-banner.trial   { background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; }
+.sub-banner.active  { background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; }
+.sub-banner.expired { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+.sub-banner-ico { font-size:18px; flex-shrink:0; }
+.sub-banner-txt { flex:1; line-height:1.5; }
+.sub-banner-txt strong { font-weight:700; }
+
 /* SECTIONS */
 .section { background:white; border-radius:10px; margin-bottom:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
 .section-head { padding:14px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; border-bottom:1px solid transparent; }
@@ -137,6 +146,11 @@ input:checked + .slider:before { transform:translateX(22px); }
       <span>Modifiez votre livret d'accueil</span>
     </div>
     <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+
+  <div class="sub-banner" id="sub-banner">
+    <div class="sub-banner-ico" id="sub-ico"></div>
+    <div class="sub-banner-txt" id="sub-txt"></div>
   </div>
 
   <!-- 1. ÉTABLISSEMENT -->
@@ -663,6 +677,43 @@ var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
   if (el && _slug) el.href = '/' + _slug + '/auth/reset';
 })();
 
+// ── BANNIÈRE ABONNEMENT ──
+async function loadSubscriptionBanner() {
+  if (!_slug || !_jwt) return;
+  try {
+    var r = await fetch('/' + _slug + '/subscription', {
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    if (!r.ok) return;
+    var d = await r.json();
+    if (!d.ok) return;
+
+    var banner = document.getElementById('sub-banner');
+    var ico    = document.getElementById('sub-ico');
+    var txt    = document.getElementById('sub-txt');
+    var planLabel = d.plan === 'large' ? 'Grand hôtel' : 'Petit établissement';
+
+    if (d.status === 'trial') {
+      var days = d.daysLeft || 0;
+      ico.textContent = '🕐';
+      txt.innerHTML = '<strong>Essai gratuit</strong> — ' + Math.max(0, days) + ' jour' + (days > 1 ? 's' : '') + ' restant' + (days > 1 ? 's' : '') + '. Contactez-nous pour activer votre abonnement.';
+      banner.className = 'sub-banner trial';
+      banner.style.display = 'flex';
+    } else if (d.status === 'active') {
+      var end = d.endsAt ? new Date(d.endsAt).toLocaleDateString('fr-FR') : '—';
+      ico.textContent = '✅';
+      txt.innerHTML = '<strong>Abonnement actif</strong> — ' + planLabel + ' · valable jusqu\'au ' + end + '.';
+      banner.className = 'sub-banner active';
+      banner.style.display = 'flex';
+    } else if (d.status === 'expired') {
+      ico.textContent = '⚠️';
+      txt.innerHTML = '<strong>Abonnement expiré.</strong> La sauvegarde de vos données est suspendue. Contactez-nous à <a href="mailto:contact@assenka.com" style="color:inherit">contact@assenka.com</a> pour renouveler.';
+      banner.className = 'sub-banner expired';
+      banner.style.display = 'flex';
+    }
+  } catch(e) { /* silencieux */ }
+}
+
 // Connexion automatique si JWT valide
 (function() {
   if (_jwt && _slug) {
@@ -670,6 +721,7 @@ var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
     initForm();
+    loadSubscriptionBanner();
   }
 })();
 

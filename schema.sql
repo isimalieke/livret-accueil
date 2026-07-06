@@ -5,14 +5,20 @@
 
 -- Hôtels (métadonnées établissement)
 CREATE TABLE IF NOT EXISTS hotels (
-  slug        TEXT PRIMARY KEY,
-  nom         TEXT NOT NULL,
-  ville       TEXT DEFAULT '',
-  pays        TEXT DEFAULT '',
-  adresse     TEXT DEFAULT '',
-  telephone   TEXT DEFAULT '',
-  whatsapp    TEXT DEFAULT '',
-  created_at  TEXT NOT NULL
+  slug                  TEXT PRIMARY KEY,
+  nom                   TEXT NOT NULL,
+  ville                 TEXT DEFAULT '',
+  pays                  TEXT DEFAULT '',
+  adresse               TEXT DEFAULT '',
+  telephone             TEXT DEFAULT '',
+  whatsapp              TEXT DEFAULT '',
+  created_at            TEXT NOT NULL,
+  -- Abonnement
+  plan                  TEXT DEFAULT 'small',         -- 'small' | 'large'
+  subscription_status   TEXT DEFAULT 'trial',         -- 'trial' | 'active' | 'expired'
+  subscription_ends_at  TEXT,                          -- ISO date
+  billing_period        TEXT,                          -- 'monthly' | 'annual'
+  chambres              TEXT DEFAULT '1-5'             -- from registration
 );
 
 -- Utilisateurs (hôteliers + gestionnaires)

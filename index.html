@@ -1657,7 +1657,16 @@ function setLang(lang) {
   document.querySelectorAll('.lang-btn').forEach(function(b) { b.classList.remove('active'); });
   var btn = document.querySelector('.lang-btn[onclick="setLang(\'' + lang + '\')"]');
   if (btn) btn.classList.add('active');
+  try { localStorage.setItem('livret_lang', lang); } catch(e) {}
 }
+
+// Restaurer la langue au chargement
+(function() {
+  try {
+    var saved = localStorage.getItem('livret_lang');
+    if (saved === 'en') setLang('en');
+  } catch(e) {}
+})();
 
 // ── PWA ──
 if ('serviceWorker' in navigator) {

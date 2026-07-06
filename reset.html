@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réinitialisation du mot de passe — Livret Digital</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 4px 32px rgba(0,0,0,.10);
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .logo {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+    margin-bottom: 18px;
+    color: #1e293b;
+  }
+  input:focus { border-color: #7c3aed; }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s, opacity .2s;
+  }
+  .btn:hover { background: #6d28d9; }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .msg {
+    display: none;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+  .msg.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .msg.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .back {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #7c3aed;
+    text-decoration: none;
+  }
+  .back:hover { text-decoration: underline; }
+  .pw-wrap { position: relative; margin-bottom: 18px; }
+  .pw-wrap input { margin-bottom: 0; }
+  .pw-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #94a3b8;
+    padding: 2px;
+  }
+  #panel-success-final {
+    display: none;
+    text-align: center;
+  }
+  #panel-success-final .big-ico { font-size: 52px; margin-bottom: 12px; }
+  #panel-success-final h2 { font-size: 20px; font-weight: 700; color: #15803d; margin-bottom: 8px; }
+  #panel-success-final p { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 24px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🔑</div>
+
+  <!-- VUE 1 : Demande de réinitialisation -->
+  <div id="panel-forgot">
+    <h1>Mot de passe oublié ?</h1>
+    <p class="subtitle">Saisissez votre adresse email. Si un compte existe, vous recevrez un lien de réinitialisation.</p>
+    <label for="email-input">Adresse email</label>
+    <input type="email" id="email-input" placeholder="votre@email.com" autocomplete="email">
+    <button class="btn" id="forgot-btn" onclick="sendReset()">Envoyer le lien →</button>
+    <div class="msg" id="forgot-msg"></div>
+    <a class="back" id="back-link" href="#">← Retour à la connexion</a>
+  </div>
+
+  <!-- VUE 2 : Nouveau mot de passe -->
+  <div id="panel-reset" style="display:none">
+    <h1>Nouveau mot de passe</h1>
+    <p class="subtitle">Choisissez un mot de passe sécurisé (min. 8 caractères).</p>
+    <label for="pwd1">Nouveau mot de passe</label>
+    <div class="pw-wrap">
+      <input type="password" id="pwd1" placeholder="••••••••" autocomplete="new-password">
+      <button class="pw-toggle" onclick="togglePw('pwd1',this)" type="button">👁</button>
+    </div>
+    <label for="pwd2">Confirmer le mot de passe</label>
+    <div class="pw-wrap">
+      <input type="password" id="pwd2" placeholder="••••••••" autocomplete="new-password">
+      <button class="pw-toggle" onclick="togglePw('pwd2',this)" type="button">👁</button>
+    </div>
+    <button class="btn" id="reset-btn" onclick="doReset()">Enregistrer le nouveau mot de passe</button>
+    <div class="msg" id="reset-msg"></div>
+  </div>
+
+  <!-- VUE 3 : Succès final -->
+  <div id="panel-success-final">
+    <div class="big-ico">✅</div>
+    <h2>Mot de passe mis à jour !</h2>
+    <p>Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.</p>
+    <a class="btn" id="go-login" href="#" style="display:block;text-decoration:none;text-align:center">Se connecter →</a>
+  </div>
+</div>
+
+<script>
+var _slug = (function() {
+  // Extraire le slug depuis /{slug}/auth/reset
+  var parts = location.pathname.split('/').filter(Boolean);
+  return parts[0] || '';
+})();
+
+var _token = new URLSearchParams(location.search).get('token') || '';
+
+// Initialisation
+(function init() {
+  // Lien retour
+  document.getElementById('back-link').href = '/' + _slug + '/admin';
+  document.getElementById('go-login').href  = '/' + _slug + '/admin';
+
+  // Si token présent → montrer la vue de reset
+  if (_token) {
+    document.getElementById('panel-forgot').style.display = 'none';
+    document.getElementById('panel-reset').style.display  = 'block';
+  }
+})();
+
+function togglePw(id, btn) {
+  var inp = document.getElementById(id);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else                         { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
+function showMsg(id, text, type) {
+  var el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + type;
+  el.style.display = 'block';
+}
+
+async function sendReset() {
+  var email = document.getElementById('email-input').value.trim();
+  if (!email) { showMsg('forgot-msg', 'Veuillez saisir votre adresse email.', 'error'); return; }
+
+  var btn = document.getElementById('forgot-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi…';
+
+  try {
+    var r = await fetch('/' + _slug + '/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    await r.json(); // toujours ok=true (anti-énumération)
+    showMsg('forgot-msg',
+      'Si un compte existe pour cet email, vous recevrez un lien dans quelques minutes. Vérifiez aussi vos spams.',
+      'success'
+    );
+    btn.textContent = '✅ Email envoyé';
+  } catch (e) {
+    showMsg('forgot-msg', 'Erreur de connexion. Réessayez.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Envoyer le lien →';
+  }
+}
+
+async function doReset() {
+  var p1 = document.getElementById('pwd1').value;
+  var p2 = document.getElementById('pwd2').value;
+
+  if (p1.length < 8) { showMsg('reset-msg', 'Le mot de passe doit faire au moins 8 caractères.', 'error'); return; }
+  if (p1 !== p2)     { showMsg('reset-msg', 'Les mots de passe ne correspondent pas.', 'error'); return; }
+
+  var btn = document.getElementById('reset-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enregistrement…';
+
+  try {
+    var r = await fetch('/' + _slug + '/auth/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _token, password: p1 }),
+    });
+    var data = await r.json();
+    if (data.ok) {
+      document.getElementById('panel-reset').style.display        = 'none';
+      document.getElementById('panel-success-final').style.display = 'block';
+    } else {
+      showMsg('reset-msg', data.error || 'Erreur inconnue.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer le nouveau mot de passe';
+    }
+  } catch (e) {
+    showMsg('reset-msg', 'Erreur de connexion. Réessayez.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer le nouveau mot de passe';
+  }
+}
+</script>
+</body>
+</html>

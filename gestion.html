@@ -198,6 +198,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <input class="auth-input" type="password" id="auth-pwd" placeholder="Mot de passe" autocomplete="current-password"/>
     <button class="auth-submit" onclick="doAuth()">Connexion</button>
     <div class="auth-err" id="auth-err">Mot de passe incorrect.</div>
+    <a id="forgot-link" href="#" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:#7c3aed;text-decoration:none">Mot de passe oublié ?</a>
   </div>
 </div>
 
@@ -251,6 +252,10 @@ var _openId = null;
   var parts = location.pathname.split('/').filter(Boolean);
   _slug = parts[0] || '';
   if (!_slug) { document.getElementById('auth-hotel-name').textContent = 'Slug introuvable'; return; }
+
+  // Lien mot de passe oublié
+  var fl = document.getElementById('forgot-link');
+  if (fl) fl.href = '/' + _slug + '/auth/reset';
 
   // JWT en localStorage
   var saved = localStorage.getItem('livret_jwt_' + _slug);

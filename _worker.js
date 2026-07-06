@@ -86,6 +86,17 @@ export default {
       return handleLogin(request, env, slug);
     }
 
+    // ── /{slug}/auth/forgot-password ──
+    if (sub === 'auth' && parts[2] === 'forgot-password' && request.method === 'POST') {
+      return handleForgotPassword(request, env, slug, url);
+    }
+
+    // ── /{slug}/auth/reset ──
+    if (sub === 'auth' && parts[2] === 'reset') {
+      if (request.method === 'GET') return fetchAsset(env, url.origin + '/reset.html');
+      if (request.method === 'POST') return handleResetPassword(request, env, slug);
+    }
+
     // ── /{slug}/gestionnaire (CRUD délégation) ──
     if (sub === 'gestionnaire') {
       if (request.method === 'POST' && !parts[2])
@@ -244,6 +255,71 @@ async function handleLogin(request, env, slug) {
     }, env);
 
     return json({ ok: true, token, role: user.role, nom: user.nom });
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
+  }
+}
+
+// ═════════════════════════════════════════════
+// MOT DE PASSE OUBLIÉ
+// ═════════════════════════════════════════════
+
+async function handleForgotPassword(request, env, slug, url) {
+  try {
+    const { email } = await request.json();
+    if (!email) return json({ ok: false, error: 'Email requis' }, 400);
+
+    const user = await env.DB.prepare(
+      'SELECT id, nom, email FROM users WHERE hotel_slug = ? AND email = ? AND active = 1'
+    ).bind(slug, email.toLowerCase().trim()).first();
+
+    // Réponse identique qu'il existe ou non (anti-énumération)
+    if (!user) return json({ ok: true });
+
+    // Générer un token aléatoire 32 octets
+    const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Stocker dans KV avec TTL 1 heure
+    await env.CONFIG_KV.put(
+      'reset:' + token,
+      JSON.stringify({ userId: user.id, email: user.email, slug }),
+      { expirationTtl: 3600 }
+    );
+
+    // Envoyer l'email
+    if (env.RESEND_API_KEY) {
+      const resetUrl = `${url.origin}/${slug}/auth/reset?token=${token}`;
+      await sendPasswordResetEmail(env, user, resetUrl);
+    }
+
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
+  }
+}
+
+async function handleResetPassword(request, env, slug) {
+  try {
+    const { token, password } = await request.json();
+    if (!token || !password) return json({ ok: false, error: 'Token et mot de passe requis' }, 400);
+    if (password.length < 8) return json({ ok: false, error: 'Mot de passe trop court (min 8 caractères)' }, 400);
+
+    // Récupérer le token dans KV
+    const stored = await env.CONFIG_KV.get('reset:' + token);
+    if (!stored) return json({ ok: false, error: 'Lien invalide ou expiré' }, 400);
+
+    const { userId, slug: tokenSlug } = JSON.parse(stored);
+    if (tokenSlug !== slug) return json({ ok: false, error: 'Lien invalide' }, 400);
+
+    // Mettre à jour le mot de passe en D1
+    const newHash = await hashPassword(password);
+    await env.DB.prepare('UPDATE users SET password_hash = ? WHERE id = ?').bind(newHash, userId).run();
+
+    // Invalider le token
+    await env.CONFIG_KV.delete('reset:' + token);
+
+    return json({ ok: true });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
   }
@@ -885,6 +961,16 @@ async function sendWelcomeEmail(env, hotel, origin) {
     + `<div class="intro" style="text-align:center;font-size:13px;color:#64748b">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" style="color:#0f766e;font-weight:600">${livretUrl}</a></div>`
     + emailFooter('Livret Digital');
   return resendEmail(env, hotel.email, "🏨 Votre livret d'accueil est prêt !", html, 'Livret Digital <onboarding@resend.dev>');
+}
+
+async function sendPasswordResetEmail(env, user, resetUrl) {
+  const html = emailBase('Livret Digital', '#7c3aed', '🔑', 'Réinitialisation de mot de passe')
+    + `<div class="greeting">Bonjour ${user.nom},</div>`
+    + `<div class="intro">Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.</div>`
+    + `<a class="cta" href="${resetUrl}">Réinitialiser mon mot de passe →</a>`
+    + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Ce lien est valable <strong>1 heure</strong>. Si vous n'avez pas fait cette demande, ignorez cet email.</div>`
+    + emailFooter('Livret Digital');
+  return resendEmail(env, user.email, '🔑 Réinitialisation de votre mot de passe — Livret Digital', html, 'Livret Digital <onboarding@resend.dev>');
 }
 
 async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {

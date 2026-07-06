@@ -125,6 +125,7 @@ input:checked + .slider:before { transform:translateX(22px); }
     <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()">
     <button onclick="checkPwd()">Connexion</button>
     <div class="login-error" id="login-error">Email ou mot de passe incorrect</div>
+    <a id="forgot-link" href="#" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:#7c3aed;text-decoration:none">Mot de passe oublié ?</a>
   </div>
 </div>
 
@@ -658,6 +659,12 @@ var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
 (function() {
   var el = document.getElementById('link-gestion');
   if (el && _slug) el.href = '/' + _slug + '/gestion';
+})();
+
+// ── LIEN MOT DE PASSE OUBLIÉ ──
+(function() {
+  var el = document.getElementById('forgot-link');
+  if (el && _slug) el.href = '/' + _slug + '/auth/reset';
 })();
 
 // Connexion automatique si JWT valide

@@ -41,6 +41,16 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   background:var(--cover);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   padding:32px 24px;
+  overflow:hidden;
+}
+/* Fond photo flou derrière l'écran d'auth */
+#auth-bg {
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  filter:blur(14px) brightness(0.28);
+  transform:scale(1.08);
+  opacity:0; transition:opacity 1s ease;
+  pointer-events:none;
 }
 .auth-box { width:100%; max-width:320px; text-align:center; }
 .auth-logo { font-size:36px; margin-bottom:20px; opacity:0.9; }
@@ -127,18 +137,42 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 
 /* ══ HOME COVER ══ */
 .home-cover {
-  background:var(--cover);
-  padding:32px 20px 28px;
-  text-align:center;
+  position:relative;
+  background:var(--cover) center/cover no-repeat;
+  min-height:220px;
+  display:flex; flex-direction:column; justify-content:flex-end;
   border-bottom:1px solid var(--gold-line);
+  overflow:hidden;
 }
+/* Gradient overlay sombre en bas pour lisibilité du texte */
+.home-cover::after {
+  content:'';
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.62) 100%);
+  pointer-events:none;
+}
+.home-cover-content {
+  position:relative; z-index:1;
+  padding:20px 20px 22px;
+  text-align:center;
+}
+/* Fallback sans photo : fond plein cover + padding symétrique */
+.home-cover.no-photo {
+  min-height:auto;
+  justify-content:center;
+  padding:32px 20px;
+}
+.home-cover.no-photo::after { display:none; }
+.home-cover.no-photo .home-cover-content { padding:0; }
+
 .home-hotel {
   font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
   font-size:26px; color:#fff; letter-spacing:4px; text-transform:uppercase;
   margin-bottom:8px; font-weight:400;
+  text-shadow:0 1px 6px rgba(0,0,0,0.5);
 }
-.home-cover-line { width:28px; height:1px; background:var(--gold); margin:0 auto 8px; opacity:0.6; }
-.home-loc { font-size:10px; color:rgba(255,255,255,0.42); letter-spacing:2.5px; text-transform:uppercase; }
+.home-cover-line { width:28px; height:1px; background:var(--gold); margin:0 auto 8px; opacity:0.7; }
+.home-loc { font-size:10px; color:rgba(255,255,255,0.72); letter-spacing:2.5px; text-transform:uppercase; text-shadow:0 1px 4px rgba(0,0,0,0.5); }
 .home-actions { display:flex; gap:10px; justify-content:center; margin-top:18px; }
 .btn-wa {
   display:none; align-items:center; gap:6px;
@@ -494,7 +528,8 @@ body.lang-en .en-o { display:block; }
 
 <!-- ── AUTH ── -->
 <div id="auth-screen" style="display:none">
-  <div class="auth-box">
+  <div id="auth-bg"></div>
+  <div class="auth-box" style="position:relative;z-index:1">
     <div class="auth-logo">🏨</div>
     <div class="auth-hotel" id="auth-hotel-nom">Hôtel Teranga</div>
     <div class="auth-gold-line"></div>
@@ -531,14 +566,16 @@ body.lang-en .en-o { display:block; }
 
 <!-- ══ HOME ══ -->
 <div class="screen active" id="screen-home">
-  <div class="home-cover">
-    <div class="hotel-logo-wrap"><img id="cov-logo" class="hotel-logo" src="" alt="Logo"></div>
-    <div class="home-hotel" id="cov-nom">Hôtel Teranga</div>
-    <div class="home-cover-line"></div>
-    <div class="home-loc" id="cov-loc">Almadies · Dakar · Sénégal</div>
-    <div class="home-actions">
-      <a id="cov-resa-wa" href="#" class="btn-wa" onclick="openResa(event,'wa')">💬 <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
-      <a id="cov-resa-email" href="#" class="btn-wa" onclick="openResa(event,'email')">✉️ <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
+  <div class="home-cover no-photo" id="home-cover">
+    <div class="home-cover-content">
+      <div class="hotel-logo-wrap"><img id="cov-logo" class="hotel-logo" src="" alt="Logo"></div>
+      <div class="home-hotel" id="cov-nom">Hôtel Teranga</div>
+      <div class="home-cover-line"></div>
+      <div class="home-loc" id="cov-loc">Almadies · Dakar · Sénégal</div>
+      <div class="home-actions">
+        <a id="cov-resa-wa" href="#" class="btn-wa" onclick="openResa(event,'wa')">💬 <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
+        <a id="cov-resa-email" href="#" class="btn-wa" onclick="openResa(event,'email')">✉️ <span class="fr-o">Réserver</span><span class="en-o">Book</span></a>
+      </div>
     </div>
   </div>
 
@@ -1685,6 +1722,30 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
 }
 
+// ── FOND PHOTO AUTH (avant login) ──
+(function() {
+  var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+  if (!slug) return;
+  // Essayer cover.jpg (photo uploadée) + fallback sur config.js cover_photo
+  function setAuthBg(url) {
+    var bg = document.getElementById('auth-bg');
+    if (!bg || !url) return;
+    bg.style.backgroundImage = 'url(' + url + ')';
+    bg.style.opacity = '1';
+  }
+  var img = new Image();
+  img.onload = function() { setAuthBg('/' + slug + '/cover.jpg'); };
+  img.onerror = function() {
+    // Fallback : si CONFIG déjà chargé (unlikely avant login), utiliser cover_photo
+    if (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.cover_photo) {
+      setAuthBg(CONFIG.hotel.cover_photo);
+    }
+  };
+  img.src = '/' + slug + '/cover.jpg';
+  // Exposer setAuthBg pour applyConfig (URL externe)
+  window._setAuthBg = setAuthBg;
+})();
+
 // ── APPLY CONFIG ──
 function r(id, html) { var el = document.getElementById(id); if(el) el.innerHTML = html; }
 function t(id, txt)  { var el = document.getElementById(id); if(el) el.textContent = txt; }
@@ -1731,6 +1792,19 @@ function applyConfig() {
   t('hdr-ville', h.ville + ' · ' + h.pays);
   t('cov-nom', h.nom);
   t('cov-loc', h.ville + ' · ' + h.pays);
+
+  // Photo de couverture hero + fond auth
+  var coverEl = document.getElementById('home-cover');
+  if (h.cover_photo) {
+    if (coverEl) {
+      coverEl.style.backgroundImage = 'url(' + h.cover_photo + ')';
+      coverEl.classList.remove('no-photo');
+    }
+    // Si cover_photo est une URL externe (pas cover.jpg), l'appliquer aussi à l'auth bg
+    if (typeof window._setAuthBg === 'function' && !h.cover_photo.endsWith('/cover.jpg')) {
+      window._setAuthBg(h.cover_photo);
+    }
+  }
 
   // Logo
   if (h.logo_url) {
@@ -1820,64 +1894,51 @@ function applyConfig() {
     return '<div class="row"><span class="ri">' + s.icon + '</span><div><div class="rf"><strong>' + s.fr + '</strong> — ' + s.prix + '</div><div class="re">' + s.en + ' — ' + s.prix + '</div></div></div>';
   }).join(''));
 
-  // Quartier
-  r('quartier-points', (C.quartier.points || []).map(function(p) {
-    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf"><strong>' + p.fr + '</strong>' + ml(p.fr) + ' — ' + p.distance + '</div><div class="re">' + p.en + ml(p.en) + ' — ' + p.distance + '</div></div></div>';
-  }).join(''));
-  r('quartier-commerces', (C.quartier.commerces || []).map(function(p) {
-    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf">' + p.fr + ml(p.fr.split('—')[0].trim()) + '</div><div class="re">' + p.en + ml(p.en.split('—')[0].trim()) + '</div></div></div>';
-  }).join(''));
-
-  // Transport (nouveau modèle : icon, nom, tel, url)
-  function transportRow(tt) {
-    var telLink = tt.tel ? ' — ' + tel(tt.tel) : '';
-    var urlLink = tt.url ? ' — <a href="' + tt.url + '" class="maps-btn" target="_blank" rel="noopener">🌐 Site</a>' : '';
-    // Compat ancien modèle fr/en
-    var label = tt.nom || tt.fr || '';
-    return '<div class="row"><span class="ri">' + tt.icon + '</span><div>'
-         + '<div class="rf"><strong>' + label + '</strong>' + telLink + urlLink + '</div>'
+  // ── Renderer unifié pour toutes les fiches POI ──
+  function ficheRow(f) {
+    if (!f) return '';
+    var nom = f.nom || f.fr || '';
+    var infoTxt = f.info || f.prix || f.distance || f.horaires || f.desc_fr || '';
+    var telTxt  = f.tel  || '';
+    var urlTxt  = f.url  || '';
+    var mapsLnk = nom ? ml(nom) : '';
+    return '<div class="row"><span class="ri">' + (f.icon||'📍') + '</span><div class="rf">'
+         + '<strong>' + nom + '</strong>' + mapsLnk
+         + (infoTxt ? ' <span style="color:var(--text2);font-size:12px">· ' + infoTxt + '</span>' : '')
+         + (telTxt  ? '<br>' + tel(telTxt) : '')
+         + (urlTxt  ? ' <a href="' + urlTxt + '" class="maps-btn" target="_blank" rel="noopener">🌐</a>' : '')
          + '</div></div>';
   }
-  r('transport-vtc',      (C.transport.vtc      || []).map(transportRow).join(''));
-  r('transport-commun',   (C.transport.commun   || []).map(transportRow).join(''));
-  r('transport-location', (C.transport.location || []).map(transportRow).join(''));
+
+  // Quartier
+  r('quartier-points',   (C.quartier.points    || []).map(ficheRow).join(''));
+  r('quartier-commerces',(C.quartier.commerces || []).map(ficheRow).join(''));
+
+  // Transport
+  r('transport-vtc',      ((C.transport||{}).vtc      || []).map(ficheRow).join(''));
+  r('transport-commun',   ((C.transport||{}).commun   || []).map(ficheRow).join(''));
+  r('transport-location', ((C.transport||{}).location || []).map(ficheRow).join(''));
   r('transport-adresse', 'Notre adresse / Our address : <strong>' + h.adresse + '</strong>' + ml(h.adresse));
 
-  // Restaurants
-  r('resto-senegalais', (C.restaurants.senegalais || []).map(function(rr) {
-    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_fr + ' — ' + rr.prix + (rr.telephone ? ' — ' + tel(rr.telephone) : '') + '</div><div class="re"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_en + ' — ' + rr.prix + (rr.telephone ? ' — ' + tel(rr.telephone) : '') + '</div></div></div>';
-  }).join(''));
-  r('resto-intl', (C.restaurants.international || []).map(function(rr) {
-    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_fr + ' — ' + rr.prix + (rr.telephone ? ' — ' + tel(rr.telephone) : '') + '</div><div class="re"><strong>' + rr.nom + '</strong>' + ml(rr.nom) + ' — ' + rr.desc_en + ' — ' + rr.prix + (rr.telephone ? ' — ' + tel(rr.telephone) : '') + '</div></div></div>';
-  }).join(''));
-  r('resto-gouter', (C.restaurants.a_gouter || []).map(function(rr) {
-    return '<div class="row"><span class="ri">' + rr.icon + '</span><div><div class="rf">' + rr.fr + '</div><div class="re">' + rr.en + '</div></div></div>';
-  }).join(''));
+  // Restaurants (nouveau format plat OU ancien {senegalais, international})
+  var restosArr = Array.isArray(C.restaurants) ? C.restaurants
+    : [].concat(((C.restaurants||{}).senegalais)||[], ((C.restaurants||{}).international)||[], ((C.restaurants||{}).a_gouter)||[]);
+  r('resto-senegalais', restosArr.map(ficheRow).join(''));
+  r('resto-intl',   '');
+  r('resto-gouter', '');
 
-  // Plages
-  r('plages-list', (C.plages ? C.plages.plages || [] : []).map(function(p) {
-    return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf"><strong>' + p.fr + '</strong>' + ml(p.fr) + ' — ' + p.distance + '</div><div class="re">' + p.en + ml(p.en) + ' — ' + p.distance + '</div></div></div>';
-  }).join(''));
-  r('activites-list', (C.plages ? C.plages.activites || [] : []).map(function(a) {
-    var dist = a.distance || a.prix || '';
-    var distTxt = dist ? ' — ' + dist : '';
-    return '<div class="row"><span class="ri">' + a.icon + '</span><div><div class="rf">' + a.fr + ml(a.fr.split('—')[0].trim()) + distTxt + '</div><div class="re">' + a.en + ml(a.en.split('—')[0].trim()) + distTxt + '</div></div></div>';
-  }).join(''));
+  // Plages & Activités
+  r('plages-list',    ((C.plages||{}).plages    || []).map(ficheRow).join(''));
+  r('activites-list', ((C.plages||{}).activites || []).map(ficheRow).join(''));
 
   // Shopping
-  r('marches-list', (C.shopping ? C.shopping.marches || [] : []).map(function(m) {
-    var dist = m.distance || m.horaires || '';
-    var distTxt = dist ? ' — ' + dist : '';
-    return '<div class="row"><span class="ri">' + m.icon + '</span><div><div class="rf"><strong>' + m.nom + '</strong>' + ml(m.nom) + (m.desc_fr ? ' — ' + m.desc_fr : '') + distTxt + '</div><div class="re"><strong>' + m.nom + '</strong>' + ml(m.nom) + (m.desc_en ? ' — ' + m.desc_en : '') + distTxt + '</div></div></div>';
-  }).join(''));
+  r('marches-list', ((C.shopping||{}).marches || []).map(ficheRow).join(''));
 
   // Médical
-  r('medical-urgences', (C.medical ? C.medical.urgences || [] : []).map(function(u) {
+  r('medical-urgences', ((C.medical||{}).urgences || []).map(function(u) {
     return '<div class="emergency"><div class="emer-num"><a href="tel:' + u.numero.replace(/\s/g,'') + '" class="tel-link" style="color:inherit;text-decoration:none;">' + u.numero + '</a></div><div class="emer-lbl">' + u.label_fr + ' / ' + u.label_en + '</div></div>';
   }).join(''));
-  r('medical-cliniques', (C.medical ? C.medical.cliniques || [] : []).map(function(cc) {
-    return '<div class="row"><span class="ri">' + cc.icon + '</span><div><div class="rf"><strong>' + cc.nom + '</strong>' + ml(cc.nom) + (cc.tel ? ' — ' + tel(cc.tel) : '') + ' — ' + cc.info_fr + '</div><div class="re">' + cc.nom + ml(cc.nom) + (cc.tel ? ' — ' + tel(cc.tel) : '') + ' — ' + cc.info_en + '</div></div></div>';
-  }).join(''));
+  r('medical-cliniques', ((C.medical||{}).cliniques || []).map(ficheRow).join(''));
 
   // Sécurité
   r('secu-urgences', (C.securite ? C.securite.urgences || [] : []).map(function(u) {

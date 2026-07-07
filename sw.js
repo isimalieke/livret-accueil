@@ -1,6 +1,6 @@
-const CACHE = 'welkomeo-v41';
+const CACHE = 'welkomeo-v43';
 // config.js exclu du pré-cache — contenu dynamique (KV)
-const FILES = ['./index.html', './manifest.json', './admin.html', './gestion.html', './reset.html'];
+const FILES = ['./index.html', './manifest.json', './admin.html', './gestion.html', './reset.html', './paiement.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));

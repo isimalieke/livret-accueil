@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abonnement — Welkomeo</title>
+<link rel="icon" type="image/svg+xml" href="/logo-icon.svg">
+<style>
+:root {
+  --blue: #053372;
+  --gold: #C9A84C;
+  --white: #fff;
+  --gray: #f5f5f5;
+  --border: #e0e0e0;
+  --text: #222;
+  --muted: #666;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: system-ui, sans-serif; background: var(--gray); color: var(--text); font-size:14px; min-height:100vh; }
+
+.page { max-width:700px; margin:0 auto; padding:32px 16px 60px; }
+
+.header { text-align:center; margin-bottom:32px; }
+.header .logo { font-size:36px; margin-bottom:8px; }
+.header h1 { font-size:22px; font-weight:700; color:var(--blue); }
+.header p { color:var(--muted); font-size:14px; margin-top:6px; }
+
+/* Toggle mensuel / annuel */
+.toggle-wrap { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:28px; }
+.toggle-label { font-size:14px; font-weight:500; }
+.toggle-label.active { color:var(--blue); font-weight:700; }
+.toggle-label.inactive { color:var(--muted); }
+.toggle-badge { background:#e8f5e9; color:#2e7d32; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:4px; }
+.tgl { position:relative; width:52px; height:28px; }
+.tgl input { opacity:0; width:0; height:0; }
+.tgl-slider { position:absolute; inset:0; background:#ccc; border-radius:28px; cursor:pointer; transition:.3s; }
+.tgl-slider:before { position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+input:checked + .tgl-slider { background:var(--blue); }
+input:checked + .tgl-slider:before { transform:translateX(24px); }
+
+/* Plans */
+.plans { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:480px){ .plans { grid-template-columns:1fr; } }
+
+.plan-card { background:white; border-radius:14px; border:2px solid var(--border); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,.05); transition:border-color .2s, box-shadow .2s; }
+.plan-card:hover { border-color:var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.09); }
+.plan-card.recommended { border-color:var(--blue); }
+.plan-badge { display:inline-block; background:var(--blue); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; margin-bottom:10px; letter-spacing:.5px; }
+.plan-name { font-size:18px; font-weight:700; color:var(--blue); }
+.plan-sub { font-size:12px; color:var(--muted); margin-top:2px; margin-bottom:14px; }
+.plan-price { font-size:28px; font-weight:800; color:var(--text); }
+.plan-price span { font-size:13px; font-weight:400; color:var(--muted); }
+.plan-features { margin:14px 0 20px; }
+.plan-features li { list-style:none; padding:4px 0; font-size:13px; display:flex; align-items:baseline; gap:6px; }
+.plan-features li::before { content:"✓"; color:#2e7d32; font-weight:700; flex-shrink:0; }
+.btn-pay { display:block; width:100%; padding:12px; background:var(--blue); color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; text-align:center; transition:background .15s; }
+.btn-pay:hover { background:#0A4090; }
+.plan-card.recommended .btn-pay { background:var(--gold); color:#3b2800; }
+.plan-card.recommended .btn-pay:hover { background:#b8932a; }
+
+.info-box { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px 16px; font-size:13px; color:#1d4ed8; margin-top:24px; line-height:1.6; }
+.info-box strong { display:block; margin-bottom:4px; }
+
+#status-msg { text-align:center; padding:14px; border-radius:10px; font-size:14px; margin-top:20px; display:none; }
+#status-msg.ok  { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+#status-msg.err { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+
+.back-link { display:block; text-align:center; margin-top:20px; color:var(--muted); font-size:13px; text-decoration:none; }
+.back-link:hover { color:var(--blue); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="logo">🏨</div>
+    <h1>Choisissez votre abonnement</h1>
+    <p>Paiement sécurisé via PayDunya — Wave, Orange Money, carte bancaire</p>
+  </div>
+
+  <div class="toggle-wrap">
+    <span class="toggle-label" id="lbl-mensuel">Mensuel</span>
+    <label class="tgl">
+      <input type="checkbox" id="tgl-annual" onchange="switchPeriod(this)">
+      <span class="tgl-slider"></span>
+    </label>
+    <span class="toggle-label inactive" id="lbl-annuel">Annuel <span class="toggle-badge">-17%</span></span>
+  </div>
+
+  <div class="plans">
+    <!-- Small -->
+    <div class="plan-card" id="card-small">
+      <div class="plan-name">Small</div>
+      <div class="plan-sub">1 logement</div>
+      <div class="plan-price" id="price-small">7 500 F <span>/ mois</span></div>
+      <ul class="plan-features">
+        <li>1 livret d'accueil en ligne</li>
+        <li>Toutes les sections</li>
+        <li>Ticket d'incident</li>
+        <li>Rappel check-out automatique</li>
+        <li>Support email</li>
+      </ul>
+      <button class="btn-pay" onclick="pay('small')">Payer maintenant</button>
+    </div>
+
+    <!-- Large -->
+    <div class="plan-card recommended" id="card-large">
+      <div class="plan-badge">RECOMMANDÉ</div>
+      <div class="plan-name">Large</div>
+      <div class="plan-sub">Jusqu'à 5 logements</div>
+      <div class="plan-price" id="price-large">15 000 F <span>/ mois</span></div>
+      <ul class="plan-features">
+        <li>5 livrets indépendants</li>
+        <li>Toutes les sections</li>
+        <li>Ticket d'incident</li>
+        <li>Rappel check-out automatique</li>
+        <li>Support prioritaire</li>
+      </ul>
+      <button class="btn-pay" onclick="pay('large')">Payer maintenant</button>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>💳 Comment ça marche ?</strong>
+    Cliquez sur "Payer maintenant" : vous serez redirigé vers la page de paiement PayDunya.
+    Réglez par Wave, Orange Money ou carte bancaire.
+    Votre abonnement est activé <strong>immédiatement</strong> après confirmation du paiement.
+  </div>
+
+  <div id="status-msg"></div>
+  <a class="back-link" id="back-link" href="#">← Retour au panneau admin</a>
+</div>
+
+<script>
+var _slug = '';
+var _jwt  = '';
+var _annual = false;
+
+var PRICES = {
+  small:  { monthly: 7500,  annual: 75000  },
+  large:  { monthly: 15000, annual: 150000 }
+};
+
+function formatF(n) {
+  return n.toLocaleString('fr-FR').replace(/ /g, ' ') + ' F';
+}
+
+function switchPeriod(tgl) {
+  _annual = tgl.checked;
+  document.getElementById('lbl-mensuel').className = 'toggle-label' + (_annual ? ' inactive' : ' active');
+  document.getElementById('lbl-annuel').className  = 'toggle-label' + (_annual ? ' active'   : ' inactive');
+
+  ['small','large'].forEach(function(plan) {
+    var p = _annual ? PRICES[plan].annual : PRICES[plan].monthly;
+    var suffix = _annual ? '/ an' : '/ mois';
+    document.getElementById('price-' + plan).innerHTML = formatF(p) + ' <span>' + suffix + '</span>';
+  });
+}
+
+function showMsg(msg, isErr) {
+  var el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = isErr ? 'err' : 'ok';
+  el.style.display = 'block';
+  window.scrollTo(0, el.offsetTop - 20);
+}
+
+async function pay(plan) {
+  if (!_slug || !_jwt) {
+    showMsg('Erreur : session non initialisée. Revenez depuis l\'admin.', true);
+    return;
+  }
+
+  var endpoint = '/' + _slug + '/pay/create';
+  var period = _annual ? 'annual' : 'monthly';
+
+  var btns = document.querySelectorAll('.btn-pay');
+  btns.forEach(function(b){ b.disabled = true; b.textContent = '⏳ Redirection…'; });
+
+  try {
+    var resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ plan: plan, period: period })
+    });
+    var data = await resp.json();
+    if (data.ok && data.redirect_url) {
+      window.location.href = data.redirect_url;
+    } else {
+      showMsg('Erreur : ' + (data.error || 'inconnue'), true);
+      btns.forEach(function(b){ b.disabled = false; b.textContent = 'Payer maintenant'; });
+    }
+  } catch(e) {
+    showMsg('Erreur de connexion. Vérifiez votre réseau.', true);
+    btns.forEach(function(b){ b.disabled = false; b.textContent = 'Payer maintenant'; });
+  }
+}
+
+// Initialisation : récupérer slug + jwt depuis URL et sessionStorage
+(function init() {
+  // Récupérer le slug depuis le path (/{slug}/paiement)
+  var parts = window.location.pathname.split('/').filter(Boolean);
+  _slug = parts[0] || '';
+  _jwt  = sessionStorage.getItem('welkomeo_jwt') || localStorage.getItem('welkomeo_jwt_' + _slug) || '';
+
+  document.getElementById('back-link').href = '/' + _slug + '/admin';
+
+  // Activer le label mensuel par défaut
+  document.getElementById('lbl-mensuel').classList.add('active');
+
+  // Vérifier si annual suggéré dans l'URL
+  if (window.location.search.includes('annual')) {
+    document.getElementById('tgl-annual').checked = true;
+    switchPeriod(document.getElementById('tgl-annual'));
+  }
+})();
+</script>
+</body>
+</html>

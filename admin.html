@@ -122,6 +122,21 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 input:checked + .slider { background:#053372; }
 input:checked + .slider:before { transform:translateX(22px); }
 
+/* ── Upload photo couverture ── */
+.cover-upload-zone { border:2px dashed var(--border); border-radius:8px; padding:20px; text-align:center; cursor:pointer; background:#fafafa; transition:border-color .2s; }
+.cover-upload-zone:hover { border-color:var(--gold); }
+.cover-upload-zone .cuz-icon { font-size:30px; opacity:0.4; margin-bottom:6px; }
+.cover-upload-zone .cuz-txt  { font-size:13px; color:var(--muted); }
+.cover-upload-zone .cuz-sub  { font-size:11px; color:#aaa; margin-top:3px; }
+#cover-preview-img { display:none; max-height:130px; width:100%; object-fit:cover; border-radius:6px; margin-top:8px; }
+#cover-upload-status { font-size:12px; color:var(--muted); margin-top:4px; min-height:16px; }
+
+/* ── Bouton enregistrer par section ── */
+.btn-section-save { display:block; width:100%; margin-top:16px; padding:9px; background:none; border:1px solid var(--gold); color:#7a5e1a; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; }
+.btn-section-save:hover { background:rgba(201,168,76,.08); }
+.btn-section-save.saved { border-color:#16a34a; color:#15803d; background:#f0fdf4; }
+.btn-section-save.err   { border-color:#dc2626; color:#dc2626; }
+
 /* ── Fix iOS/iPad : supprime le flash bleu + autorise la sélection dans les champs ── */
 input, textarea, select {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -170,14 +185,15 @@ input, textarea, select {
   <div class="sub-banner" id="sub-banner">
     <div class="sub-banner-ico" id="sub-ico"></div>
     <div class="sub-banner-txt" id="sub-txt"></div>
+    <a id="sub-pay-btn" href="#" style="display:none;flex-shrink:0;background:var(--blue);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">💳 S'abonner</a>
   </div>
 
   <!-- 1. ÉTABLISSEMENT -->
   <div class="section">
-    <div class="section-head" onclick="toggle(this)">
+    <div class="section-head open" onclick="toggle(this)">
       <h2>🏨 Établissement</h2><span class="chevron">▼</span>
     </div>
-    <div class="section-body">
+    <div class="section-body open">
       <div class="row2">
         <div class="field"><label>Nom complet</label><input id="h-nom" value="Hôtel Teranga"></div>
         <div class="field"><label>Nom court</label><input id="h-nom-court" value="Teranga"></div>
@@ -203,7 +219,21 @@ input, textarea, select {
       </div>
       <div class="field"><label>Email</label><input id="h-email" value="contact@hotelteranga.sn"></div>
       <div class="field"><label>Nom de l'hôte / propriétaire</label><input id="h-hote" value="Fatou &amp; Mamadou Diallo"></div>
-      <div class="field"><label>Photo de couverture (URL ou nom de fichier)</label><input id="h-photo" value="cover.jpg"><div class="hint">Laisser vide pour fond bleu. Ex : cover.jpg ou https://...</div></div>
+      <div class="field">
+        <label>Photo de couverture</label>
+        <div class="cover-upload-zone" onclick="document.getElementById('cover-file-input').click()">
+          <div id="cover-upload-placeholder">
+            <div class="cuz-icon">📸</div>
+            <div class="cuz-txt">Cliquez pour charger une photo de votre établissement</div>
+            <div class="cuz-sub">JPG · PNG · max 3 Mo</div>
+          </div>
+          <img id="cover-preview-img" alt="Photo de couverture">
+        </div>
+        <input type="file" id="cover-file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleCoverUpload(this)">
+        <div id="cover-upload-status"></div>
+        <input type="hidden" id="h-photo" value="">
+        <div class="hint">Si vous avez une URL d'image hébergée, collez-la ici : <input id="h-photo-url" placeholder="https://..." style="width:100%;margin-top:4px" oninput="document.getElementById('h-photo').value=this.value"></div>
+      </div>
     </div>
   </div>
 
@@ -293,7 +323,7 @@ input, textarea, select {
   </div>
 
   <!-- 4b. SÉJOUR ACTUEL (rappel check-out) -->
-  <div class="section">
+  <div class="section" id="sejour-section">
     <div class="section-head" onclick="toggle(this)">
       <h2>🗓️ Séjour en cours</h2><span class="chevron">▼</span>
     </div>
@@ -377,10 +407,11 @@ input, textarea, select {
     </div>
     <div class="section-body">
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom du restaurant</th><th style="width:140px">Type</th><th style="width:90px">Prix</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="resto-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('resto-rows', restoTpl)">+ Ajouter un restaurant</button>
+        <button class="btn-add" onclick="addRow('resto-rows', ficheTpl)">+ Ajouter un restaurant</button>
       </div>
+      <div class="hint">Info : type de cuisine, fourchette de prix, horaires… (ex : "Cuisine locale · 3 500 F")</div>
     </div>
   </div>
 
@@ -392,15 +423,15 @@ input, textarea, select {
     <div class="section-body">
       <div class="sub-label">Points d'intérêt</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Lieu FR</th><th>Lieu EN</th><th>Distance</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="quartier-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('quartier-rows', quartierTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('quartier-rows', ficheTpl)">+ Ajouter</button>
       </div>
       <div class="sub-label">Commerces à proximité</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Commerce FR</th><th>Commerce EN</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="commerces-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('commerces-rows', commerceTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('commerces-rows', ficheTpl)">+ Ajouter</button>
       </div>
     </div>
   </div>
@@ -413,21 +444,21 @@ input, textarea, select {
     <div class="section-body">
       <div class="sub-label">VTC & Taxis</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-vtc-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-vtc-rows', transportTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('transport-vtc-rows', ficheTpl)">+ Ajouter</button>
       </div>
       <div class="sub-label">Transport commun</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-commun-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-commun-rows', transportTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('transport-commun-rows', ficheTpl)">+ Ajouter</button>
       </div>
       <div class="sub-label">Location (voiture, scooter…)</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom / société</th><th style="width:130px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-location-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-location-rows', transportTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('transport-location-rows', ficheTpl)">+ Ajouter</button>
       </div>
     </div>
   </div>
@@ -440,15 +471,15 @@ input, textarea, select {
     <div class="section-body">
       <div class="sub-label">Plages</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom FR</th><th>Name EN</th><th>Distance</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="plages-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('plages-rows', plageTpl)">+ Ajouter une plage</button>
+        <button class="btn-add" onclick="addRow('plages-rows', ficheTpl)">+ Ajouter une plage</button>
       </div>
       <div class="sub-label">Activités</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Activité FR</th><th>Activity EN</th><th style="width:90px">Distance</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="activites-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('activites-rows', activiteTpl)">+ Ajouter une activité</button>
+        <button class="btn-add" onclick="addRow('activites-rows', ficheTpl)">+ Ajouter une activité</button>
       </div>
     </div>
   </div>
@@ -460,9 +491,9 @@ input, textarea, select {
     </div>
     <div class="section-body">
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th style="width:90px">Distance</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="marches-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('marches-rows', marcheTpl)">+ Ajouter un marché</button>
+        <button class="btn-add" onclick="addRow('marches-rows', ficheTpl)">+ Ajouter un marché</button>
       </div>
     </div>
   </div>
@@ -481,9 +512,9 @@ input, textarea, select {
       </div>
       <div class="sub-label">Cliniques</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Téléphone</th><th>Info FR</th><th>Info EN</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="cliniques-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('cliniques-rows', cliniqueTpl)">+ Ajouter une clinique</button>
+        <button class="btn-add" onclick="addRow('cliniques-rows', ficheTpl)">+ Ajouter une clinique</button>
       </div>
     </div>
   </div>
@@ -699,23 +730,29 @@ async function loadSubscriptionBanner() {
     var txt    = document.getElementById('sub-txt');
     var planLabel = d.plan === 'large' ? 'Grand hôtel' : 'Petit établissement';
 
+    var payBtn = document.getElementById('sub-pay-btn');
+    if (payBtn) payBtn.href = '/' + _slug + '/paiement';
+
     if (d.status === 'trial') {
       var days = d.daysLeft || 0;
       ico.textContent = '🕐';
-      txt.innerHTML = '<strong>Essai gratuit</strong> — ' + Math.max(0, days) + ' jour' + (days > 1 ? 's' : '') + ' restant' + (days > 1 ? 's' : '') + '. Contactez-nous pour activer votre abonnement.';
+      txt.innerHTML = '<strong>Essai gratuit</strong> — ' + Math.max(0, days) + ' jour' + (days > 1 ? 's' : '') + ' restant' + (days > 1 ? 's' : '') + '.';
       banner.className = 'sub-banner trial';
       banner.style.display = 'flex';
+      if (payBtn) payBtn.style.display = 'inline-block';
     } else if (d.status === 'active') {
       var end = d.endsAt ? new Date(d.endsAt).toLocaleDateString('fr-FR') : '—';
       ico.textContent = '✅';
       txt.innerHTML = '<strong>Abonnement actif</strong> — ' + planLabel + ' · valable jusqu\'au ' + end + '.';
       banner.className = 'sub-banner active';
       banner.style.display = 'flex';
+      if (payBtn) { payBtn.textContent = '🔄 Renouveler'; payBtn.style.display = 'inline-block'; }
     } else if (d.status === 'expired') {
       ico.textContent = '⚠️';
-      txt.innerHTML = '<strong>Abonnement expiré.</strong> La sauvegarde de vos données est suspendue. Contactez-nous à <a href="mailto:contact@welkomeo.com" style="color:inherit">contact@welkomeo.com</a> pour renouveler.';
+      txt.innerHTML = '<strong>Abonnement expiré.</strong> La sauvegarde est suspendue.';
       banner.className = 'sub-banner expired';
       banner.style.display = 'flex';
+      if (payBtn) { payBtn.style.background = '#dc2626'; payBtn.textContent = '💳 Renouveler'; payBtn.style.display = 'inline-block'; }
     }
   } catch(e) { /* silencieux */ }
 }
@@ -928,58 +965,15 @@ function serviceDemandeTpl(d) {
        + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
-function restoTpl(d) {
-  var t = d.type || 'locale';
-  var sel = '<select style="width:130px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px">'
-          + '<option value="locale"'   + (t==='locale'?' selected':'') + '>Cuisine locale</option>'
-          + '<option value="internationale"' + (t==='internationale'?' selected':'') + '>Internationale</option>'
-          + '</select>';
-  return '<td><input value="' + esc(d.icon||'🍽️') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.nom||'') + '"></td>'
-       + '<td>' + sel + '</td>'
-       + '<td><input value="' + esc(d.prix||'') + '" placeholder="Ex: 3 500 F" style="width:80px"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function quartierTpl(d) {
+// ── Template unifié pour toutes les fiches POI ──
+// Remplace restoTpl, quartierTpl, commerceTpl, transportTpl, plageTpl, activiteTpl, marcheTpl, cliniqueTpl
+function ficheTpl(d) {
+  d = d || {};
   return '<td><input value="' + esc(d.icon||'📍') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
-       + '<td><input value="' + esc(d.distance||'') + '" style="width:80px"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function commerceTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🏪') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function transportTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🚗') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.nom||d.fr||'') + '" placeholder="Ex : Yango"></td>'
-       + '<td><input value="' + esc(d.tel||'') + '" placeholder="+221 …" style="width:120px"></td>'
+       + '<td><input value="' + esc(d.nom||d.fr||'') + '" placeholder="Nom…"></td>'
+       + '<td><input value="' + esc(d.info||d.prix||d.distance||d.horaires||d.desc_fr||'') + '" placeholder="Info, prix, distance…" style="width:100px"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" placeholder="+221…" style="width:110px"></td>'
        + '<td><input value="' + esc(d.url||'') + '" placeholder="https://…"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function plageTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🏖️') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
-       + '<td><input value="' + esc(d.distance||'') + '" style="width:80px"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function activiteTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🤿') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
-       + '<td><input value="' + esc(d.distance||d.prix||'') + '" placeholder="Ex: 2 km" style="width:80px"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function marcheTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🏺') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.nom||'') + '"></td>'
-       + '<td><input value="' + esc(d.desc_fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.desc_en||'') + '"></td>'
-       + '<td><input value="' + esc(d.distance||d.horaires||'') + '" placeholder="Ex: 5 min" style="width:80px"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function urgenceTpl(d) {
@@ -988,13 +982,7 @@ function urgenceTpl(d) {
        + '<td><input value="' + esc(d.label_en||'') + '"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
-function cliniqueTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🏥') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.nom||'') + '"></td>'
-       + '<td><input value="' + esc(d.tel||'') + '" style="width:110px"></td>'
-       + '<td><input value="' + esc(d.info_fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.info_en||'') + '"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+function cliniqueTpl(d) { return ficheTpl(Object.assign({icon:'🏥'}, d)); // alias compat
 }
 function ambassadeTpl(d) {
   return '<td><input value="' + esc(d.pays||'') + '"></td>'
@@ -1015,7 +1003,16 @@ function initForm() {
   sv('h-nom', h.nom); sv('h-nom-court', h.nom_court);
   sv('h-ville', h.ville); sv('h-pays', h.pays);
   sv('h-adresse', h.adresse); sv('h-email', h.email);
-  sv('h-hote', h.hote_nom); sv('h-photo', h.cover_photo);
+  sv('h-hote', h.hote_nom);
+  // Photo de couverture
+  if (h.cover_photo) {
+    document.getElementById('h-photo').value = h.cover_photo;
+    document.getElementById('h-photo-url').value = h.cover_photo;
+    var img = document.getElementById('cover-preview-img');
+    img.src = h.cover_photo;
+    img.style.display = 'block';
+    document.getElementById('cover-upload-placeholder').style.display = 'none';
+  }
   // Numéros de téléphone (nouveau format tableau + compat ancienne structure)
   if (h.telephones && h.telephones.length) {
     loadTelRows(h.telephones);
@@ -1076,36 +1073,45 @@ function initForm() {
     else { addApplItem(); }
   } else { addApplItem(); }
 
-  // Restaurants
-  // Restaurants : fusionner locale + internationale dans la liste unifiée
-  (C.restaurants.senegalais||[]).forEach(function(r){ addRow('resto-rows', restoTpl, Object.assign({type:'locale'}, r)); });
-  (C.restaurants.international||[]).forEach(function(r){ addRow('resto-rows', restoTpl, Object.assign({type:'internationale'}, r)); });
+  // Helper migration ancien format → nouveau {icon,nom,info,tel,url}
+  function toFiche(d, defaults) {
+    defaults = defaults || {};
+    return Object.assign({ icon: defaults.icon||'📍', nom: d.nom||d.fr||'', info: d.info||d.prix||d.distance||d.horaires||d.desc_fr||'', tel: d.tel||'', url: d.url||'' }, d);
+  }
+
+  // Restaurants (nouveau format plat OU ancien {senegalais, international})
+  if (Array.isArray(C.restaurants)) {
+    C.restaurants.forEach(function(r){ addRow('resto-rows', ficheTpl, toFiche(r, {icon:'🍽️'})); });
+  } else if (C.restaurants) {
+    (C.restaurants.senegalais||[]).forEach(function(r){ addRow('resto-rows', ficheTpl, toFiche(Object.assign({icon:'🍽️'},r))); });
+    (C.restaurants.international||[]).forEach(function(r){ addRow('resto-rows', ficheTpl, toFiche(Object.assign({icon:'🍽️'},r))); });
+  }
 
   // Quartier
-  C.quartier.points.forEach(function(p){ addRow('quartier-rows', quartierTpl, p); });
-  C.quartier.commerces.forEach(function(p){ addRow('commerces-rows', commerceTpl, p); });
+  (C.quartier.points||[]).forEach(function(p){ addRow('quartier-rows', ficheTpl, toFiche(p, {icon:'📍'})); });
+  (C.quartier.commerces||[]).forEach(function(p){ addRow('commerces-rows', ficheTpl, toFiche(p, {icon:'🏪'})); });
 
   // Transport
   if (C.transport) {
-    C.transport.vtc.forEach(function(t){ addRow('transport-vtc-rows', transportTpl, t); });
-    C.transport.commun.forEach(function(t){ addRow('transport-commun-rows', transportTpl, t); });
-    C.transport.location.forEach(function(t){ addRow('transport-location-rows', transportTpl, t); });
+    (C.transport.vtc||[]).forEach(function(t){ addRow('transport-vtc-rows', ficheTpl, toFiche(t, {icon:'🚗'})); });
+    (C.transport.commun||[]).forEach(function(t){ addRow('transport-commun-rows', ficheTpl, toFiche(t, {icon:'🚌'})); });
+    (C.transport.location||[]).forEach(function(t){ addRow('transport-location-rows', ficheTpl, toFiche(t, {icon:'🔑'})); });
   }
 
-  // Plages
+  // Plages & Activités
   if (C.plages) {
-    C.plages.plages.forEach(function(p){ addRow('plages-rows', plageTpl, p); });
-    C.plages.activites.forEach(function(a){ addRow('activites-rows', activiteTpl, a); });
+    (C.plages.plages||[]).forEach(function(p){ addRow('plages-rows', ficheTpl, toFiche(p, {icon:'🏖️'})); });
+    (C.plages.activites||[]).forEach(function(a){ addRow('activites-rows', ficheTpl, toFiche(a, {icon:'🤿'})); });
   }
 
   // Shopping
   if (C.shopping) {
-    C.shopping.marches.forEach(function(m){ addRow('marches-rows', marcheTpl, m); });
+    (C.shopping.marches||[]).forEach(function(m){ addRow('marches-rows', ficheTpl, toFiche(m, {icon:'🏺'})); });
   }
 
   // Médical
-  C.medical.urgences.forEach(function(u){ addRow('urgences-rows', urgenceTpl, u); });
-  C.medical.cliniques.forEach(function(c){ addRow('cliniques-rows', cliniqueTpl, c); });
+  (C.medical.urgences||[]).forEach(function(u){ addRow('urgences-rows', urgenceTpl, u); });
+  (C.medical.cliniques||[]).forEach(function(c){ addRow('cliniques-rows', ficheTpl, toFiche(c, {icon:'🏥'})); });
 
   // Sécurité
   if (C.securite && C.securite.urgences) {
@@ -1127,6 +1133,26 @@ function initForm() {
     sv('avis-tripadvisor', C.avis.tripadvisor || '');
     sv('avis-booking',     C.avis.booking     || '');
   }
+
+  // Injecter les boutons "Enregistrer cette section" dans chaque section éditable
+  injectSectionSaveButtons();
+}
+
+// Injecte un bouton "Enregistrer" en bas de chaque section éditable
+function injectSectionSaveButtons() {
+  var SKIP = ['equipe-section', 'tickets-section', 'sejour-section'];
+  document.querySelectorAll('.section .section-body').forEach(function(body) {
+    var section = body.closest('.section');
+    if (!section) return;
+    if (SKIP.indexOf(section.id) !== -1) return;
+    if (body.querySelector('.btn-section-save')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-section-save';
+    btn.textContent = '💾 Enregistrer cette section';
+    btn.onclick = function() { saveSectionOnline(this); };
+    body.appendChild(btn);
+  });
 }
 
 // ── LECTURE LIGNES DYNAMIQUES ──
@@ -1144,25 +1170,23 @@ function readRows(tbodyId, fields) {
 
 // ── GÉNÉRATION CONFIG.JS ──
 function buildConfigContent() {
-  var regles        = readRows('regles-rows',          ['icon','fr','en']);
-  var inclus        = readRows('inclus-rows',          ['icon','fr','en']);
-  var demande       = readRows('demande-rows',         ['icon','fr','en','prix']);
-  var restos        = readRows('resto-rows',            ['icon','nom','type','prix']);
-  var restoSn       = restos.filter(function(r){ return r.type !== 'internationale'; });
-  var restoIntl     = restos.filter(function(r){ return r.type === 'internationale'; });
-  var gouter        = [];
-  var quartierPts   = readRows('quartier-rows',        ['icon','fr','en','distance']);
-  var commerces     = readRows('commerces-rows',       ['icon','fr','en']);
-  var vtc           = readRows('transport-vtc-rows',   ['icon','nom','tel','url']);
-  var commun        = readRows('transport-commun-rows',['icon','nom','tel','url']);
-  var location      = readRows('transport-location-rows',['icon','nom','tel','url']);
-  var plages        = readRows('plages-rows',          ['icon','fr','en','distance']);
-  var activites     = readRows('activites-rows',       ['icon','fr','en','distance']);
-  var marches       = readRows('marches-rows',         ['icon','nom','desc_fr','desc_en','distance']);
-  var urgences      = readRows('urgences-rows',        ['numero','label_fr','label_en']);
-  var cliniques     = readRows('cliniques-rows',       ['icon','nom','tel','info_fr','info_en']);
-  var securite      = readRows('securite-rows',        ['numero','label_fr','label_en']);
-  var ambassades    = readRows('ambassades-rows',      ['pays','adresse','tel','urgence']);
+  var FICHE         = ['icon','nom','info','tel','url'];
+  var regles        = readRows('regles-rows',             ['icon','fr','en']);
+  var inclus        = readRows('inclus-rows',             ['icon','fr','en']);
+  var demande       = readRows('demande-rows',            ['icon','fr','en','prix']);
+  var restos        = readRows('resto-rows',              FICHE);
+  var quartierPts   = readRows('quartier-rows',           FICHE);
+  var commerces     = readRows('commerces-rows',          FICHE);
+  var vtc           = readRows('transport-vtc-rows',      FICHE);
+  var commun        = readRows('transport-commun-rows',   FICHE);
+  var location      = readRows('transport-location-rows', FICHE);
+  var plages        = readRows('plages-rows',             FICHE);
+  var activites     = readRows('activites-rows',          FICHE);
+  var marches       = readRows('marches-rows',            FICHE);
+  var urgences      = readRows('urgences-rows',           ['numero','label_fr','label_en']);
+  var cliniques     = readRows('cliniques-rows',          FICHE);
+  var securite      = readRows('securite-rows',           ['numero','label_fr','label_en']);
+  var ambassades    = readRows('ambassades-rows',         ['pays','adresse','tel','urgence']);
 
   function j(o) { return JSON.stringify(o, null, 4); }
   function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
@@ -1234,12 +1258,8 @@ function buildConfigContent() {
   var applData = readApplItems();
   js += '  appareils: { items: ' + JSON.stringify(applData) + ' },\n\n';
 
-  // Restaurants
-  js += '  restaurants: {\n';
-  js += '    senegalais:    ' + j(restoSn) + ',\n';
-  js += '    international: ' + j(restoIntl) + ',\n';
-  js += '    a_gouter:      ' + j(gouter) + ',\n';
-  js += '  },\n\n';
+  // Restaurants (format plat unifié)
+  js += '  restaurants: ' + j(restos) + ',\n\n';
 
   // Quartier
   js += '  quartier: {\n';
@@ -1305,12 +1325,70 @@ function generateConfig() {
   showMsg('dl-msg', '✅ config.js téléchargé.');
 }
 
-async function saveOnline() {
-  if (!_jwt) { alert('Vous devez être connecté pour sauvegarder.'); return; }
+// ── Upload photo de couverture ──
+async function handleCoverUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 3 * 1024 * 1024) { alert('La photo ne doit pas dépasser 3 Mo.'); return; }
+  var status = document.getElementById('cover-upload-status');
+  status.textContent = '⏳ Envoi en cours…';
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    var img = document.getElementById('cover-preview-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('cover-upload-placeholder').style.display = 'none';
+    if (!_jwt) { document.getElementById('h-photo').value = e.target.result; status.textContent = '⚠️ Non connecté — photo stockée localement.'; return; }
+    try {
+      var uploadUrl = _configEndpoint.replace('/config.js', '/upload-cover');
+      var resp = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+        body: JSON.stringify({ base64: e.target.result, filename: file.name })
+      });
+      var data = await resp.json();
+      if (data.ok) {
+        document.getElementById('h-photo').value = data.url;
+        document.getElementById('h-photo-url').value = data.url;
+        status.textContent = '✅ Photo chargée — cliquez "Enregistrer" pour sauvegarder.';
+      } else {
+        document.getElementById('h-photo').value = e.target.result;
+        status.textContent = '⚠️ Serveur indisponible — photo stockée en local.';
+      }
+    } catch(err) {
+      document.getElementById('h-photo').value = e.target.result;
+      status.textContent = '⚠️ Erreur réseau — photo stockée en local.';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Enregistrer par section ──
+async function saveSectionOnline(btn) {
+  var orig = btn.textContent;
+  btn.textContent = '⏳ Enregistrement…';
+  btn.disabled = true;
+  btn.classList.remove('saved','err');
+  var ok = await saveOnline(true);
+  if (ok) {
+    btn.textContent = '✅ Enregistré !';
+    btn.classList.add('saved');
+  } else {
+    btn.textContent = '❌ Erreur';
+    btn.classList.add('err');
+  }
+  setTimeout(function() {
+    btn.textContent = orig;
+    btn.classList.remove('saved','err');
+    btn.disabled = false;
+  }, 2500);
+}
+
+async function saveOnline(silent) {
+  if (!_jwt) { if (!silent) alert('Vous devez être connecté pour sauvegarder.'); return false; }
 
   var btn = document.getElementById('save-online-btn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Enregistrement…';
+  if (!silent) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
 
   var js = buildConfigContent();
 
@@ -1322,16 +1400,19 @@ async function saveOnline() {
     });
     var data = await resp.json();
     if (data.ok) {
-      showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
+      if (!silent) showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
+      if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+      return true;
     } else {
-      showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);
+      if (!silent) showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);
+      if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+      return false;
     }
   } catch(e) {
-    showMsg('online-msg', '❌ Impossible de contacter le serveur. Vérifiez votre connexion.', true);
+    if (!silent) showMsg('online-msg', '❌ Impossible de contacter le serveur.', true);
+    if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+    return false;
   }
-
-  btn.disabled = false;
-  btn.textContent = '☁️ Enregistrer en ligne';
 }
 
 async function saveGuestStay() {

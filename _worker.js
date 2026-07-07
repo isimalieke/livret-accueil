@@ -82,6 +82,14 @@ export default {
     // ── /{slug}/config.js ──
     if (sub === 'config.js') return handleConfig(request, env, slug);
 
+    // ── /{slug}/upload-cover ──
+    if (sub === 'upload-cover' && request.method === 'POST')
+      return handleUploadCover(request, env, slug);
+
+    // ── /{slug}/cover.jpg ──
+    if (sub === 'cover.jpg')
+      return handleGetCover(env, slug);
+
     // ── /{slug}/subscription ──
     if (sub === 'subscription' && request.method === 'GET')
       return handleGetSubscription(request, env, slug);
@@ -138,6 +146,21 @@ export default {
     // ── /{slug}/guest-stay ──
     if (sub === 'guest-stay' && request.method === 'POST') {
       return handleSaveGuestStay(request, env, slug);
+    }
+
+    // ── /{slug}/paiement ──
+    if (sub === 'paiement' || sub === 'paiement.html') {
+      return fetchAsset(env, url.origin + '/paiement.html');
+    }
+
+    // ── /{slug}/pay/create ──
+    if (sub === 'pay' && parts[2] === 'create' && request.method === 'POST') {
+      return handlePayCreate(request, env, slug, url);
+    }
+
+    // ── /{slug}/pay/callback ──
+    if (sub === 'pay' && parts[2] === 'callback' && request.method === 'POST') {
+      return handlePayCallback(request, env, slug);
     }
 
     // ── /{slug}/tickets/search ──
@@ -519,6 +542,234 @@ async function handleConfig(request, env, slug) {
   }
 
   return new Response('Method not allowed', { status: 405 });
+}
+
+// ═════════════════════════════════════════════
+// UPLOAD / GET COVER PHOTO
+// ═════════════════════════════════════════════
+
+async function handleUploadCover(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+
+  let body;
+  try { body = await request.json(); } catch(e) { return json({ ok: false, error: 'JSON invalide' }, 400); }
+
+  const { base64, filename } = body || {};
+  if (!base64 || !base64.startsWith('data:image/')) {
+    return json({ ok: false, error: 'Image manquante ou format invalide' }, 400);
+  }
+
+  // Taille approximative : chaque caractère base64 = 0.75 octet
+  const estimatedBytes = (base64.length * 0.75);
+  if (estimatedBytes > 4 * 1024 * 1024) {
+    return json({ ok: false, error: 'Image trop grande (max 3 Mo)' }, 400);
+  }
+
+  // Stocker le base64 dans KV sous la clé hotel:{slug}:cover
+  await env.CONFIG_KV.put('hotel:' + slug + ':cover', base64, { expirationTtl: 60 * 60 * 24 * 365 });
+
+  // Retourner l'URL publique /{slug}/cover.jpg
+  const coverUrl = '/' + slug + '/cover.jpg';
+  return json({ ok: true, url: coverUrl });
+}
+
+async function handleGetCover(env, slug) {
+  const base64 = await env.CONFIG_KV.get('hotel:' + slug + ':cover');
+  if (!base64) {
+    return new Response('Not found', { status: 404 });
+  }
+
+  // Extraire le MIME type et les données binaires
+  const match = base64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/s);
+  if (!match) return new Response('Invalid data', { status: 500 });
+
+  const mimeType = match[1];
+  const binaryStr = atob(match[2]);
+  const bytes = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+  return new Response(bytes, {
+    headers: {
+      'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=86400',
+    },
+  });
+}
+
+// ═════════════════════════════════════════════
+// PAYDUNYA — PAIEMENT ABONNEMENT
+// ═════════════════════════════════════════════
+
+const PAYDUNYA_PLANS = {
+  small_monthly:  { amount: 7500,   label: 'Welkomeo Small — Mensuel',  plan: 'small', period: 'monthly',  months: 1  },
+  small_annual:   { amount: 75000,  label: 'Welkomeo Small — Annuel',   plan: 'small', period: 'annual',   months: 12 },
+  large_monthly:  { amount: 15000,  label: 'Welkomeo Large — Mensuel',  plan: 'large', period: 'monthly',  months: 1  },
+  large_annual:   { amount: 150000, label: 'Welkomeo Large — Annuel',   plan: 'large', period: 'annual',   months: 12 },
+};
+
+async function handlePayCreate(request, env, slug, url) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+
+  // Vérifier les clés PayDunya
+  const masterKey  = env.PAYDUNYA_MASTER_KEY;
+  const privateKey = env.PAYDUNYA_PRIVATE_KEY;
+  const token      = env.PAYDUNYA_TOKEN;
+  if (!masterKey || !privateKey || !token) {
+    return json({ ok: false, error: 'Configuration PayDunya manquante. Vérifiez les secrets Cloudflare.' }, 500);
+  }
+
+  let body;
+  try { body = await request.json(); } catch(e) { return json({ ok: false, error: 'JSON invalide' }, 400); }
+
+  const { plan, period } = body || {};
+  const planKey = (plan || '') + '_' + (period || '');
+  const planInfo = PAYDUNYA_PLANS[planKey];
+  if (!planInfo) return json({ ok: false, error: 'Plan invalide : ' + planKey }, 400);
+
+  // Récupérer les infos de l'hôtel
+  const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(slug).first();
+  if (!hotel) return json({ ok: false, error: 'Hôtel non trouvé' }, 404);
+
+  const origin    = url.origin;
+  const returnUrl = origin + '/' + slug + '/admin?payment=success';
+  const cancelUrl = origin + '/' + slug + '/paiement?cancelled=1';
+  const callbackUrl = origin + '/' + slug + '/pay/callback';
+
+  // Stocker un token de session pour valider le callback
+  const invoiceToken = crypto.randomUUID();
+  await env.CONFIG_KV.put(
+    'pay:pending:' + slug + ':' + invoiceToken,
+    JSON.stringify({ plan: planInfo.plan, period: planInfo.period, months: planInfo.months, slug }),
+    { expirationTtl: 3600 }
+  );
+
+  const payload = {
+    invoice: {
+      total_amount: planInfo.amount,
+      description: planInfo.label + ' — ' + hotel.nom,
+    },
+    store: {
+      name: 'Welkomeo',
+      tagline: 'Livret d\'accueil numérique',
+      website_url: 'https://welkomeo.com',
+    },
+    actions: {
+      cancel_url: cancelUrl,
+      return_url: returnUrl,
+      callback_url: callbackUrl,
+    },
+    custom_data: {
+      slug: slug,
+      plan: planInfo.plan,
+      period: planInfo.period,
+      months: planInfo.months,
+      token: invoiceToken,
+    },
+  };
+
+  let pdResp, pdData;
+  try {
+    pdResp = await fetch('https://app.paydunya.com/api/v1/checkout-invoice/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'PAYDUNYA-MASTER-KEY':  masterKey,
+        'PAYDUNYA-PRIVATE-KEY': privateKey,
+        'PAYDUNYA-TOKEN':       token,
+      },
+      body: JSON.stringify(payload),
+    });
+    pdData = await pdResp.json();
+  } catch(e) {
+    console.error('[PayDunya] fetch error', String(e));
+    return json({ ok: false, error: 'Erreur de connexion PayDunya' }, 502);
+  }
+
+  if (!pdResp.ok || pdData.response_code !== '00') {
+    console.error('[PayDunya] create invoice error', pdResp.status, JSON.stringify(pdData));
+    return json({ ok: false, error: pdData.response_text || 'Erreur PayDunya' }, 502);
+  }
+
+  return json({ ok: true, redirect_url: pdData.response_text });
+}
+
+async function handlePayCallback(request, env, slug) {
+  // PayDunya envoie une notification IPN en POST
+  let body;
+  try { body = await request.json(); } catch(e) { return new Response('ok', { status: 200 }); }
+
+  const invoiceData = body.data || body;
+  const status = (invoiceData.status || '').toLowerCase();
+
+  // Accepter seulement les paiements confirmés
+  if (status !== 'completed' && status !== 'done') {
+    return new Response('ok', { status: 200 });
+  }
+
+  // Récupérer les custom_data
+  const custom = invoiceData.custom_data || {};
+  const pendingSlug = custom.slug || slug;
+  const plan   = custom.plan;
+  const period = custom.period;
+  const months = parseInt(custom.months || '1', 10);
+  const invoiceToken = custom.token;
+
+  if (!plan || !pendingSlug) return new Response('ok', { status: 200 });
+
+  // Valider via le token stocké en KV (anti-replay)
+  if (invoiceToken) {
+    const stored = await env.CONFIG_KV.get('pay:pending:' + pendingSlug + ':' + invoiceToken);
+    if (!stored) {
+      console.warn('[PayDunya] token IPN inconnu ou expiré :', invoiceToken);
+      return new Response('ok', { status: 200 });
+    }
+    await env.CONFIG_KV.delete('pay:pending:' + pendingSlug + ':' + invoiceToken);
+  }
+
+  // Calculer la nouvelle date d'expiration
+  const now = new Date();
+  // Si abonnement actif, prolonger depuis la date d'expiration actuelle
+  const current = await env.DB.prepare(
+    'SELECT subscription_status, subscription_ends_at FROM hotels WHERE slug = ?'
+  ).bind(pendingSlug).first();
+
+  let base = now;
+  if (current && current.subscription_ends_at) {
+    const ends = new Date(current.subscription_ends_at);
+    if (ends > now) base = ends;
+  }
+
+  const newEnds = new Date(base);
+  newEnds.setMonth(newEnds.getMonth() + months);
+
+  await env.DB.prepare(
+    'UPDATE hotels SET subscription_status = ?, subscription_plan = ?, subscription_ends_at = ? WHERE slug = ?'
+  ).bind('active', plan, newEnds.toISOString(), pendingSlug).run();
+
+  console.log('[PayDunya] abonnement activé :', pendingSlug, plan, period, '->', newEnds.toISOString());
+
+  // Notifier l'hôtelier par email
+  try {
+    const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(pendingSlug).first();
+    if (hotel && hotel.email) {
+      const planLabel = plan === 'large' ? 'Large' : 'Small';
+      const periodLabel = period === 'annual' ? 'Annuel' : 'Mensuel';
+      const dateStr = newEnds.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      await resendEmail(env, hotel.email, '✅ Votre abonnement Welkomeo est actif',
+        `<p>Bonjour,</p>
+        <p>Votre abonnement <strong>Welkomeo ${planLabel} ${periodLabel}</strong> a été activé avec succès.</p>
+        <p>Valide jusqu'au : <strong>${dateStr}</strong></p>
+        <p>Vous pouvez gérer votre livret sur <a href="https://welkomeo.com/${pendingSlug}/admin">welkomeo.com/${pendingSlug}/admin</a></p>
+        <p>Merci de votre confiance,<br>L'équipe Welkomeo</p>`
+      );
+    }
+  } catch(e) {
+    console.error('[PayDunya] email notification error', String(e));
+  }
+
+  return new Response('ok', { status: 200 });
 }
 
 // ═════════════════════════════════════════════

@@ -91,15 +91,15 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   text-align:center; padding:28px 16px 20px;
 }
 .back-row-bottom .back-btn-inline {
-  background:var(--cover); color:rgba(255,255,255,0.75); border:none;
-  border-radius:4px; padding:14px 48px;
-  font-size:12px; font-weight:400; letter-spacing:2px; text-transform:uppercase;
-  cursor:pointer; box-shadow:0 2px 12px rgba(28,20,9,0.2);
+  background:var(--blue); color:rgba(255,255,255,0.85); border:none;
+  border-radius:8px; padding:14px 48px;
+  font-size:12px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase;
+  cursor:pointer; box-shadow:0 2px 12px rgba(29,78,216,0.25);
   width:100%; max-width:300px;
-  -webkit-user-select:none; transition:color .2s;
+  -webkit-user-select:none; transition:opacity .2s;
 }
-.back-row-bottom .back-btn-inline:hover { color:#fff; }
-.back-row-bottom .back-btn-inline:active { opacity:0.85; }
+.back-row-bottom .back-btn-inline:hover { color:#fff; opacity:0.9; }
+.back-row-bottom .back-btn-inline:active { opacity:0.8; }
 
 /* Appareils / Mode d'emploi cards */
 .appl-card { background:var(--card-bg); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; }
@@ -156,8 +156,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   padding:20px 20px 22px;
   text-align:center;
 }
-/* Fallback sans photo : fond plein cover + padding symétrique */
+/* Fallback sans photo : fond bleu marine + padding symétrique */
 .home-cover.no-photo {
+  background:var(--blue) !important;
   min-height:auto;
   justify-content:center;
   padding:32px 20px;
@@ -228,13 +229,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 
 /* ══ PAGE HEADER ══ */
 .page-hdr {
-  padding:18px 18px 16px; background:var(--cover);
-  border-bottom:1px solid var(--gold-line);
+  padding:14px 18px 12px; background:var(--blue);
+  border-bottom:none;
   display:flex; align-items:center; gap:14px;
 }
-.page-hdr-icon  { font-size:22px; opacity:0.8; }
-.page-hdr-title { font-size:17px; color:#fff; font-weight:600; letter-spacing:0.2px; }
-.page-hdr-sub   { font-size:10px; color:rgba(255,255,255,0.4); margin-top:3px; letter-spacing:1.5px; text-transform:uppercase; }
+.page-hdr-icon  { font-size:20px; opacity:0.9; }
+.page-hdr-title { font-size:16px; color:#fff; font-weight:600; letter-spacing:0.2px; }
+.page-hdr-sub   { font-size:10px; color:rgba(255,255,255,0.55); margin-top:2px; letter-spacing:1px; text-transform:uppercase; }
 .page-body { padding:16px; padding-bottom:8px; background:var(--bg); }
 
 /* ══ CARDS ══ */
@@ -501,34 +502,37 @@ body.lang-en .en-o { display:block; }
 
 /* ══ CATEGORY PAGE ══ */
 .cat-page-hdr {
-  background:var(--cover); padding:20px 18px 16px;
+  background:var(--blue); padding:16px 18px 14px;
   display:flex; align-items:center; gap:12px;
-  border-bottom:1px solid var(--gold-line);
+  border-bottom:none;
 }
-.cat-page-hdr-ico { font-size:22px; opacity:0.7; }
+.cat-page-hdr-ico { font-size:20px; opacity:0.9; }
 .cat-page-hdr-title {
-  font-size:18px; color:#fff;
+  font-size:17px; color:#fff;
   font-weight:600; letter-spacing:0.2px;
 }
 
 /* ══ SUB-LIST ══ */
 .sub-list { padding:14px; padding-bottom:8px; }
 .sub-list-item {
-  background:var(--card-bg); border-radius:8px; padding:14px 16px;
-  margin-bottom:8px; border:1px solid var(--border);
-  display:flex; align-items:center; gap:14px;
+  background:var(--card-bg); border-radius:12px; padding:13px 14px 13px 12px;
+  margin-bottom:8px;
+  border:1px solid rgba(29,78,216,0.12);
+  border-left:3px solid var(--blue);
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  display:flex; align-items:center; gap:13px;
   cursor:pointer;
-  -webkit-user-select:none; transition:transform .1s;
+  -webkit-user-select:none; transition:transform .1s, box-shadow .1s;
 }
-.sub-list-item:active { transform:scale(0.98); }
+.sub-list-item:active { transform:scale(0.98); box-shadow:none; }
 .sli-ico {
-  width:42px; height:42px; border-radius:6px; background:var(--bg);
+  width:42px; height:42px; border-radius:10px; background:#dbeafe;
   display:flex; align-items:center; justify-content:center;
   font-size:20px; flex-shrink:0;
 }
-.sli-label { font-size:15px; font-weight:500; color:var(--text); letter-spacing:0.1px; }
-.sli-sub { font-size:11px; color:var(--text2); margin-top:2px; line-height:1.4; }
-.sli-arrow { margin-left:auto; color:var(--gold); font-size:18px; flex-shrink:0; opacity:0.6; }
+.sli-label { font-size:15px; font-weight:600; color:var(--text); letter-spacing:0.1px; }
+.sli-sub { font-size:12px; color:var(--text2); margin-top:2px; line-height:1.4; }
+.sli-arrow { margin-left:auto; color:var(--blue); font-size:20px; flex-shrink:0; opacity:0.35; }
 
 /* ══ CONVERTISSEUR ══ */
 .conv-card { background:var(--card-bg); border-radius:18px; border:1px solid var(--border); padding:16px; margin-bottom:14px; }

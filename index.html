@@ -436,29 +436,54 @@ body.lang-en .pz-text.en-t { display:block; }
 body.lang-en .fr-o { display:none; }
 body.lang-en .en-o { display:block; }
 
+/* ══ HOME MENU — FOND FLOU ══ */
+.grid-wrap { position:relative; overflow:hidden; }
+#home-menu-bg {
+  position:absolute; inset:-30px;
+  background-size:cover; background-position:center;
+  filter:blur(22px) brightness(0.22);
+  opacity:0; transition:opacity 0.9s ease;
+  pointer-events:none;
+}
+#ticket-follow-wrap, .grid-wrap > .back-row-bottom { position:relative; z-index:1; }
+
 /* ══ HOME — 4 GRANDES TUILES ══ */
 .cat-grid {
   display:flex; flex-direction:column;
   gap:10px; margin-bottom:12px;
+  position:relative; z-index:1;
 }
 .cat-tile {
-  background:var(--card-bg); border-radius:10px;
-  border:1px solid var(--border); box-shadow:var(--shadow-sm);
-  padding:18px 20px;
-  display:flex; flex-direction:row; align-items:center; gap:16px; text-align:left;
+  background:rgba(255,255,255,0.94); border-radius:12px;
+  border:1px solid rgba(29,78,216,0.12);
+  border-left:3px solid var(--blue);
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+  padding:14px 14px 14px 13px;
+  display:flex; flex-direction:row; align-items:center; gap:13px; text-align:left;
   cursor:pointer; -webkit-user-select:none; user-select:none;
   transition:transform .15s, box-shadow .15s;
 }
 .cat-tile:active { transform:scale(0.98); box-shadow:none; }
-.cat-tile-ico { font-size:32px; flex-shrink:0; }
-.cat-tile-label { font-size:21px; font-weight:500; color:var(--text); margin-bottom:3px; line-height:1.2; font-family:'Cormorant Garamond','Playfair Display',Georgia,serif; letter-spacing:0.5px; }
-.cat-tile-sub { font-size:12px; color:#5a4e40; line-height:1.45; letter-spacing:0.3px; }
+.cat-tile-ico {
+  font-size:24px; flex-shrink:0;
+  width:46px; height:46px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+}
+.cat-tile[data-cat="sejour"]   .cat-tile-ico { background:#dbeafe; }
+.cat-tile[data-cat="decouvrir"] .cat-tile-ico { background:#dcfce7; }
+.cat-tile[data-cat="urgences"] .cat-tile-ico { background:#fee2e2; }
+.cat-tile[data-cat="depart"]   .cat-tile-ico { background:#fef9c3; }
+.cat-tile-text { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.cat-tile-label { font-size:15px; font-weight:600; color:var(--text); line-height:1.3; }
+.cat-tile-sub { font-size:12px; color:#5a4e40; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cat-tile-arr { color:var(--blue); font-size:20px; flex-shrink:0; opacity:0.35; }
 
 /* Incident banner sur accueil */
 .incident-home {
-  background:var(--card-bg); border:1px solid rgba(201,168,76,0.3); border-radius:8px;
+  background:rgba(255,255,255,0.94); border:1px solid rgba(201,168,76,0.3); border-radius:8px;
   padding:14px 16px; display:flex; align-items:center; gap:14px;
   cursor:pointer; -webkit-user-select:none; transition:transform .1s;
+  position:relative; z-index:1;
 }
 .incident-home:active { transform:scale(0.98); }
 .incident-home-ico {
@@ -580,35 +605,48 @@ body.lang-en .en-o { display:block; }
   </div>
 
   <div class="grid-wrap">
+    <div id="home-menu-bg"></div>
 
     <div class="cat-grid">
-      <div class="cat-tile" onclick="showCat('sejour')">
+      <div class="cat-tile" data-cat="sejour" onclick="showCat('sejour')">
         <div class="cat-tile-ico">🏠</div>
-        <div class="cat-tile-label fr-o">Votre séjour</div>
-        <div class="cat-tile-label en-o">Your stay</div>
-        <div class="cat-tile-sub fr-o">WiFi, équipements, règles</div>
-        <div class="cat-tile-sub en-o">WiFi, amenities, rules</div>
+        <div class="cat-tile-text">
+          <div class="cat-tile-label fr-o">Votre séjour</div>
+          <div class="cat-tile-label en-o">Your stay</div>
+          <div class="cat-tile-sub fr-o">WiFi, équipements, règles</div>
+          <div class="cat-tile-sub en-o">WiFi, amenities, rules</div>
+        </div>
+        <div class="cat-tile-arr">›</div>
       </div>
-      <div class="cat-tile" onclick="showCat('decouvrir')">
+      <div class="cat-tile" data-cat="decouvrir" onclick="showCat('decouvrir')">
         <div class="cat-tile-ico">🌍</div>
-        <div class="cat-tile-label fr-o">Découvrir</div>
-        <div class="cat-tile-label en-o">Explore</div>
-        <div class="cat-tile-sub fr-o">Restaurants, plages, activités</div>
-        <div class="cat-tile-sub en-o">Restaurants, beaches, activities</div>
+        <div class="cat-tile-text">
+          <div class="cat-tile-label fr-o">Découvrir</div>
+          <div class="cat-tile-label en-o">Explore</div>
+          <div class="cat-tile-sub fr-o">Restaurants, plages, activités</div>
+          <div class="cat-tile-sub en-o">Restaurants, beaches, activities</div>
+        </div>
+        <div class="cat-tile-arr">›</div>
       </div>
-      <div class="cat-tile" onclick="showCat('urgences')">
+      <div class="cat-tile" data-cat="urgences" onclick="showCat('urgences')">
         <div class="cat-tile-ico">🚨</div>
-        <div class="cat-tile-label fr-o">Urgences</div>
-        <div class="cat-tile-label en-o">Emergencies</div>
-        <div class="cat-tile-sub fr-o">Médecin, police, ambassades</div>
-        <div class="cat-tile-sub en-o">Medical, police, embassies</div>
+        <div class="cat-tile-text">
+          <div class="cat-tile-label fr-o">Urgences</div>
+          <div class="cat-tile-label en-o">Emergencies</div>
+          <div class="cat-tile-sub fr-o">Médecin, police, ambassades</div>
+          <div class="cat-tile-sub en-o">Medical, police, embassies</div>
+        </div>
+        <div class="cat-tile-arr">›</div>
       </div>
-      <div class="cat-tile" onclick="showCat('depart')">
+      <div class="cat-tile" data-cat="depart" onclick="showCat('depart')">
         <div class="cat-tile-ico">🧳</div>
-        <div class="cat-tile-label fr-o">Départ</div>
-        <div class="cat-tile-label en-o">Departure</div>
-        <div class="cat-tile-sub fr-o">Check-out, transports, avis</div>
-        <div class="cat-tile-sub en-o">Check-out, transport, review</div>
+        <div class="cat-tile-text">
+          <div class="cat-tile-label fr-o">Départ</div>
+          <div class="cat-tile-label en-o">Departure</div>
+          <div class="cat-tile-sub fr-o">Check-out, transports, avis</div>
+          <div class="cat-tile-sub en-o">Check-out, transport, review</div>
+        </div>
+        <div class="cat-tile-arr">›</div>
       </div>
     </div>
 
@@ -1793,12 +1831,20 @@ function applyConfig() {
   t('cov-nom', h.nom);
   t('cov-loc', h.ville + ' · ' + h.pays);
 
-  // Photo de couverture hero + fond auth
+  // Photo de couverture hero + fond auth + fond menu flou
   var coverEl = document.getElementById('home-cover');
   if (h.cover_photo) {
     if (coverEl) {
       coverEl.style.backgroundImage = 'url(' + h.cover_photo + ')';
       coverEl.classList.remove('no-photo');
+    }
+    // Fond flou derrière les tiles du menu
+    var homeBg = document.getElementById('home-menu-bg');
+    if (homeBg) {
+      homeBg.style.backgroundImage = 'url(' + h.cover_photo + ')';
+      setTimeout(function() { homeBg.style.opacity = '1'; }, 150);
+      var gw = document.querySelector('.grid-wrap');
+      if (gw) gw.style.background = 'transparent';
     }
     // Si cover_photo est une URL externe (pas cover.jpg), l'appliquer aussi à l'auth bg
     if (typeof window._setAuthBg === 'function' && !h.cover_photo.endsWith('/cover.jpg')) {

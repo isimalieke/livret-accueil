@@ -302,7 +302,7 @@ body.lang-en .re { display:block; }
 .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 @media(max-width:380px) { .grid2 { grid-template-columns:1fr; } }
 .gc { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:var(--shadow-sm); }
-.gc-title { font-size:12px; color:var(--accent); margin-bottom:6px; letter-spacing:0.3px; font-weight:600; }
+.gc-title { font-size:12px; color:var(--blue); margin-bottom:6px; letter-spacing:0.3px; font-weight:600; }
 .gc-text { font-size:12px; color:var(--text2); line-height:1.55; }
 .gc-text.fr-t { display:block; }
 .gc-text.en-t { display:none; }
@@ -347,11 +347,11 @@ body.lang-en .wt-en { display:block; color:var(--text); font-style:normal; }
 .pay-logo  { font-size:14px; font-weight:600; color:var(--text); margin-bottom:6px; }
 .pay-info  { font-size:13px; color:var(--text2); margin-bottom:10px; line-height:1.6; }
 .pay-btn {
-  display:inline-block; background:var(--accent); color:#fff;
-  border:none; padding:9px 18px; border-radius:20px;
+  display:inline-block; background:var(--blue); color:#fff;
+  border:none; padding:10px 20px; border-radius:8px;
   font-size:13px; font-weight:500; text-decoration:none; cursor:pointer;
 }
-.pay-btn:hover { background:var(--cover2); }
+.pay-btn:hover { opacity:0.9; }
 
 /* ══ CHECKOUT STEPS ══ */
 .co-step {
@@ -406,7 +406,7 @@ body.lang-en .field label.en-t { display:block; }
 .pz-text.en-t { display:none; }
 body.lang-en .pz-text.fr-t { display:none; }
 body.lang-en .pz-text.en-t { display:block; }
-.btn-primary { width:100%; background:var(--cover); border:none; color:rgba(255,255,255,0.85); padding:13px; border-radius:4px; font-size:12px; font-weight:400; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-family:inherit; transition:color .2s; }
+.btn-primary { width:100%; background:var(--blue); border:none; color:rgba(255,255,255,0.9); padding:13px; border-radius:8px; font-size:13px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; font-family:inherit; box-shadow:0 2px 10px rgba(29,78,216,0.2); transition:opacity .2s; }
 .btn-primary:hover { color:#fff; }
 .btn-primary:active { opacity:0.85; }
 .btn-success { display:none; background:#dcfce7; border:1px solid #86efac; color:#15803d; padding:14px; border-radius:12px; font-size:13px; text-align:center; margin-top:10px; }
@@ -537,7 +537,7 @@ body.lang-en .en-o { display:block; }
 /* ══ CONVERTISSEUR ══ */
 .conv-card { background:var(--card-bg); border-radius:18px; border:1px solid var(--border); padding:16px; margin-bottom:14px; }
 .conv-block { background:var(--bg); border:1.5px solid var(--border); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
-.conv-block:focus-within { border-color:var(--cover); }
+.conv-block:focus-within { border-color:var(--blue); }
 .conv-block-result { border-color:var(--border); background:var(--bg); }
 .conv-lbl { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
 .conv-input { border:none; background:transparent; font-size:26px; font-weight:700; color:var(--text); outline:none; width:100%; min-width:0; }
@@ -545,7 +545,7 @@ body.lang-en .en-o { display:block; }
 .conv-select-wrap { flex-shrink:0; border-left:1.5px solid var(--border); padding-left:12px; }
 .conv-select { border:none; background:transparent; font-size:13px; font-weight:600; color:var(--text); outline:none; max-width:130px; cursor:pointer; }
 .conv-swap-wrap { text-align:center; margin:10px 0; }
-.conv-swap { background:var(--cover); border:none; border-radius:50%; width:36px; height:36px; font-size:17px; color:#fff; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+.conv-swap { background:var(--blue); border:none; border-radius:50%; width:36px; height:36px; font-size:17px; color:#fff; cursor:pointer; box-shadow:0 2px 8px rgba(29,78,216,.25); }
 .conv-rate-info { text-align:center; font-size:12px; color:var(--text2); margin-bottom:12px; }
 .conv-tbl-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
 .conv-tbl-row:last-child { border-bottom:none; }
@@ -1003,7 +1003,7 @@ body.lang-en .en-o { display:block; }
     <div id="maps-poi-wrap" style="display:none;margin-bottom:14px">
       <a id="maps-poi-btn" href="#" target="_blank" rel="noopener"
          onclick="event.preventDefault();event.stopPropagation();window.open(this.href,'_blank','noopener')"
-         style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--cover);color:#fff;border-radius:14px;padding:14px;font-size:14px;font-weight:600;text-decoration:none">
+         style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:600;text-decoration:none">
         📍 <span class="fr-o">Explorer le quartier sur Google Maps</span><span class="en-o">Explore the neighbourhood on Google Maps</span>
       </a>
       <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:6px" class="fr-o">Restaurants, pharmacies, banques, commerces autour de l'hôtel</div>

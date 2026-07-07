@@ -1859,12 +1859,16 @@ function applyConfig() {
     return '<div class="row"><span class="ri">' + p.icon + '</span><div><div class="rf"><strong>' + p.fr + '</strong>' + ml(p.fr) + ' — ' + p.distance + '</div><div class="re">' + p.en + ml(p.en) + ' — ' + p.distance + '</div></div></div>';
   }).join(''));
   r('activites-list', (C.plages ? C.plages.activites || [] : []).map(function(a) {
-    return '<div class="row"><span class="ri">' + a.icon + '</span><div><div class="rf">' + a.fr + ml(a.fr.split('—')[0].trim()) + ' — ' + a.prix + '</div><div class="re">' + a.en + ml(a.en.split('—')[0].trim()) + ' — ' + a.prix + '</div></div></div>';
+    var dist = a.distance || a.prix || '';
+    var distTxt = dist ? ' — ' + dist : '';
+    return '<div class="row"><span class="ri">' + a.icon + '</span><div><div class="rf">' + a.fr + ml(a.fr.split('—')[0].trim()) + distTxt + '</div><div class="re">' + a.en + ml(a.en.split('—')[0].trim()) + distTxt + '</div></div></div>';
   }).join(''));
 
   // Shopping
   r('marches-list', (C.shopping ? C.shopping.marches || [] : []).map(function(m) {
-    return '<div class="row"><span class="ri">' + m.icon + '</span><div><div class="rf"><strong>' + m.nom + '</strong>' + ml(m.nom) + ' — ' + m.desc_fr + ' — ' + m.horaires + '</div><div class="re"><strong>' + m.nom + '</strong>' + ml(m.nom) + ' — ' + m.desc_en + ' — ' + m.horaires + '</div></div></div>';
+    var dist = m.distance || m.horaires || '';
+    var distTxt = dist ? ' — ' + dist : '';
+    return '<div class="row"><span class="ri">' + m.icon + '</span><div><div class="rf"><strong>' + m.nom + '</strong>' + ml(m.nom) + (m.desc_fr ? ' — ' + m.desc_fr : '') + distTxt + '</div><div class="re"><strong>' + m.nom + '</strong>' + ml(m.nom) + (m.desc_en ? ' — ' + m.desc_en : '') + distTxt + '</div></div></div>';
   }).join(''));
 
   // Médical

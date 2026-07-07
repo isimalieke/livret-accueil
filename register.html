@@ -303,12 +303,8 @@ body {
         </div>
       </div>
       <div class="field">
-        <label>WhatsApp</label>
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-          <input type="checkbox" id="f-wa-same" checked onchange="toggleWaSame()" style="width:16px;height:16px;cursor:pointer">
-          <span style="font-size:13px;color:var(--text2)">Même numéro que le téléphone</span>
-        </div>
-        <div id="f-wa-different" style="display:none;gap:6px;flex-direction:row">
+        <label>WhatsApp <span style="font-weight:400;text-transform:none;letter-spacing:0">(si différent du téléphone)</span></label>
+        <div style="display:flex;gap:6px">
           <select id="f-wa-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer">
             <option value="+221">🇸🇳 +221</option>
             <option value="+33">🇫🇷 +33</option>
@@ -326,9 +322,9 @@ body {
             <option value="+224">🇬🇳 +224</option>
             <option value="+237">🇨🇲 +237</option>
           </select>
-          <input type="tel" id="f-wa-num" placeholder="77 123 45 67" style="flex:1;padding:11px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:15px;color:var(--text);outline:none;font-family:inherit">
+          <input type="tel" id="f-wa-num" placeholder="Laisser vide si identique au téléphone" style="flex:1">
         </div>
-        <div class="hint">Le numéro WhatsApp recevra les notifications de vos clients.</div>
+        <div class="hint">Laissez vide si c'est le même numéro. Le WhatsApp reçoit les notifications de vos clients.</div>
       </div>
       <div class="field">
         <label>Email professionnel <span class="required-mark">*</span></label>
@@ -343,7 +339,10 @@ body {
     <div class="card-form">
       <div class="field">
         <label>Mot de passe de votre livret <span class="required-mark">*</span></label>
-        <input type="password" id="f-password" placeholder="Choisissez un mot de passe sécurisé" autocomplete="new-password">
+        <div style="position:relative">
+          <input type="password" id="f-password" placeholder="Choisissez un mot de passe sécurisé" autocomplete="new-password" style="padding-right:42px">
+          <button type="button" onclick="togglePwd('f-password','eye-reg')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#6e6e73;padding:4px" id="eye-reg">👁</button>
+        </div>
         <div class="hint">Ce mot de passe protège votre espace admin et votre livret. Minimum 6 caractères.</div>
       </div>
     </div>
@@ -469,10 +468,11 @@ var currentStep = 1;
 var selectedType = 'Hôtel';
 var logoBase64 = '';
 
-function toggleWaSame() {
-  var same = document.getElementById('f-wa-same').checked;
-  var el   = document.getElementById('f-wa-different');
-  el.style.display = same ? 'none' : 'flex';
+function togglePwd(inputId, btnId) {
+  var inp = document.getElementById(inputId);
+  var btn = document.getElementById(btnId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
 }
 
 function selectType(card, val) {
@@ -580,21 +580,19 @@ async function submitForm() {
   var responsable = document.getElementById('f-responsable').value.trim();
   var telCode     = document.getElementById('f-tel-code').value;
   var telNum      = document.getElementById('f-tel').value.trim();
-  var tel         = telNum ? telCode + telNum : '';
+  var tel         = telNum ? telCode + ' ' + telNum : '';
   var email       = document.getElementById('f-email').value.trim();
   var password    = document.getElementById('f-password').value;
   var wifi        = document.getElementById('f-wifi').value.trim();
   var wifimdp     = document.getElementById('f-wifimdp').value.trim();
   var bienvenue   = document.getElementById('f-bienvenue').value.trim();
+  var checkin     = document.getElementById('f-checkin').value.trim();
+  var checkout    = document.getElementById('f-checkout').value.trim();
 
-  // WhatsApp : même numéro ou différent
-  var waSame = document.getElementById('f-wa-same').checked;
-  var whatsapp = tel;
-  if (!waSame) {
-    var waCode = document.getElementById('f-wa-code').value;
-    var waNum  = document.getElementById('f-wa-num').value.trim();
-    whatsapp = waNum ? waCode + waNum : tel;
-  }
+  // WhatsApp : champ séparé, ou même numéro si vide
+  var waCode   = document.getElementById('f-wa-code').value;
+  var waNum    = document.getElementById('f-wa-num').value.trim();
+  var whatsapp = waNum ? waCode + ' ' + waNum : tel;
 
   try {
     var res = await fetch('/register', {
@@ -606,6 +604,8 @@ async function submitForm() {
         hote_nom: responsable,
         wifi_reseau: wifi, wifi_mdp: wifimdp,
         bienvenue_fr: bienvenue,
+        checkin: checkin || '14h00',
+        checkout: checkout || '11h00',
         chambres: document.getElementById('f-chambres').value,
       }),
     });

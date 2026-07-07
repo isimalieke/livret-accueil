@@ -147,7 +147,10 @@ input, textarea, select {
     <div class="login-title">Administration</div>
     <div class="login-sub">Welkomeo · par Assenka</div>
     <input type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()">
-    <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()">
+    <div style="position:relative;margin-bottom:12px">
+      <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:0">
+      <button type="button" onclick="togglePwd('pwd-input','eye-login')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:4px" id="eye-login">👁</button>
+    </div>
     <button onclick="checkPwd()">Connexion</button>
     <div class="login-error" id="login-error">Email ou mot de passe incorrect</div>
     <a id="forgot-link" href="#" style="display:block;text-align:center;margin-top:14px;font-size:13px;color:#7c3aed;text-decoration:none">Mot de passe oublié ?</a>
@@ -373,23 +376,10 @@ input, textarea, select {
       <h2>🍽️ Restaurants</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="sub-label">Cuisine locale</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
-        <tbody id="resto-sn-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('resto-sn-rows', restoTpl)">+ Ajouter</button>
-      </div>
-      <div class="sub-label">Internationale</div>
-      <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
-        <tbody id="resto-intl-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('resto-intl-rows', restoTpl)">+ Ajouter</button>
-      </div>
-      <div class="sub-label">Plats à goûter absolument</div>
-      <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Plat FR</th><th>Dish EN</th><th style="width:30px"></th></tr></thead>
-        <tbody id="gouter-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('gouter-rows', gouterTpl)">+ Ajouter un plat</button>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom du restaurant</th><th style="width:140px">Type</th><th style="width:90px">Prix</th><th style="width:30px"></th></tr></thead>
+        <tbody id="resto-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('resto-rows', restoTpl)">+ Ajouter un restaurant</button>
       </div>
     </div>
   </div>
@@ -456,7 +446,7 @@ input, textarea, select {
       </div>
       <div class="sub-label">Activités</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Activité FR</th><th>Activity EN</th><th>Prix</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Activité FR</th><th>Activity EN</th><th style="width:90px">Distance</th><th style="width:30px"></th></tr></thead>
         <tbody id="activites-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('activites-rows', activiteTpl)">+ Ajouter une activité</button>
       </div>
@@ -470,7 +460,7 @@ input, textarea, select {
     </div>
     <div class="section-body">
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th>Horaires</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th>Description FR</th><th>Description EN</th><th style="width:90px">Distance</th><th style="width:30px"></th></tr></thead>
         <tbody id="marches-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('marches-rows', marcheTpl)">+ Ajouter un marché</button>
       </div>
@@ -741,6 +731,13 @@ async function loadSubscriptionBanner() {
   }
 })();
 
+function togglePwd(inputId, btnId) {
+  var inp = document.getElementById(inputId);
+  var btn = document.getElementById(btnId);
+  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+  else { inp.type = 'password'; btn.textContent = '👁'; }
+}
+
 async function checkPwd() {
   var email = (document.getElementById('email-input').value || '').trim();
   var pwd   = document.getElementById('pwd-input').value;
@@ -932,17 +929,15 @@ function serviceDemandeTpl(d) {
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function restoTpl(d) {
+  var t = d.type || 'locale';
+  var sel = '<select style="width:130px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px">'
+          + '<option value="locale"'   + (t==='locale'?' selected':'') + '>Cuisine locale</option>'
+          + '<option value="internationale"' + (t==='internationale'?' selected':'') + '>Internationale</option>'
+          + '</select>';
   return '<td><input value="' + esc(d.icon||'🍽️') + '" style="width:50px;text-align:center"></td>'
        + '<td><input value="' + esc(d.nom||'') + '"></td>'
-       + '<td><input value="' + esc(d.desc_fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.desc_en||'') + '"></td>'
-       + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
-       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
-}
-function gouterTpl(d) {
-  return '<td><input value="' + esc(d.icon||'🥘') + '" style="width:50px;text-align:center"></td>'
-       + '<td><input value="' + esc(d.fr||'') + '"></td>'
-       + '<td><input value="' + esc(d.en||'') + '"></td>'
+       + '<td>' + sel + '</td>'
+       + '<td><input value="' + esc(d.prix||'') + '" placeholder="Ex: 3 500 F" style="width:80px"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function quartierTpl(d) {
@@ -976,7 +971,7 @@ function activiteTpl(d) {
   return '<td><input value="' + esc(d.icon||'🤿') + '" style="width:50px;text-align:center"></td>'
        + '<td><input value="' + esc(d.fr||'') + '"></td>'
        + '<td><input value="' + esc(d.en||'') + '"></td>'
-       + '<td><input value="' + esc(d.prix||'') + '" style="width:90px"></td>'
+       + '<td><input value="' + esc(d.distance||d.prix||'') + '" placeholder="Ex: 2 km" style="width:80px"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function marcheTpl(d) {
@@ -984,7 +979,7 @@ function marcheTpl(d) {
        + '<td><input value="' + esc(d.nom||'') + '"></td>'
        + '<td><input value="' + esc(d.desc_fr||'') + '"></td>'
        + '<td><input value="' + esc(d.desc_en||'') + '"></td>'
-       + '<td><input value="' + esc(d.horaires||'') + '" style="width:70px"></td>'
+       + '<td><input value="' + esc(d.distance||d.horaires||'') + '" placeholder="Ex: 5 min" style="width:80px"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 function urgenceTpl(d) {
@@ -1082,11 +1077,9 @@ function initForm() {
   } else { addApplItem(); }
 
   // Restaurants
-  C.restaurants.senegalais.forEach(function(r){ addRow('resto-sn-rows', restoTpl, r); });
-  C.restaurants.international.forEach(function(r){ addRow('resto-intl-rows', restoTpl, r); });
-  if (C.restaurants.a_gouter) {
-    C.restaurants.a_gouter.forEach(function(g){ addRow('gouter-rows', gouterTpl, g); });
-  }
+  // Restaurants : fusionner locale + internationale dans la liste unifiée
+  (C.restaurants.senegalais||[]).forEach(function(r){ addRow('resto-rows', restoTpl, Object.assign({type:'locale'}, r)); });
+  (C.restaurants.international||[]).forEach(function(r){ addRow('resto-rows', restoTpl, Object.assign({type:'internationale'}, r)); });
 
   // Quartier
   C.quartier.points.forEach(function(p){ addRow('quartier-rows', quartierTpl, p); });
@@ -1154,17 +1147,18 @@ function buildConfigContent() {
   var regles        = readRows('regles-rows',          ['icon','fr','en']);
   var inclus        = readRows('inclus-rows',          ['icon','fr','en']);
   var demande       = readRows('demande-rows',         ['icon','fr','en','prix']);
-  var restoSn       = readRows('resto-sn-rows',        ['icon','nom','desc_fr','desc_en','prix']);
-  var restoIntl     = readRows('resto-intl-rows',      ['icon','nom','desc_fr','desc_en','prix']);
-  var gouter        = readRows('gouter-rows',          ['icon','fr','en']);
+  var restos        = readRows('resto-rows',            ['icon','nom','type','prix']);
+  var restoSn       = restos.filter(function(r){ return r.type !== 'internationale'; });
+  var restoIntl     = restos.filter(function(r){ return r.type === 'internationale'; });
+  var gouter        = [];
   var quartierPts   = readRows('quartier-rows',        ['icon','fr','en','distance']);
   var commerces     = readRows('commerces-rows',       ['icon','fr','en']);
   var vtc           = readRows('transport-vtc-rows',   ['icon','nom','tel','url']);
   var commun        = readRows('transport-commun-rows',['icon','nom','tel','url']);
   var location      = readRows('transport-location-rows',['icon','nom','tel','url']);
   var plages        = readRows('plages-rows',          ['icon','fr','en','distance']);
-  var activites     = readRows('activites-rows',       ['icon','fr','en','prix']);
-  var marches       = readRows('marches-rows',         ['icon','nom','desc_fr','desc_en','horaires']);
+  var activites     = readRows('activites-rows',       ['icon','fr','en','distance']);
+  var marches       = readRows('marches-rows',         ['icon','nom','desc_fr','desc_en','distance']);
   var urgences      = readRows('urgences-rows',        ['numero','label_fr','label_en']);
   var cliniques     = readRows('cliniques-rows',       ['icon','nom','tel','info_fr','info_en']);
   var securite      = readRows('securite-rows',        ['numero','label_fr','label_en']);

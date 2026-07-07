@@ -416,7 +416,7 @@ async function handleRegister(request, env, url) {
     const data = await request.json();
     const {
       nom, email, password, ville, pays, adresse, telephone, whatsapp,
-      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, chambres,
+      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout, chambres,
     } = data;
 
     // Déterminer le plan selon la taille de l'établissement
@@ -453,7 +453,7 @@ async function handleRegister(request, env, url) {
     // Config initiale dans KV — inclut toutes les données saisies à l'inscription
     await env.CONFIG_KV.put(
       'hotel:' + slug + ':config',
-      buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr })
+      buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout })
     );
 
     // Générer un token directement après inscription
@@ -1140,9 +1140,23 @@ async function handleMigrateSubscription(env) {
   return json({ ok: true, results });
 }
 
-function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr }) {
+function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout }) {
   const esc = (s) => JSON.stringify(s || '');
   const bvnFr = bienvenue_fr || 'Bienvenue dans notre établissement.';
+
+  // Construire le tableau telephones depuis les valeurs brutes "+221 77 123 45 67"
+  function parseTel(str, label) {
+    if (!str) return null;
+    const parts = str.split(' ');
+    const dialcode = parts[0] && parts[0].startsWith('+') ? parts[0] : '+221';
+    const numero = parts[0].startsWith('+') ? parts.slice(1).join(' ') : str;
+    return { dialcode, numero, label };
+  }
+  const telRow = parseTel(telephone, 'Réception');
+  const waRow  = whatsapp && whatsapp !== telephone ? parseTel(whatsapp, 'WhatsApp') : null;
+  const telephones = [telRow, waRow].filter(Boolean);
+  const telephonesJson = JSON.stringify(telephones, null, 4);
+
   return `const CONFIG = {
   hotel: {
     nom:         ${esc(nom)},
@@ -1152,6 +1166,7 @@ function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, em
     adresse:     ${esc(adresse || '')},
     telephone:   ${esc(telephone || '')},
     whatsapp:    ${esc(whatsapp || telephone || '')},
+    telephones:  ${telephonesJson},
     email:       ${esc(email || '')},
     hote_nom:    ${esc(hote_nom || '')},
     logo_url:    "",
@@ -1164,7 +1179,7 @@ function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, em
   },
   pratique: {
     wifi_reseau: ${esc(wifi_reseau || '')}, wifi_mdp: ${esc(wifi_mdp || '')},
-    checkin: "14h00", checkout: "11h00",
+    checkin: ${esc(checkin || '14h00')}, checkout: ${esc(checkout || '11h00')},
     cles:    "Déposez les clés à la réception",
     cles_en: "Leave keys at reception",
     regles:  [],

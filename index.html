@@ -584,6 +584,25 @@ body.has-cover-photo [class*="-card"],
 body.has-cover-photo [class*="-box"] {
   background:rgba(255,255,255,0.88) !important;
 }
+
+/* Formulaire incident sur fond photo — labels dorés, selects blancs */
+body.has-cover-photo .field label,
+body.has-cover-photo .field label.fr-t,
+body.has-cover-photo .field label.en-t {
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 9px;
+  font-weight: 600;
+}
+body.has-cover-photo .field select,
+body.has-cover-photo .field input,
+body.has-cover-photo .field textarea {
+  background: #ffffff !important;
+}
+body.has-cover-photo #inc-dialcode {
+  background: #ffffff !important;
+}
 </style>
 </head>
 <body class="lang-fr">
@@ -1354,7 +1373,7 @@ body.has-cover-photo [class*="-box"] {
       <label class="fr-t">Votre téléphone</label>
       <label class="en-t">Your phone number</label>
       <div style="display:flex;gap:6px">
-        <select id="inc-dialcode" style="width:110px;padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;background:var(--card);color:var(--text);outline:none">
+        <select id="inc-dialcode" style="width:110px;padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;background:var(--card-bg);color:var(--text);outline:none">
           <option value="+221">🇸🇳 +221</option>
           <option value="+33">🇫🇷 +33</option>
           <option value="+32">🇧🇪 +32</option>

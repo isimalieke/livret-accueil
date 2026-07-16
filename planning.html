@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Planning · Welkomeo</title>
+  <style>
+    :root { --blue:#053372; --gold:#c9a84c; --text:#1e293b; --text2:#64748b; --border:#e2e8f0; --bg:#f1f5f9; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+
+    /* ── Top bar ── */
+    .topbar { background:var(--blue); color:#fff; padding:12px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    .topbar-title { font-size:16px; font-weight:700; flex:1; }
+    .topbar-sub { font-size:11px; opacity:.7; margin-top:2px; }
+    .btn-top { background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .btn-top:hover { background:rgba(255,255,255,.25); }
+
+    /* ── Nav bar ── */
+    .navbar { background:#fff; border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .nav-period { font-size:13px; font-weight:600; color:var(--text); flex:1; text-align:center; }
+    .btn-nav { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:13px; cursor:pointer; color:var(--text); font-weight:600; }
+    .btn-nav:hover { background:var(--border); }
+    .btn-today { background:var(--blue); color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+
+    /* ── Grid wrapper ── */
+    .grid-wrap { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; }
+
+    /* ── Planning table ── */
+    .planning-table { border-collapse:collapse; }
+    .planning-table th, .planning-table td { border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+    /* Room name column */
+    .col-room { position:sticky; left:0; z-index:10; background:#fff; width:110px; min-width:110px; max-width:110px; border-right:2px solid var(--border) !important; }
+    .col-room-head { background:var(--blue); color:#fff; font-size:11px; font-weight:700; padding:6px 10px; text-align:left; position:sticky; top:0; left:0; z-index:20; white-space:nowrap; }
+    .room-name-cell { font-size:11px; font-weight:700; color:var(--text); padding:0 10px; height:48px; display:flex; align-items:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* Day header */
+    .col-day-head { background:var(--blue); color:rgba(255,255,255,.75); font-size:9px; font-weight:600; text-align:center; padding:4px 2px 5px; min-width:38px; width:38px; position:sticky; top:0; z-index:9; user-select:none; }
+    .col-day-head.today-h { background:var(--gold); }
+    .col-day-head .dn { font-size:14px; font-weight:800; color:#fff; line-height:1.1; display:block; }
+    .col-day-head .month-tag { font-size:8px; background:rgba(255,255,255,.2); border-radius:3px; padding:1px 3px; margin-top:3px; display:inline-block; }
+
+    /* Day cells */
+    .day-free { min-width:38px; width:38px; height:48px; background:#fff; }
+    .day-free.row-alt { background:#fafafa; }
+    .day-free.today-col { background:#eff6ff; }
+    .day-stay { min-width:38px; width:38px; height:48px; background:#1a3a6c; cursor:pointer; position:relative; transition:filter .1s; }
+    .day-stay:hover { filter:brightness(1.15); }
+    .day-stay.stay-start { border-left:3px solid var(--gold) !important; }
+    .day-stay.today-col { background:#0d2d5a; }
+    .stay-label { position:absolute; left:6px; top:50%; transform:translateY(-50%); font-size:10px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; max-width:100px; text-overflow:ellipsis; pointer-events:none; }
+
+    /* Empty state */
+    .empty-state { padding:60px 20px; text-align:center; color:var(--text2); font-size:14px; }
+    .empty-state h3 { font-size:18px; color:var(--text); margin-bottom:8px; }
+
+    /* ── Modal ── */
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:100; align-items:flex-end; justify-content:center; }
+    .modal-bg.open { display:flex; }
+    .modal { background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:500px; padding:28px 24px 32px; max-height:88vh; overflow-y:auto; position:relative; }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--text2); line-height:1; }
+    .modal-tag { display:inline-block; background:var(--blue); color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; margin-bottom:10px; }
+    .modal-name { font-size:20px; font-weight:800; color:var(--text); margin-bottom:4px; }
+    .modal-dates { font-size:13px; color:var(--text2); margin-bottom:14px; }
+    .modal-info { font-size:12px; color:var(--text2); margin-bottom:4px; }
+    .modal-link { font-size:11px; color:var(--text2); word-break:break-all; margin-bottom:16px; margin-top:10px; padding:8px 10px; background:var(--bg); border-radius:6px; }
+    .modal-btns { display:flex; gap:8px; margin-bottom:8px; }
+    .btn-wa { flex:1; background:#25d366; color:#fff; border:none; border-radius:8px; padding:13px 8px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-em { flex:1; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:13px 8px; font-size:13px; font-weight:700; cursor:pointer; }
+    .btn-del { width:100%; background:#fee2e2; color:#dc2626; border:none; border-radius:8px; padding:11px; font-size:13px; font-weight:700; cursor:pointer; margin-top:6px; }
+
+    /* ── Login ── */
+    .login-wrap { flex:1; display:flex; align-items:center; justify-content:center; background:var(--blue); }
+    .login-card { background:#fff; border-radius:16px; padding:32px 24px; width:90%; max-width:360px; }
+    .login-logo { font-size:22px; font-weight:800; color:var(--blue); margin-bottom:4px; }
+    .login-sub { font-size:13px; color:var(--text2); margin-bottom:24px; }
+    .l-label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; display:block; }
+    .l-input { width:100%; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:14px; margin-bottom:14px; outline:none; }
+    .l-input:focus { border-color:var(--blue); }
+    .l-btn { width:100%; background:var(--blue); color:#fff; border:none; border-radius:8px; padding:12px; font-size:14px; font-weight:700; cursor:pointer; }
+    .l-err { color:#dc2626; font-size:12px; margin-top:8px; display:none; }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">Welkomeo</div>
+    <div class="login-sub">Planning · accès hôtelier</div>
+    <label class="l-label">Email</label>
+    <input id="l-email" class="l-input" type="email" placeholder="vous@hotel.com" autocomplete="email">
+    <label class="l-label">Mot de passe</label>
+    <input id="l-pwd" class="l-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="l-btn" onclick="doLogin()">Accéder au planning</button>
+    <div id="l-err" class="l-err"></div>
+  </div>
+</div>
+
+<!-- ══ PLANNING ══ -->
+<div id="planning-screen" style="display:none;flex-direction:column;flex:1">
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">📅 Planning</div>
+      <div class="topbar-sub" id="hotel-name">Chargement…</div>
+    </div>
+    <button class="btn-top" onclick="goAdmin()">← Admin</button>
+  </div>
+
+  <div class="navbar">
+    <button class="btn-nav" onclick="shiftView(-14)" title="−2 semaines">«</button>
+    <button class="btn-nav" onclick="shiftView(-7)" title="−1 semaine">‹</button>
+    <div class="nav-period" id="nav-period"></div>
+    <button class="btn-today" onclick="goToday()">Aujourd'hui</button>
+    <button class="btn-nav" onclick="shiftView(7)" title="+1 semaine">›</button>
+    <button class="btn-nav" onclick="shiftView(14)" title="+2 semaines">»</button>
+  </div>
+
+  <div class="grid-wrap">
+    <div id="planning-grid">
+      <div class="empty-state">⏳ Chargement…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ STAY MODAL ══ -->
+<div class="modal-bg" id="stay-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+var _jwt = null, _slug = '', _stays = [], _rooms = [];
+var DAYS = 35;
+var _viewStart = null;
+var _modalStay = null;
+var _hotelNom = '';
+
+// ── INIT ──
+window.onload = function() {
+  _slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  _jwt  = localStorage.getItem('livret_jwt_' + _slug);
+  var d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - 3);
+  _viewStart = d;
+  if (_jwt) {
+    showPlanningScreen();
+    loadStays();
+  }
+};
+
+function showPlanningScreen() {
+  document.getElementById('login-screen').style.display  = 'none';
+  var ps = document.getElementById('planning-screen');
+  ps.style.display = 'flex';
+}
+
+function goAdmin() { window.location.href = '/' + _slug + '/admin'; }
+
+// ── LOGIN ──
+async function doLogin() {
+  var email = (document.getElementById('l-email').value || '').trim();
+  var pwd   = document.getElementById('l-pwd').value || '';
+  var err   = document.getElementById('l-err');
+  err.style.display = 'none';
+  try {
+    var r = await fetch('/' + _slug + '/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email:email, password:pwd})
+    });
+    var data = await r.json();
+    if (data.token) {
+      _jwt = data.token;
+      localStorage.setItem('livret_jwt_' + _slug, _jwt);
+      showPlanningScreen();
+      loadStays();
+    } else {
+      err.textContent = data.error || 'Identifiants incorrects';
+      err.style.display = 'block';
+    }
+  } catch(e) { err.textContent = 'Erreur de connexion'; err.style.display = 'block'; }
+}
+
+// ── LOAD DATA ──
+async function loadStays() {
+  try {
+    var r = await fetch('/' + _slug + '/stays', { headers: {'Authorization':'Bearer ' + _jwt} });
+    if (r.status === 401) { localStorage.removeItem('livret_jwt_' + _slug); location.reload(); return; }
+    var data = await r.json();
+    if (!data.ok) { showError('Erreur API : ' + (data.error||'')); return; }
+    _stays = data.stays || [];
+
+    // Try to get hotel name + chambres from config.js
+    try {
+      var cr = await fetch('/' + _slug + '/config.js');
+      var txt = await cr.text();
+      var nm = txt.match(/nom\s*:\s*['"]([^'"]+)['"]/);
+      if (nm) { _hotelNom = nm[1]; document.getElementById('hotel-name').textContent = nm[1]; }
+      // Extract chambres array
+      var cm = txt.match(/chambres\s*:\s*(\[[^\]]*\])/s);
+      if (cm) {
+        try {
+          var arr = JSON.parse(cm[1].replace(/(\w+)\s*:/g, '"$1":').replace(/'/g,'"'));
+          arr.forEach(function(c){ if(c.nom && _rooms.indexOf(c.nom) < 0) _rooms.push(c.nom); });
+        } catch(e){}
+      }
+    } catch(e){}
+
+    deriveRooms();
+    renderGrid();
+  } catch(e) { showError('Erreur de chargement'); }
+}
+
+function deriveRooms() {
+  // Add rooms from stays that aren't already in _rooms (from config)
+  _stays.forEach(function(s) {
+    var r = (s.room || '').trim();
+    if (r && _rooms.indexOf(r) < 0) _rooms.push(r);
+  });
+  // Sort rooms numerically/alphabetically
+  _rooms.sort(function(a,b){ return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'}); });
+}
+
+function showError(msg) {
+  document.getElementById('planning-grid').innerHTML = '<div class="empty-state"><h3>❌ ' + esc(msg) + '</h3></div>';
+}
+
+// ── DATE UTILS ──
+function toYMD(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function addDays(d, n) { var r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(s) { if(!s) return '—'; var p=s.split('-'); return p[2]+'/'+p[1]+'/'+p[0].slice(2); }
+var MS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+var DS = ['Di','Lu','Ma','Me','Je','Ve','Sa'];
+
+// ── NAVIGATION ──
+function shiftView(days) { _viewStart = addDays(_viewStart, days); renderGrid(); }
+function goToday() {
+  var d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-3);
+  _viewStart = d; renderGrid();
+}
+
+// ── RENDER ──
+function renderGrid() {
+  var dates = [];
+  for (var i = 0; i < DAYS; i++) dates.push(addDays(_viewStart, i));
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayStr = toYMD(today);
+  var last = dates[dates.length-1];
+
+  // Nav label
+  document.getElementById('nav-period').textContent =
+    MS[_viewStart.getMonth()] + ' ' + _viewStart.getDate() + ' → ' +
+    MS[last.getMonth()] + ' ' + last.getDate() + ' ' + last.getFullYear();
+
+  if (!_rooms.length && !_stays.length) {
+    document.getElementById('planning-grid').innerHTML =
+      '<div class="empty-state"><h3>Aucun séjour enregistré</h3><p style="margin-top:8px;font-size:13px">Ajoutez des séjours depuis l\'<a href="/' + _slug + '/admin" style="color:var(--blue)">interface admin</a>.</p></div>';
+    return;
+  }
+
+  var allRooms = _rooms.slice();
+  // Add a "Non assigné" row only if there are stays without a room
+  var hasNoRoom = _stays.some(function(s){ return !s.room; });
+
+  var html = '<table class="planning-table"><thead><tr>';
+  html += '<th class="col-room col-room-head">Chambre</th>';
+  dates.forEach(function(d, i) {
+    var dStr = toYMD(d);
+    var isToday = dStr === todayStr;
+    var showMonth = (d.getDate() === 1) || (i === 0);
+    html += '<th class="col-day-head' + (isToday ? ' today-h' : '') + '">';
+    html += '<span style="font-size:9px;display:block">' + DS[d.getDay()] + '</span>';
+    html += '<span class="dn">' + d.getDate() + '</span>';
+    if (showMonth) html += '<div class="month-tag">' + MS[d.getMonth()] + '</div>';
+    html += '</th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  // One row per room
+  allRooms.forEach(function(room, ri) {
+    var roomStays = _stays.filter(function(s){ return (s.room||'').trim() === room; });
+    html += '<tr>';
+    html += '<td class="col-room"><div class="room-name-cell">' + esc(room) + '</div></td>';
+    dates.forEach(function(d) {
+      var dStr = toYMD(d);
+      var isToday = dStr === todayStr;
+      var stay = null;
+      for (var si = 0; si < roomStays.length; si++) {
+        if (roomStays[si].checkin <= dStr && roomStays[si].checkout > dStr) { stay = roomStays[si]; break; }
+      }
+      if (stay) {
+        var isStart = stay.checkin === dStr;
+        var prenom = (stay.guest_name || '').split(' ')[0];
+        html += '<td class="day-stay' + (isToday?' today-col':'') + (isStart?' stay-start':'') + '" onclick="showModal(\'' + stay.id + '\')">';
+        if (isStart) html += '<span class="stay-label">' + esc(prenom) + '</span>';
+        html += '</td>';
+      } else {
+        html += '<td class="day-free' + (ri%2?' row-alt':'') + (isToday?' today-col':'') + '"></td>';
+      }
+    });
+    html += '</tr>';
+  });
+
+  // "Non assigné" row
+  if (hasNoRoom) {
+    var noRoomStays = _stays.filter(function(s){ return !s.room; });
+    html += '<tr>';
+    html += '<td class="col-room"><div class="room-name-cell" style="color:var(--text2);font-style:italic">Non assigné</div></td>';
+    dates.forEach(function(d) {
+      var dStr = toYMD(d);
+      var isToday = dStr === todayStr;
+      var stay = null;
+      for (var si = 0; si < noRoomStays.length; si++) {
+        if (noRoomStays[si].checkin <= dStr && noRoomStays[si].checkout > dStr) { stay = noRoomStays[si]; break; }
+      }
+      if (stay) {
+        var isStart = stay.checkin === dStr;
+        html += '<td class="day-stay' + (isToday?' today-col':'') + (isStart?' stay-start':'') + '" onclick="showModal(\'' + stay.id + '\')">';
+        if (isStart) html += '<span class="stay-label">' + esc((stay.guest_name||'').split(' ')[0]) + '</span>';
+        html += '</td>';
+      } else {
+        html += '<td class="day-free' + (isToday?' today-col':'') + '"></td>';
+      }
+    });
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+  document.getElementById('planning-grid').innerHTML = html;
+
+  // Scroll today's column into view
+  setTimeout(function() {
+    var el = document.querySelector('.today-col');
+    if (el) el.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  }, 80);
+}
+
+// ── MODAL ──
+function showModal(id) {
+  var stay = null;
+  for (var i = 0; i < _stays.length; i++) { if (_stays[i].id === id) { stay = _stays[i]; break; } }
+  if (!stay) return;
+  _modalStay = stay;
+
+  var origin = window.location.origin;
+  var link = origin + '/' + _slug + (stay.room ? '?room=' + encodeURIComponent(stay.room) : '');
+
+  var html = '';
+  if (stay.room) html += '<div class="modal-tag">🛏️ ' + esc(stay.room) + '</div><br>';
+  html += '<div class="modal-name">' + esc(stay.guest_name) + '</div>';
+  html += '<div class="modal-dates">📅 ' + fmtDate(stay.checkin) + ' → ' + fmtDate(stay.checkout) + '</div>';
+  if (stay.guest_email) html += '<div class="modal-info">✉️ ' + esc(stay.guest_email) + '</div>';
+  if (stay.guest_phone) html += '<div class="modal-info">📞 ' + esc(stay.guest_phone) + '</div>';
+  html += '<div class="modal-link">🔗 ' + esc(link) + '</div>';
+  html += '<div class="modal-btns">';
+  html += '<button class="btn-wa" onclick="modalWhatsApp()">📱 WhatsApp</button>';
+  if (stay.guest_email) html += '<button class="btn-em" onclick="modalEmail(this)">✉️ Email</button>';
+  html += '</div>';
+  html += '<button class="btn-del" onclick="modalDelete()">🗑 Supprimer ce séjour</button>';
+
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('stay-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('stay-modal').classList.remove('open');
+  _modalStay = null;
+}
+
+function modalWhatsApp() {
+  if (!_modalStay) return;
+  var link = window.location.origin + '/' + _slug + (_modalStay.room ? '?room=' + encodeURIComponent(_modalStay.room) : '');
+  var hotel = _hotelNom || 'votre hôte';
+  var prenom = (_modalStay.guest_name || '').split(' ')[0];
+  var roomTxt = _modalStay.room ? '\n🛏️ Chambre : ' + _modalStay.room : '';
+  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+    + hotel + ' vous envoie votre livret d\'accueil numérique.' + roomTxt + '\n\n'
+    + '🔗 ' + link + '\n\nVous y trouverez toutes les informations utiles pour votre séjour.\n\nÀ très bientôt !';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+async function modalEmail(btn) {
+  if (!_modalStay || !_modalStay.guest_email) return;
+  var orig = btn.textContent;
+  btn.textContent = '⏳'; btn.disabled = true;
+  var link = window.location.origin + '/' + _slug + (_modalStay.room ? '?room=' + encodeURIComponent(_modalStay.room) : '');
+  try {
+    var r = await fetch('/' + _slug + '/send-guest-link', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer ' + _jwt},
+      body: JSON.stringify({guestName:_modalStay.guest_name, guestEmail:_modalStay.guest_email, room:_modalStay.room||'', livretUrl:link, hotelNom:_hotelNom})
+    });
+    var data = await r.json();
+    btn.textContent = data.ok ? '✅ Envoyé' : '❌ Erreur';
+    setTimeout(function(){ btn.textContent = orig; btn.disabled = false; }, 3000);
+  } catch(e) { btn.textContent = '❌'; btn.disabled = false; }
+}
+
+async function modalDelete() {
+  if (!_modalStay) return;
+  if (!confirm('Supprimer le séjour de ' + _modalStay.guest_name + ' ?')) return;
+  try {
+    await fetch('/' + _slug + '/stays/' + _modalStay.id, {
+      method: 'DELETE', headers: {'Authorization':'Bearer ' + _jwt}
+    });
+    closeModal();
+    _rooms = []; // Reset so rooms are re-derived
+    loadStays();
+  } catch(e) { alert('❌ Erreur de connexion'); }
+}
+</script>
+</body>
+</html>

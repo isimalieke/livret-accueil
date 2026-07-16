@@ -618,7 +618,11 @@ input, textarea, select {
   <!-- SÉJOURS EN COURS -->
   <div class="section" id="sejour-section">
     <div class="section-head" onclick="toggle(this); loadStays()">
-      <h2>🗓️ Séjours en cours</h2><span class="chevron">▼</span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">🗓️ Séjours en cours</h2>
+        <a id="link-planning" href="#" onclick="event.stopPropagation()" style="background:#0d9488;color:#fff;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap">📅 Vue planning</a>
+      </div>
+      <span class="chevron">▼</span>
     </div>
     <div class="section-body" style="display:block">
       <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#15803d">
@@ -790,6 +794,8 @@ var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
 (function() {
   var el = document.getElementById('link-gestion');
   if (el && _slug) el.href = '/' + _slug + '/gestion';
+  var elp = document.getElementById('link-planning');
+  if (elp && _slug) elp.href = '/' + _slug + '/planning';
 })();
 
 // ── LIEN MOT DE PASSE OUBLIÉ ──

@@ -102,6 +102,11 @@ export default {
       return fetchAsset(env, url.origin + '/admin.html');
     }
 
+    // ── /{slug}/planning ──
+    if (sub === 'planning' || sub === 'planning.html') {
+      return fetchAsset(env, url.origin + '/planning.html');
+    }
+
     // ── /{slug}/gestion ──
     if (sub === 'gestion' || sub === 'gestion.html') {
       return fetchAsset(env, url.origin + '/gestion.html');

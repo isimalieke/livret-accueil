@@ -86,20 +86,6 @@ body {
 .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 @media(max-width:400px) { .field-row { grid-template-columns:1fr; } }
 
-/* Type cards */
-.type-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.type-card {
-  border:2px solid var(--border); border-radius:12px; padding:14px 12px;
-  cursor:pointer; text-align:center; transition:border-color .2s, background .2s;
-  background:var(--bg);
-}
-.type-card:hover { border-color:#93c5fd; background:#eff6ff; }
-.type-card.selected { border-color:var(--blue); background:#eff6ff; }
-.type-card input { display:none; }
-.type-card .tc-icon { font-size:24px; margin-bottom:6px; }
-.type-card .tc-lbl  { font-size:13px; font-weight:600; color:var(--text); }
-.type-card .tc-sub  { font-size:11px; color:var(--text2); margin-top:2px; }
-
 /* Upload zone */
 .upload-zone {
   border:2px dashed var(--border); border-radius:12px; padding:24px;
@@ -192,38 +178,6 @@ body {
   <div class="step-panel active" id="step-1">
     <div class="step-title">Votre établissement</div>
     <div class="step-sub">Ces informations apparaîtront sur votre livret d'accueil.</div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Type d'établissement <span class="required-mark">*</span></label>
-        <div class="type-grid" id="type-grid">
-          <label class="type-card selected" onclick="selectType(this,'Hôtel')">
-            <input type="radio" name="type" value="Hôtel" checked>
-            <div class="tc-icon">🏨</div>
-            <div class="tc-lbl">Hôtel</div>
-            <div class="tc-sub">Tout type d'hôtel</div>
-          </label>
-          <label class="type-card" onclick="selectType(this,'Maison d\'hôtes')">
-            <input type="radio" name="type" value="Maison d'hôtes">
-            <div class="tc-icon">🏡</div>
-            <div class="tc-lbl">Maison d'hôtes</div>
-            <div class="tc-sub">Riad, villa, chambre</div>
-          </label>
-          <label class="type-card" onclick="selectType(this,'Appartement')">
-            <input type="radio" name="type" value="Appartement">
-            <div class="tc-icon">🏢</div>
-            <div class="tc-lbl">Appartement</div>
-            <div class="tc-sub">Airbnb, meublé</div>
-          </label>
-          <label class="type-card" onclick="selectType(this,'Autre')">
-            <input type="radio" name="type" value="Autre">
-            <div class="tc-icon">✨</div>
-            <div class="tc-lbl">Autre</div>
-            <div class="tc-sub">Lodge, éco-lodge…</div>
-          </label>
-        </div>
-      </div>
-    </div>
 
     <div class="card-form">
       <div class="field">
@@ -465,7 +419,6 @@ body {
 
 <script>
 var currentStep = 1;
-var selectedType = 'Hôtel';
 var logoBase64 = '';
 
 function togglePwd(inputId, btnId) {
@@ -473,12 +426,6 @@ function togglePwd(inputId, btnId) {
   var btn = document.getElementById(btnId);
   if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
   else { inp.type = 'password'; btn.textContent = '👁'; }
-}
-
-function selectType(card, val) {
-  document.querySelectorAll('.type-card').forEach(function(c) { c.classList.remove('selected'); });
-  card.classList.add('selected');
-  selectedType = val;
 }
 
 function previewLogo(input) {

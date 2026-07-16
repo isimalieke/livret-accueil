@@ -164,11 +164,10 @@ body {
 
 <!-- PROGRESS -->
 <div class="progress-wrap" id="progress-wrap">
-  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:33%"></div></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
   <div class="steps-label">
     <div class="step-dot active" id="dot-1">1 · Établissement</div>
     <div class="step-dot" id="dot-2">2 · Votre compte</div>
-    <div class="step-dot" id="dot-3">3 · Livret</div>
   </div>
 </div>
 
@@ -318,62 +317,8 @@ body {
       </div>
     </div>
 
-    <div class="nav-btns">
-      <button class="btn-prev" onclick="goStep(1)">← Retour</button>
-      <button class="btn-next" onclick="goStep(3)">Continuer →</button>
-    </div>
-  </div>
-
-  <!-- ── STEP 3 : LIVRET ── -->
-  <div class="step-panel" id="step-3">
-    <div class="step-title">Votre livret</div>
-    <div class="step-sub">Tout est optionnel — vous pouvez compléter ces informations à tout moment depuis votre espace admin.</div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Réseau WiFi</label>
-        <input type="text" id="f-wifi" placeholder="ex : Teranga_Guests">
-      </div>
-      <div class="field">
-        <label>Mot de passe WiFi</label>
-        <input type="text" id="f-wifimdp" placeholder="ex : teranga2024">
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Heure check-in</label>
-          <input type="text" id="f-checkin" placeholder="14h00">
-        </div>
-        <div class="field">
-          <label>Heure check-out</label>
-          <input type="text" id="f-checkout" placeholder="11h00">
-        </div>
-      </div>
-    </div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Message de bienvenue <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
-        <textarea id="f-bienvenue" placeholder="Chers hôtes, bienvenue dans notre établissement. Nous espérons que votre séjour sera agréable…"></textarea>
-        <div class="hint">Si vous ne remplissez pas ce champ, un message de bienvenue adapté sera rédigé pour vous.</div>
-      </div>
-    </div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Comment avez-vous connu Welkomeo ? <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
-        <select id="f-source">
-          <option value="">Choisir…</option>
-          <option value="Bouche à oreille">Bouche à oreille</option>
-          <option value="Réseaux sociaux">Réseaux sociaux</option>
-          <option value="Google">Google</option>
-          <option value="Recommandation partenaire">Recommandation partenaire</option>
-          <option value="Autre">Autre</option>
-        </select>
-      </div>
-    </div>
-
     <div class="nav-btns" style="display:block">
-      <button class="btn-prev" onclick="goStep(2)" style="width:100%;margin-bottom:10px">← Retour</button>
+      <button class="btn-prev" onclick="goStep(1)" style="width:100%;margin-bottom:10px">← Retour</button>
     </div>
 
     <button class="btn-submit" onclick="submitForm()">
@@ -383,6 +328,9 @@ body {
       Votre livret est créé instantanément. Un email de confirmation vous sera envoyé.
     </p>
   </div>
+
+  <!-- step-3 vide pour compatibilité JS -->
+  <div id="step-3" style="display:none"></div>
 
   <!-- ── SUCCÈS : VÉRIFICATION EMAIL ── -->
   <div id="success-panel">
@@ -491,11 +439,12 @@ function validateStep(step) {
 }
 
 function updateProgress() {
-  var pct = { 1:33, 2:66, 3:100 };
+  var pct = { 1:50, 2:100, 3:100 };
   document.getElementById('progress-fill').style.width = pct[currentStep] + '%';
 
-  for (var i = 1; i <= 3; i++) {
+  for (var i = 1; i <= 2; i++) {
     var dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
     dot.classList.remove('active','done');
     if (i === currentStep) dot.classList.add('active');
     else if (i < currentStep) dot.classList.add('done');
@@ -517,11 +466,6 @@ async function submitForm() {
   var tel         = telNum ? telCode + ' ' + telNum : '';
   var email       = document.getElementById('f-email').value.trim();
   var password    = document.getElementById('f-password').value;
-  var wifi        = document.getElementById('f-wifi').value.trim();
-  var wifimdp     = document.getElementById('f-wifimdp').value.trim();
-  var bienvenue   = document.getElementById('f-bienvenue').value.trim();
-  var checkin     = document.getElementById('f-checkin').value.trim();
-  var checkout    = document.getElementById('f-checkout').value.trim();
 
   // WhatsApp : champ séparé, ou même numéro si vide
   var waCode   = document.getElementById('f-wa-code').value;
@@ -536,10 +480,6 @@ async function submitForm() {
         nom, adresse, ville, pays, email, password,
         telephone: tel, whatsapp: whatsapp,
         hote_nom: responsable,
-        wifi_reseau: wifi, wifi_mdp: wifimdp,
-        bienvenue_fr: bienvenue,
-        checkin: checkin || '14h00',
-        checkout: checkout || '11h00',
         chambres: document.getElementById('f-chambres').value,
       }),
     });
@@ -553,7 +493,7 @@ async function submitForm() {
       document.getElementById('confirm-email').textContent = email;
       document.getElementById('confirm-slug').textContent = data.slug;
 
-      document.getElementById('step-3').classList.remove('active');
+      document.getElementById('step-2').classList.remove('active');
       document.getElementById('success-panel').style.display = 'block';
       document.getElementById('progress-wrap').style.display = 'none';
     } else {

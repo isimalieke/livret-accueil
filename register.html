@@ -355,6 +355,14 @@ body {
     <div id="confirm-slug" style="display:none"></div>
   </div>
 
+  <!-- ── ESSAI DÉJÀ UTILISÉ ── -->
+  <div id="trial-used-panel" style="display:none;text-align:center;padding:48px 20px;max-width:480px;margin:0 auto">
+    <div style="font-size:48px;margin-bottom:16px">🔒</div>
+    <div class="success-title" style="margin-bottom:12px">Essai gratuit déjà utilisé</div>
+    <div class="success-text">Cette adresse email a déjà bénéficié d'un essai gratuit Welkomeo.<br>Connectez-vous à votre espace existant pour souscrire à un abonnement.</div>
+    <a href="/register" style="display:inline-block;margin-top:24px;padding:13px 28px;background:var(--blue);color:#fff;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none">← Connexion à mon espace</a>
+  </div>
+
 </div>
 
 <div class="page-footer">
@@ -496,6 +504,11 @@ async function submitForm() {
       document.getElementById('step-2').classList.remove('active');
       document.getElementById('success-panel').style.display = 'block';
       document.getElementById('progress-wrap').style.display = 'none';
+    } else if (data.code === 'TRIAL_ALREADY_USED') {
+      // Email déjà utilisé — orienter vers connexion
+      document.getElementById('step-2').classList.remove('active');
+      document.getElementById('progress-wrap').style.display = 'none';
+      document.getElementById('trial-used-panel').style.display = 'block';
     } else {
       alert('Erreur : ' + data.error);
       btn.disabled = false;

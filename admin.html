@@ -45,6 +45,31 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 .sub-banner-txt { flex:1; line-height:1.5; }
 .sub-banner-txt strong { font-weight:700; }
 
+/* MODAL PAIEMENT */
+.pay-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9000; align-items:center; justify-content:center; padding:16px; }
+.pay-modal-overlay.open { display:flex; }
+.pay-modal { background:#fff; border-radius:16px; width:100%; max-width:480px; padding:28px 24px; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
+.pay-modal-title { font-size:18px; font-weight:700; color:var(--blue); margin-bottom:4px; }
+.pay-modal-sub { font-size:13px; color:#64748b; margin-bottom:20px; }
+.pay-period-tabs { display:flex; gap:8px; margin-bottom:18px; }
+.pay-period-tab { flex:1; padding:8px; text-align:center; border-radius:8px; border:1.5px solid var(--border); font-size:13px; font-weight:600; cursor:pointer; color:#64748b; transition:.15s; }
+.pay-period-tab.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.pay-plans { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.pay-plan-card { border:2px solid var(--border); border-radius:12px; padding:14px; cursor:pointer; transition:.15s; position:relative; }
+.pay-plan-card:hover { border-color:var(--blue); }
+.pay-plan-card.selected { border-color:var(--blue); background:#eff6ff; }
+.pay-plan-card .plan-name { font-weight:700; font-size:14px; color:var(--blue); }
+.pay-plan-card .plan-desc { font-size:11px; color:#64748b; margin:3px 0 8px; }
+.pay-plan-card .plan-price { font-size:20px; font-weight:800; color:var(--text); }
+.pay-plan-card .plan-period { font-size:11px; color:#64748b; }
+.pay-plan-card .plan-saving { display:none; position:absolute; top:8px; right:8px; background:#15803d; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.pay-plan-card.selected .plan-saving { display:block; }
+.pay-cta { width:100%; padding:13px; background:var(--blue); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity .15s; }
+.pay-cta:hover { opacity:0.88; }
+.pay-cta:disabled { opacity:0.5; cursor:default; }
+.pay-modal-close { float:right; background:none; border:none; font-size:20px; cursor:pointer; color:#94a3b8; margin-top:-4px; }
+.pay-modal-msg { font-size:12px; color:#64748b; text-align:center; margin-top:12px; }
+
 /* SECTIONS */
 .section { background:white; border-radius:10px; margin-bottom:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
 .section-group { font-size:10px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:2px; padding:22px 2px 8px; border-bottom:2px solid var(--blue); margin-bottom:12px; opacity:0.7; }
@@ -760,7 +785,7 @@ async function loadSubscriptionBanner() {
     var planLabel = d.plan === 'large' ? 'Grand hôtel' : 'Petit établissement';
 
     var payBtn = document.getElementById('sub-pay-btn');
-    if (payBtn) payBtn.href = '/' + _slug + '/paiement';
+    if (payBtn) { payBtn.href = '#'; payBtn.onclick = function(e){ e.preventDefault(); openPayModal(); }; }
 
     if (d.status === 'trial') {
       var days = d.daysLeft || 0;
@@ -1830,5 +1855,108 @@ function esc(s) {
 window.applyConfig = function() { initForm(); };
 </script>
 <script src="config.js"></script>
+
+<!-- ══ MODAL PAIEMENT ══ -->
+<div class="pay-modal-overlay" id="pay-modal-overlay" onclick="if(event.target===this)closePayModal()">
+  <div class="pay-modal">
+    <button class="pay-modal-close" onclick="closePayModal()">✕</button>
+    <div class="pay-modal-title">Choisir un abonnement</div>
+    <div class="pay-modal-sub">Paiement sécurisé via PayDunya · Résiliable à tout moment</div>
+
+    <div class="pay-period-tabs">
+      <div class="pay-period-tab active" id="tab-monthly" onclick="setPayPeriod('monthly')">Mensuel</div>
+      <div class="pay-period-tab" id="tab-annual" onclick="setPayPeriod('annual')">Annuel <span style="background:#15803d;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px">−17%</span></div>
+    </div>
+
+    <div class="pay-plans">
+      <div class="pay-plan-card selected" id="plan-small" onclick="setPayPlan('small')">
+        <div class="plan-name">Small</div>
+        <div class="plan-desc">1 – 15 chambres</div>
+        <div class="plan-price" id="price-small">7 500</div>
+        <div class="plan-period">FCFA / mois</div>
+        <div class="plan-saving" id="saving-small"></div>
+      </div>
+      <div class="pay-plan-card" id="plan-large" onclick="setPayPlan('large')">
+        <div class="plan-name">Large</div>
+        <div class="plan-desc">16 chambres et +</div>
+        <div class="plan-price" id="price-large">15 000</div>
+        <div class="plan-period">FCFA / mois</div>
+        <div class="plan-saving" id="saving-large"></div>
+      </div>
+    </div>
+
+    <button class="pay-cta" id="pay-cta-btn" onclick="startPayment()">💳 Procéder au paiement</button>
+    <div class="pay-modal-msg" id="pay-modal-msg"></div>
+  </div>
+</div>
+
+<script>
+var _payPeriod = 'monthly';
+var _payPlan   = 'small';
+var PAY_PRICES  = {
+  small:  { monthly: 7500,   annual: 75000  },
+  large:  { monthly: 15000,  annual: 150000 },
+};
+
+function openPayModal() {
+  document.getElementById('pay-modal-overlay').classList.add('open');
+  document.getElementById('pay-modal-msg').textContent = '';
+  updatePayUI();
+}
+function closePayModal() {
+  document.getElementById('pay-modal-overlay').classList.remove('open');
+}
+function setPayPeriod(p) {
+  _payPeriod = p;
+  document.getElementById('tab-monthly').classList.toggle('active', p === 'monthly');
+  document.getElementById('tab-annual').classList.toggle('active', p === 'annual');
+  updatePayUI();
+}
+function setPayPlan(p) {
+  _payPlan = p;
+  document.getElementById('plan-small').classList.toggle('selected', p === 'small');
+  document.getElementById('plan-large').classList.toggle('selected', p === 'large');
+}
+function updatePayUI() {
+  ['small','large'].forEach(function(p) {
+    var monthly = PAY_PRICES[p].monthly;
+    var annual  = PAY_PRICES[p].annual;
+    if (_payPeriod === 'monthly') {
+      document.getElementById('price-' + p).textContent = monthly.toLocaleString('fr-FR');
+      document.getElementById('saving-' + p).textContent = '';
+    } else {
+      var perMonth = Math.round(annual / 12);
+      document.getElementById('price-' + p).textContent = annual.toLocaleString('fr-FR');
+      document.getElementById('saving-' + p).textContent = 'Économie ' + (monthly * 12 - annual).toLocaleString('fr-FR') + ' FCFA';
+    }
+  });
+}
+async function startPayment() {
+  var btn = document.getElementById('pay-cta-btn');
+  var msg = document.getElementById('pay-modal-msg');
+  btn.disabled = true;
+  btn.textContent = '⏳ Connexion à PayDunya…';
+  msg.textContent = '';
+  try {
+    var r = await fetch('/' + _slug + '/pay/initiate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ plan: _payPlan, period: _payPeriod }),
+    });
+    var d = await r.json();
+    if (d.ok && d.invoice && d.invoice.url) {
+      window.location.href = d.invoice.url;
+    } else {
+      msg.textContent = '❌ ' + (d.error || 'Erreur lors de la création du paiement.');
+      btn.disabled = false;
+      btn.textContent = '💳 Procéder au paiement';
+    }
+  } catch(e) {
+    msg.textContent = '❌ Erreur réseau. Réessayez.';
+    btn.disabled = false;
+    btn.textContent = '💳 Procéder au paiement';
+  }
+}
+</script>
 </body>
 </html>

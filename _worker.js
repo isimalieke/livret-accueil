@@ -200,7 +200,10 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(runCheckoutReminders(env));
+    ctx.waitUntil(Promise.all([
+      runCheckoutReminders(env),
+      runTrialReminders(env),
+    ]));
   },
 };
 
@@ -466,10 +469,22 @@ async function handleRegister(request, env, url) {
 
     const slug = toSlug(nom);
 
-    // Vérifier doublon dans D1
+    // Vérifier doublon slug
     const existing = await env.DB.prepare('SELECT slug FROM hotels WHERE slug = ?').bind(slug).first();
     if (existing)
       return json({ ok: false, error: `Un établissement "${nom}" existe déjà.` }, 409);
+
+    // 1 essai gratuit par adresse email
+    const emailLower = email.toLowerCase().trim();
+    const emailUsed  = await env.DB.prepare(
+      'SELECT u.id FROM users u WHERE u.email = ? AND u.role = \'hotelier\' LIMIT 1'
+    ).bind(emailLower).first();
+    if (emailUsed)
+      return json({
+        ok:    false,
+        error: 'Cette adresse email a déjà bénéficié d\'un essai gratuit. Connectez-vous à votre espace existant ou choisissez un abonnement.',
+        code:  'TRIAL_ALREADY_USED',
+      }, 409);
 
     const now               = new Date().toISOString();
     const passwordHash      = await hashPassword(password);
@@ -1198,6 +1213,64 @@ body{margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSys
 </div></body></html>`;
 
   await resendEmail(env, stay.email, `Votre check-out demain — ${hotelNom}`, html, `Welkomeo <noreply@welkomeo.com>`);
+}
+
+// ═════════════════════════════════════════════
+// RAPPELS FIN DE TRIAL
+// ═════════════════════════════════════════════
+
+async function runTrialReminders(env) {
+  if (!env.BREVO_API_KEY) return;
+
+  const now   = new Date();
+  const day3  = new Date(now); day3.setDate(day3.getDate() + 3);
+  const day1  = new Date(now); day1.setDate(day1.getDate() + 1);
+
+  const d3str = day3.toISOString().slice(0, 10); // J-3 : expiration dans 3 jours
+  const d1str = day1.toISOString().slice(0, 10); // J-0 : expiration demain (envoyé aujourd'hui)
+
+  // Récupérer les hôtels trial dont l'expiration tombe dans 3 jours OU demain
+  const { results } = await env.DB.prepare(`
+    SELECT h.slug, h.nom, h.subscription_ends_at, h.plan,
+           u.email, u.nom as responsable
+    FROM hotels h
+    JOIN users u ON u.hotel_slug = h.slug AND u.role = 'hotelier' AND u.active = 1
+    WHERE h.subscription_status = 'trial'
+      AND (substr(h.subscription_ends_at, 1, 10) = ? OR substr(h.subscription_ends_at, 1, 10) = ?)
+  `).bind(d3str, d1str).all();
+
+  for (const h of results || []) {
+    const expiresDate = h.subscription_ends_at ? h.subscription_ends_at.slice(0, 10) : '';
+    const isLastDay   = expiresDate === d1str;
+    const adminUrl    = `https://welkomeo.com/${h.slug}/admin`;
+    const planLabel   = h.plan === 'large' ? 'Large (Grand hôtel)' : 'Small (Petit établissement)';
+
+    const subject = isLastDay
+      ? `⚠️ Votre essai Welkomeo expire demain`
+      : `📅 Plus que 3 jours d'essai gratuit — Welkomeo`;
+
+    const intro = isLastDay
+      ? `Votre période d'essai gratuit se termine <strong>demain</strong>. Sans abonnement, vous ne pourrez plus enregistrer vos modifications.`
+      : `Il vous reste <strong>3 jours</strong> d'essai gratuit sur Welkomeo. Profitez-en pour configurer votre livret !`;
+
+    const html = emailBase('Welkomeo', '#053372', isLastDay ? '⚠️' : '📅', subject.replace(/^[^ ]+ /, ''))
+      + `<div class="greeting">Bonjour ${h.responsable},</div>`
+      + `<div class="intro">${intro}</div>`
+      + `<div class="intro">Pour continuer à utiliser Welkomeo sans interruption, choisissez votre formule :</div>`
+      + `<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">`
+      + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Small</td><td style="padding:8px 12px">1–15 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">7 500 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">75 000 FCFA/an</td></tr>`
+      + `<tr><td style="padding:8px 12px;font-weight:700">Large</td><td style="padding:8px 12px">16 chambres et +</td><td style="padding:8px 12px;font-weight:700;color:#053372">15 000 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">150 000 FCFA/an</td></tr>`
+      + `</table>`
+      + `<a class="cta" href="${adminUrl}">S'abonner depuis mon espace admin →</a>`
+      + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Votre livret : <a href="https://welkomeo.com/${h.slug}" style="color:#053372">welkomeo.com/${h.slug}</a></div>`
+      + emailFooter('Welkomeo · par Assenka');
+
+    try {
+      await resendEmail(env, h.email, subject, html, 'Welkomeo <noreply@welkomeo.com>');
+    } catch(e) {
+      console.error('[Welkomeo] runTrialReminders email failed for', h.slug, String(e));
+    }
+  }
 }
 
 // ═════════════════════════════════════════════

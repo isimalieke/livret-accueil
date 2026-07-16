@@ -561,26 +561,28 @@ body.lang-en .en-o { display:block; }
   pointer-events:none;
 }
 body.has-cover-photo { background:transparent; }
-body.has-cover-photo .main { background:transparent; min-height:100vh; }
+body.has-cover-photo .main,
+body.has-cover-photo .grid-wrap,
+body.has-cover-photo .page-body,
+body.has-cover-photo .sub-list { background:transparent !important; }
+body.has-cover-photo .main { min-height:100vh; }
 body.has-cover-photo .screen { min-height:100vh; }
 
-/* Cartes et listes : fond blanc semi-transparent sur photo */
-body.has-cover-photo .sub-list-item {
-  background:rgba(255,255,255,0.90);
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-}
-body.has-cover-photo .sub-list { background:transparent; }
+/* Cartes flottantes sur la photo */
+body.has-cover-photo .sub-list-item,
 body.has-cover-photo .card,
-body.has-cover-photo .page-content,
-body.has-cover-photo .section-card,
-body.has-cover-photo .info-card,
+body.has-cover-photo .appl-card,
+body.has-cover-photo .conv-card,
+body.has-cover-photo .conv-block,
+body.has-cover-photo .conv-block-result {
+  background:rgba(255,255,255,0.91) !important;
+}
 body.has-cover-photo .tip-box,
 body.has-cover-photo .wifi-box,
-body.has-cover-photo .paiement-box {
+body.has-cover-photo .paiement-box,
+body.has-cover-photo [class*="-card"],
+body.has-cover-photo [class*="-box"] {
   background:rgba(255,255,255,0.88) !important;
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
 }
 </style>
 </head>

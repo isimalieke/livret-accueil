@@ -167,7 +167,7 @@ body {
   <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:33%"></div></div>
   <div class="steps-label">
     <div class="step-dot active" id="dot-1">1 · Établissement</div>
-    <div class="step-dot" id="dot-2">2 · Contact</div>
+    <div class="step-dot" id="dot-2">2 · Votre compte</div>
     <div class="step-dot" id="dot-3">3 · Livret</div>
   </div>
 </div>
@@ -185,7 +185,21 @@ body {
         <input type="text" id="f-nom" placeholder="ex : Hôtel Teranga">
       </div>
       <div class="field">
-        <label>Adresse complète <span class="required-mark">*</span></label>
+        <label>Logo de l'établissement</label>
+        <div class="upload-zone" onclick="document.getElementById('logo-file').click()">
+          <div class="uz-icon">🖼️</div>
+          <div class="uz-txt">Cliquez pour ajouter votre logo</div>
+          <div class="uz-sub">PNG ou JPG · fond transparent conseillé · max 2 Mo</div>
+          <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="previewLogo(this)">
+          <img id="logo-preview" src="" alt="Aperçu logo">
+        </div>
+        <div class="hint" id="logo-hint" style="margin-top:8px">Votre logo apparaîtra en haut de votre livret. Vous pouvez en ajouter un plus tard depuis votre espace admin.</div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Adresse complète</label>
         <input type="text" id="f-adresse" placeholder="ex : 12 Route des Almadies">
       </div>
       <div class="field-row">
@@ -223,16 +237,34 @@ body {
     </div>
   </div>
 
-  <!-- ── STEP 2 : CONTACT ── -->
+  <!-- ── STEP 2 : VOTRE COMPTE ── -->
   <div class="step-panel" id="step-2">
-    <div class="step-title">Vos coordonnées</div>
-    <div class="step-sub">Pour vous contacter et configurer votre espace Welkomeo.</div>
+    <div class="step-title">Votre compte</div>
+    <div class="step-sub">Ces informations vous permettront de vous connecter à votre espace Welkomeo.</div>
 
+    <!-- Identifiants de connexion -->
     <div class="card-form">
       <div class="field">
         <label>Nom &amp; prénom du responsable <span class="required-mark">*</span></label>
         <input type="text" id="f-responsable" placeholder="ex : Isima Lieke">
       </div>
+      <div class="field">
+        <label>Email — votre identifiant de connexion <span class="required-mark">*</span></label>
+        <input type="email" id="f-email" placeholder="ex : contact@hotel-teranga.sn" autocomplete="username">
+        <div class="hint">Cet email servira à vous connecter et à recevoir les notifications de vos clients.</div>
+      </div>
+      <div class="field">
+        <label>Mot de passe de votre compte <span class="required-mark">*</span></label>
+        <div style="position:relative">
+          <input type="password" id="f-password" placeholder="Minimum 6 caractères" autocomplete="new-password" style="padding-right:42px">
+          <button type="button" onclick="togglePwd('f-password','eye-reg')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#6e6e73;padding:4px" id="eye-reg">👁</button>
+        </div>
+        <div class="hint">Ce mot de passe protège votre espace admin. Minimum 6 caractères.</div>
+      </div>
+    </div>
+
+    <!-- Coordonnées de contact -->
+    <div class="card-form">
       <div class="field">
         <label>Téléphone <span class="required-mark">*</span></label>
         <div style="display:flex;gap:6px">
@@ -278,40 +310,11 @@ body {
           </select>
           <input type="tel" id="f-wa-num" placeholder="Laisser vide si identique au téléphone" style="flex:1">
         </div>
-        <div class="hint">Laissez vide si c'est le même numéro. Le WhatsApp reçoit les notifications de vos clients.</div>
+        <div class="hint">Le WhatsApp reçoit les signalements de vos clients en temps réel.</div>
       </div>
       <div class="field">
-        <label>Email professionnel <span class="required-mark">*</span></label>
-        <input type="email" id="f-email" placeholder="ex : contact@hotel-teranga.sn">
-      </div>
-      <div class="field">
-        <label>Site web (optionnel)</label>
+        <label>Site web <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
         <input type="url" id="f-site" placeholder="ex : https://hotel-teranga.com">
-      </div>
-    </div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Mot de passe de votre livret <span class="required-mark">*</span></label>
-        <div style="position:relative">
-          <input type="password" id="f-password" placeholder="Choisissez un mot de passe sécurisé" autocomplete="new-password" style="padding-right:42px">
-          <button type="button" onclick="togglePwd('f-password','eye-reg')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#6e6e73;padding:4px" id="eye-reg">👁</button>
-        </div>
-        <div class="hint">Ce mot de passe protège votre espace admin et votre livret. Minimum 6 caractères.</div>
-      </div>
-    </div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Comment avez-vous connu Welkomeo ?</label>
-        <select id="f-source">
-          <option value="">Choisir…</option>
-          <option value="Bouche à oreille">Bouche à oreille</option>
-          <option value="Réseaux sociaux">Réseaux sociaux</option>
-          <option value="Google">Google</option>
-          <option value="Recommandation partenaire">Recommandation partenaire</option>
-          <option value="Autre">Autre</option>
-        </select>
       </div>
     </div>
 
@@ -324,25 +327,7 @@ body {
   <!-- ── STEP 3 : LIVRET ── -->
   <div class="step-panel" id="step-3">
     <div class="step-title">Votre livret</div>
-    <div class="step-sub">Quelques paramètres pour personnaliser votre livret d'accueil.</div>
-
-    <div class="info-box">
-      ℹ️ Ces informations peuvent être modifiées à tout moment depuis votre espace administrateur.
-    </div>
-
-    <div class="card-form">
-      <div class="field">
-        <label>Logo de l'établissement</label>
-        <div class="upload-zone" onclick="document.getElementById('logo-file').click()">
-          <div class="uz-icon">🖼️</div>
-          <div class="uz-txt">Cliquez pour ajouter votre logo</div>
-          <div class="uz-sub">PNG ou JPG · fond transparent conseillé · max 2 Mo</div>
-          <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="previewLogo(this)">
-          <img id="logo-preview" src="" alt="Aperçu logo">
-        </div>
-        <div class="hint" id="logo-hint" style="margin-top:8px">Votre logo apparaîtra en haut de votre livret, en version blanche sur fond sombre.</div>
-      </div>
-    </div>
+    <div class="step-sub">Tout est optionnel — vous pouvez compléter ces informations à tout moment depuis votre espace admin.</div>
 
     <div class="card-form">
       <div class="field">
@@ -367,9 +352,23 @@ body {
 
     <div class="card-form">
       <div class="field">
-        <label>Message de bienvenue (optionnel)</label>
+        <label>Message de bienvenue <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
         <textarea id="f-bienvenue" placeholder="Chers hôtes, bienvenue dans notre établissement. Nous espérons que votre séjour sera agréable…"></textarea>
-        <div class="hint">Si vous ne remplissez pas ce champ, notre équipe rédigera un message de bienvenue adapté à votre établissement.</div>
+        <div class="hint">Si vous ne remplissez pas ce champ, un message de bienvenue adapté sera rédigé pour vous.</div>
+      </div>
+    </div>
+
+    <div class="card-form">
+      <div class="field">
+        <label>Comment avez-vous connu Welkomeo ? <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
+        <select id="f-source">
+          <option value="">Choisir…</option>
+          <option value="Bouche à oreille">Bouche à oreille</option>
+          <option value="Réseaux sociaux">Réseaux sociaux</option>
+          <option value="Google">Google</option>
+          <option value="Recommandation partenaire">Recommandation partenaire</option>
+          <option value="Autre">Autre</option>
+        </select>
       </div>
     </div>
 
@@ -381,7 +380,7 @@ body {
       ✅ Créer mon livret maintenant
     </button>
     <p style="font-size:11px;color:var(--text2);text-align:center;margin-top:10px;line-height:1.6">
-      Votre livret est créé instantanément et disponible immédiatement.
+      Votre livret est créé instantanément. Un email de confirmation vous sera envoyé.
     </p>
   </div>
 
@@ -459,11 +458,6 @@ function validateStep(step) {
       document.getElementById('f-nom').focus();
       return false;
     }
-    if (!document.getElementById('f-adresse').value.trim()) {
-      alert('Veuillez saisir l\'adresse de votre établissement.');
-      document.getElementById('f-adresse').focus();
-      return false;
-    }
     if (!document.getElementById('f-ville').value.trim()) {
       alert('Veuillez saisir la ville.');
       document.getElementById('f-ville').focus();
@@ -476,15 +470,6 @@ function validateStep(step) {
       document.getElementById('f-responsable').focus();
       return false;
     }
-    if (!document.getElementById('f-tel').value.trim()) {
-      alert('Veuillez saisir un numéro de téléphone.');
-      document.getElementById('f-tel').focus();
-      return false;
-    }
-    if (!document.getElementById('f-tel-code').value) {
-      alert('Veuillez sélectionner un indicatif pays.');
-      return false;
-    }
     if (!document.getElementById('f-email').value.trim()) {
       alert('Veuillez saisir votre email.');
       document.getElementById('f-email').focus();
@@ -494,6 +479,11 @@ function validateStep(step) {
     if (!pwd || pwd.length < 6) {
       alert('Le mot de passe doit contenir au moins 6 caractères.');
       document.getElementById('f-password').focus();
+      return false;
+    }
+    if (!document.getElementById('f-tel').value.trim()) {
+      alert('Veuillez saisir un numéro de téléphone.');
+      document.getElementById('f-tel').focus();
       return false;
     }
   }

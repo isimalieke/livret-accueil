@@ -726,7 +726,7 @@ body.has-cover-photo [class*="-box"] {
       <div><div class="sli-label fr-o">WiFi &amp; Infos</div><div class="sli-label en-o">WiFi &amp; Info</div><div class="sli-sub fr-o">Réseau, horaires, règles</div><div class="sli-sub en-o">Network, hours, rules</div></div>
       <div class="sli-arrow">›</div>
     </div>
-    <div class="sub-list-item" onclick="showPage('appareils')">
+    <div class="sub-list-item" id="tile-appareils" onclick="showPage('appareils')">
       <div class="sli-ico">🔌</div>
       <div><div class="sli-label fr-o">Mode d'emploi</div><div class="sli-label en-o">Appliances</div><div class="sli-sub fr-o">Clim, TV, équipements</div><div class="sli-sub en-o">AC, TV, appliances</div></div>
       <div class="sli-arrow">›</div>
@@ -1977,6 +1977,11 @@ function applyConfig() {
             + '</div>';
     });
     container.innerHTML = html || '<p style="color:var(--text2);padding:12px 0">—</p>';
+    // Masquer la tuile si aucun appareil configuré
+    if (!items.length) {
+      var tile = document.getElementById('tile-appareils');
+      if (tile) tile.style.display = 'none';
+    }
   })();
 
   // Services

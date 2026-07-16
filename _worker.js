@@ -495,11 +495,14 @@ async function handleRegister(request, env, url) {
       buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout })
     );
 
-    // Email de vérification (non bloquant)
+    // Email de vérification (awaité — CF Workers tue les Promises non-awaitées)
     const verifyUrl = `${url.origin}/${slug}/auth/verify-email?token=${verificationToken}`;
     if (env.BREVO_API_KEY) {
-      sendVerificationEmail(env, { nom, email: email.toLowerCase().trim(), slug }, verifyUrl)
-        .catch(e => console.error('[Welkomeo] sendVerificationEmail failed:', String(e)));
+      try {
+        await sendVerificationEmail(env, { nom, email: email.toLowerCase().trim(), slug }, verifyUrl);
+      } catch(e) {
+        console.error('[Welkomeo] sendVerificationEmail failed:', String(e));
+      }
     } else {
       console.warn('[Welkomeo] BREVO_API_KEY absent — email de vérification non envoyé pour', slug);
     }
@@ -1307,10 +1310,13 @@ async function handleVerifyEmail(request, env, slug, url) {
     exp: Math.floor(Date.now()/1000) + 86400*30,
   }, env);
 
-  // Envoyer l'email de bienvenue (maintenant que l'adresse est validée)
+  // Envoyer l'email de bienvenue (awaité — CF Workers tue les Promises non-awaitées)
   if (env.BREVO_API_KEY) {
-    sendWelcomeEmail(env, { nom: user.nom, email: user.email, slug }, url.origin)
-      .catch(e => console.error('[Welkomeo] sendWelcomeEmail failed:', String(e)));
+    try {
+      await sendWelcomeEmail(env, { nom: user.nom, email: user.email, slug }, url.origin);
+    } catch(e) {
+      console.error('[Welkomeo] sendWelcomeEmail failed:', String(e));
+    }
   }
 
   const adminUrl = `${url.origin}/${slug}/admin?verified=1&authtoken=${jwtToken}`;

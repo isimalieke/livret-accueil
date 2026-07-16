@@ -556,17 +556,32 @@ body.lang-en .en-o { display:block; }
 #global-photo-bg {
   position:fixed; inset:0; z-index:-1;
   background-size:cover; background-position:center;
-  filter:blur(22px) brightness(0.30);
+  filter:blur(8px) brightness(0.62);
   opacity:0; transition:opacity 1.2s ease;
   pointer-events:none;
 }
 body.has-cover-photo { background:transparent; }
-body.has-cover-photo .main { background:transparent; }
+body.has-cover-photo .main { background:transparent; min-height:100vh; }
+body.has-cover-photo .screen { min-height:100vh; }
+
+/* Cartes et listes : fond blanc semi-transparent sur photo */
 body.has-cover-photo .sub-list-item {
-  background:rgba(255,255,255,0.93);
-  backdrop-filter:blur(2px);
+  background:rgba(255,255,255,0.90);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
 }
 body.has-cover-photo .sub-list { background:transparent; }
+body.has-cover-photo .card,
+body.has-cover-photo .page-content,
+body.has-cover-photo .section-card,
+body.has-cover-photo .info-card,
+body.has-cover-photo .tip-box,
+body.has-cover-photo .wifi-box,
+body.has-cover-photo .paiement-box {
+  background:rgba(255,255,255,0.88) !important;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
 </style>
 </head>
 <body class="lang-fr">

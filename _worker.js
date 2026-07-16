@@ -128,6 +128,16 @@ export default {
       if (request.method === 'POST') return handleResetPassword(request, env, slug);
     }
 
+    // ── /{slug}/auth/verify-email ──
+    if (sub === 'auth' && parts[2] === 'verify-email' && request.method === 'GET') {
+      return handleVerifyEmail(request, env, slug, url);
+    }
+
+    // ── /{slug}/auth/resend-verification ──
+    if (sub === 'auth' && parts[2] === 'resend-verification' && request.method === 'POST') {
+      return handleResendVerification(request, env, slug, url);
+    }
+
     // ── /{slug}/gestionnaire (CRUD délégation) ──
     if (sub === 'gestionnaire') {
       if (request.method === 'POST' && !parts[2])
@@ -291,6 +301,11 @@ async function handleLogin(request, env, slug) {
 
     if (!user || !(await verifyPassword(password, user.password_hash)))
       return json({ ok: false, error: 'Email ou mot de passe incorrect' }, 401);
+
+    // Bloquer si email non vérifié (colonne peut valoir 0 ou NULL pour anciens comptes sans migration)
+    if (user.email_verified === 0) {
+      return json({ ok: false, error: 'Votre adresse email n\'est pas encore vérifiée. Consultez votre boîte mail.', code: 'EMAIL_NOT_VERIFIED', slug }, 403);
+    }
 
     const token = await signJWT({
       sub:  user.id,
@@ -456,9 +471,10 @@ async function handleRegister(request, env, url) {
     if (existing)
       return json({ ok: false, error: `Un établissement "${nom}" existe déjà.` }, 409);
 
-    const now          = new Date().toISOString();
-    const passwordHash = await hashPassword(password);
-    const userId       = crypto.randomUUID();
+    const now               = new Date().toISOString();
+    const passwordHash      = await hashPassword(password);
+    const userId            = crypto.randomUUID();
+    const verificationToken = crypto.randomUUID();
 
     // Créer l'hôtel avec abonnement trial
     await env.DB.prepare(
@@ -468,10 +484,10 @@ async function handleRegister(request, env, url) {
     ).bind(slug, nom, ville||'', pays||'', adresse||'', telephone||'', whatsapp||'', now,
            plan, 'trial', trialEndsAt, chambres||'1-5').run();
 
-    // Créer l'utilisateur hôtelier
+    // Créer l'utilisateur hôtelier (email non vérifié)
     await env.DB.prepare(
-      'INSERT INTO users (id, hotel_slug, nom, email, password_hash, role, active, created_at) VALUES (?,?,?,?,?,?,1,?)'
-    ).bind(userId, slug, nom, email.toLowerCase().trim(), passwordHash, 'hotelier', now).run();
+      'INSERT INTO users (id, hotel_slug, nom, email, password_hash, role, active, created_at, email_verified, verification_token) VALUES (?,?,?,?,?,?,1,?,0,?)'
+    ).bind(userId, slug, nom, email.toLowerCase().trim(), passwordHash, 'hotelier', now, verificationToken).run();
 
     // Config initiale dans KV — inclut toutes les données saisies à l'inscription
     await env.CONFIG_KV.put(
@@ -479,20 +495,16 @@ async function handleRegister(request, env, url) {
       buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, email, hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout })
     );
 
-    // Générer un token directement après inscription
-    const token = await signJWT({
-      sub: userId, slug, role: 'hotelier', nom, exp: Math.floor(Date.now()/1000) + 86400*30,
-    }, env);
-
-    // Email de bienvenue (non bloquant)
+    // Email de vérification (non bloquant)
+    const verifyUrl = `${url.origin}/${slug}/auth/verify-email?token=${verificationToken}`;
     if (env.BREVO_API_KEY) {
-      sendWelcomeEmail(env, { nom, email: email.toLowerCase().trim(), slug }, url.origin)
-        .catch(e => console.error('[Welkomeo] sendWelcomeEmail failed:', String(e)));
+      sendVerificationEmail(env, { nom, email: email.toLowerCase().trim(), slug }, verifyUrl)
+        .catch(e => console.error('[Welkomeo] sendVerificationEmail failed:', String(e)));
     } else {
-      console.warn('[Welkomeo] BREVO_API_KEY absent — email de bienvenue non envoyé pour', slug);
+      console.warn('[Welkomeo] BREVO_API_KEY absent — email de vérification non envoyé pour', slug);
     }
 
-    return json({ ok: true, slug, livretUrl: url.origin + '/' + slug, token });
+    return json({ ok: true, slug, livretUrl: url.origin + '/' + slug, pendingVerification: true });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
   }
@@ -1268,6 +1280,80 @@ async function sendWelcomeEmail(env, hotel, origin) {
     + emailFooter('Welkomeo · par Assenka');
   const from = env.BREVO_FROM || 'Welkomeo <noreply@welkomeo.com>';
   return resendEmail(env, hotel.email, "🏨 Votre Welkomeo est prêt !", html, from);
+}
+
+async function handleVerifyEmail(request, env, slug, url) {
+  const token = new URL(request.url).searchParams.get('token');
+  if (!token) {
+    return new Response(null, { status: 302, headers: { 'Location': `${url.origin}/register?error=token_manquant` } });
+  }
+
+  const user = await env.DB.prepare(
+    'SELECT * FROM users WHERE hotel_slug = ? AND verification_token = ?'
+  ).bind(slug, token).first();
+
+  if (!user) {
+    return new Response(null, { status: 302, headers: { 'Location': `${url.origin}/register?error=lien_invalide` } });
+  }
+
+  // Marquer email comme vérifié
+  await env.DB.prepare(
+    'UPDATE users SET email_verified = 1, verification_token = NULL WHERE id = ?'
+  ).bind(user.id).run();
+
+  // Auto-login : générer un JWT et rediriger vers admin
+  const jwtToken = await signJWT({
+    sub: user.id, slug, role: user.role, nom: user.nom,
+    exp: Math.floor(Date.now()/1000) + 86400*30,
+  }, env);
+
+  // Envoyer l'email de bienvenue (maintenant que l'adresse est validée)
+  if (env.BREVO_API_KEY) {
+    sendWelcomeEmail(env, { nom: user.nom, email: user.email, slug }, url.origin)
+      .catch(e => console.error('[Welkomeo] sendWelcomeEmail failed:', String(e)));
+  }
+
+  const adminUrl = `${url.origin}/${slug}/admin?verified=1&authtoken=${jwtToken}`;
+  return new Response(null, { status: 302, headers: { 'Location': adminUrl } });
+}
+
+async function handleResendVerification(request, env, slug, url) {
+  try {
+    const { email } = await request.json();
+    if (!email) return json({ ok: false, error: 'Email requis' }, 400);
+
+    const user = await env.DB.prepare(
+      'SELECT id, nom, email, email_verified FROM users WHERE hotel_slug = ? AND email = ? AND active = 1'
+    ).bind(slug, email.toLowerCase().trim()).first();
+
+    // Réponse identique qu'il existe ou non (anti-énumération)
+    if (!user || user.email_verified === 1) return json({ ok: true });
+
+    const newToken = crypto.randomUUID();
+    await env.DB.prepare(
+      'UPDATE users SET verification_token = ? WHERE id = ?'
+    ).bind(newToken, user.id).run();
+
+    const verifyUrl = `${url.origin}/${slug}/auth/verify-email?token=${newToken}`;
+    if (env.BREVO_API_KEY) {
+      await sendVerificationEmail(env, { nom: user.nom, email: user.email, slug }, verifyUrl);
+    }
+
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
+  }
+}
+
+async function sendVerificationEmail(env, hotel, verifyUrl) {
+  const html = emailBase('Welkomeo', '#053372', '✉️', 'Vérifiez votre adresse email')
+    + `<div class="greeting">Bonjour ${hotel.nom},</div>`
+    + `<div class="intro">Merci de votre inscription sur Welkomeo ! Pour activer votre compte et accéder à votre espace admin, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous.</div>`
+    + `<a class="cta" href="${verifyUrl}">Vérifier mon adresse email →</a>`
+    + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Ce lien est valable <strong>48 heures</strong>. Si vous n'avez pas créé de compte Welkomeo, ignorez cet email.</div>`
+    + emailFooter('Welkomeo · par Assenka');
+  const from = env.BREVO_FROM || 'Welkomeo <noreply@welkomeo.com>';
+  return resendEmail(env, hotel.email, '✉️ Confirmez votre adresse email — Welkomeo', html, from);
 }
 
 async function sendPasswordResetEmail(env, user, resetUrl) {

@@ -24,17 +24,23 @@ CREATE TABLE IF NOT EXISTS hotels (
 -- Utilisateurs (hôteliers + gestionnaires)
 -- role : 'hotelier' | 'gestionnaire'
 -- active : 1 = actif, 0 = révoqué
+-- email_verified : 1 = email confirmé, 0 = en attente
 CREATE TABLE IF NOT EXISTS users (
-  id            TEXT PRIMARY KEY,
-  hotel_slug    TEXT NOT NULL,
-  nom           TEXT NOT NULL,
-  email         TEXT NOT NULL,
-  password_hash TEXT NOT NULL,
-  role          TEXT NOT NULL DEFAULT 'gestionnaire',
-  active        INTEGER NOT NULL DEFAULT 1,
-  created_at    TEXT NOT NULL,
+  id                 TEXT PRIMARY KEY,
+  hotel_slug         TEXT NOT NULL,
+  nom                TEXT NOT NULL,
+  email              TEXT NOT NULL,
+  password_hash      TEXT NOT NULL,
+  role               TEXT NOT NULL DEFAULT 'gestionnaire',
+  active             INTEGER NOT NULL DEFAULT 1,
+  created_at         TEXT NOT NULL,
+  email_verified     INTEGER NOT NULL DEFAULT 1, -- DEFAULT 1 pour les comptes existants
+  verification_token TEXT,
   FOREIGN KEY (hotel_slug) REFERENCES hotels(slug)
 );
+
+-- Migration à exécuter sur la base existante (une seule fois) :
+-- npx wrangler d1 execute welkomeo-db --remote --command "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 1; ALTER TABLE users ADD COLUMN verification_token TEXT;"
 
 -- Tickets d'incident
 CREATE TABLE IF NOT EXISTS tickets (

@@ -385,30 +385,27 @@ body {
     </p>
   </div>
 
-  <!-- ── SUCCÈS ── -->
+  <!-- ── SUCCÈS : VÉRIFICATION EMAIL ── -->
   <div id="success-panel">
-    <div class="success-icon">🎉</div>
-    <div class="success-title">Votre livret est prêt !</div>
+    <div class="success-icon">📧</div>
+    <div class="success-title">Vérifiez votre adresse email</div>
     <div class="success-text">
-      Votre livret d'accueil est créé et disponible immédiatement. Complétez vos informations via votre espace admin.
+      Un email de confirmation a été envoyé à <strong id="confirm-email"></strong>.<br>
+      Cliquez sur le lien dans l'email pour activer votre compte et accéder à votre espace admin.
     </div>
-    <div class="success-contact" style="text-align:left">
-      <div style="margin-bottom:10px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6e6e73;margin-bottom:4px">Votre livret (partagez à vos clients)</div>
-        <a id="livret-url" href="#" target="_blank" style="color:#2563eb;font-weight:600;word-break:break-all">#</a>
-      </div>
-      <div style="border-top:1px solid #e5e7eb;padding-top:10px;margin-top:4px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6e6e73;margin-bottom:4px">Votre espace admin</div>
-        <a id="admin-url" href="#" target="_blank" style="color:#2563eb;font-weight:600;word-break:break-all">#</a>
-      </div>
-      <div style="border-top:1px solid #e5e7eb;padding-top:10px;margin-top:10px;font-size:12px;color:#6e6e73">
-        📧 Un email de confirmation avec vos liens a été envoyé. Vérifiez aussi vos spams.
-      </div>
+    <div class="success-contact" style="text-align:left;font-size:13px;color:#4b5563;line-height:1.7">
+      <div style="margin-bottom:4px">💡 <strong>Pensez à vérifier vos spams</strong> si vous ne recevez pas l'email sous 2 minutes.</div>
+      <div>Une fois activé, vous recevrez un second email avec vos liens de connexion.</div>
     </div>
-    <a id="go-admin-btn" href="#" target="_blank"
-       style="display:block;margin-top:16px;background:#2c3e50;color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:700;text-decoration:none;font-size:15px">
-      ⚙️ Configurer mon livret maintenant →
-    </a>
+    <button onclick="resendEmail()"
+       style="display:block;width:100%;margin-top:16px;background:#f1f5f9;color:#374151;padding:12px;border-radius:12px;text-align:center;font-weight:600;font-size:14px;border:1px solid #e2e8f0;cursor:pointer">
+      🔄 Renvoyer l'email de confirmation
+    </button>
+    <div id="resend-msg" style="display:none;margin-top:10px;text-align:center;font-size:13px;color:#15803d"></div>
+    <div id="livret-url" style="display:none"></div>
+    <div id="admin-url" style="display:none"></div>
+    <div id="go-admin-btn" style="display:none"></div>
+    <div id="confirm-slug" style="display:none"></div>
   </div>
 
 </div>
@@ -560,17 +557,11 @@ async function submitForm() {
     var data = await res.json();
 
     if (data.ok) {
-      // Stocker le JWT et le slug pour auto-login dans l'admin
+      // Stocker le slug (pas de JWT avant vérification email)
       localStorage.setItem('livret_slug', data.slug);
-      localStorage.setItem('livret_jwt_' + data.slug, data.token);
-
-      // Afficher le succès avec l'URL du livret
-      document.getElementById('livret-url').textContent = data.livretUrl;
-      document.getElementById('livret-url').href = data.livretUrl;
-      document.getElementById('admin-url').href = data.livretUrl + '/admin';
-      document.getElementById('admin-url').textContent = data.livretUrl + '/admin';
-
-      document.getElementById('go-admin-btn').href = data.livretUrl + '/admin';
+      // Afficher l'email saisi pour confirmation
+      document.getElementById('confirm-email').textContent = email;
+      document.getElementById('confirm-slug').textContent = data.slug;
 
       document.getElementById('step-3').classList.remove('active');
       document.getElementById('success-panel').style.display = 'block';
@@ -584,6 +575,25 @@ async function submitForm() {
     alert('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
     btn.disabled = false;
     btn.innerHTML = '✅ Créer mon livret maintenant';
+  }
+}
+
+async function resendEmail() {
+  var emailEl = document.getElementById('confirm-email');
+  var slugEl  = document.getElementById('confirm-slug');
+  var msgEl   = document.getElementById('resend-msg');
+  if (!emailEl || !slugEl) return;
+  try {
+    await fetch('/' + slugEl.textContent + '/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailEl.textContent }),
+    });
+    msgEl.textContent = '✅ Email renvoyé ! Vérifiez votre boîte mail et vos spams.';
+    msgEl.style.display = 'block';
+  } catch(e) {
+    msgEl.textContent = 'Erreur — réessayez.';
+    msgEl.style.display = 'block';
   }
 }
 </script>

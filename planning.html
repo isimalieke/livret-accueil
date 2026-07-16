@@ -386,6 +386,7 @@ function modalWhatsApp() {
   var greeting = civility ? civility + ' ' + _modalStay.guest_name : _modalStay.guest_name || '';
   var roomLine = _modalStay.room ? '🛏️ Votre chambre : ' + _modalStay.room + '\n' : '';
   var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
+    + '🏨 Bienvenue chez ' + hotel + ' !\n\n'
     + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'

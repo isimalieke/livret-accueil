@@ -122,6 +122,16 @@ export default {
       return handleLogin(request, env, slug);
     }
 
+    // ── /{slug}/upload-cover ──
+    if (sub === 'upload-cover' && request.method === 'POST') {
+      return handleUploadCover(request, env, slug);
+    }
+
+    // ── /{slug}/cover-photo ──
+    if (sub === 'cover-photo' && request.method === 'GET') {
+      return handleGetCoverPhoto(env, slug);
+    }
+
     // ── /{slug}/auth/forgot-password ──
     if (sub === 'auth' && parts[2] === 'forgot-password' && request.method === 'POST') {
       return handleForgotPassword(request, env, slug, url);
@@ -1171,6 +1181,50 @@ async function handleDeleteStay(request, env, slug, stayId) {
     return json({ ok: true });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+// ═════════════════════════════════════════════
+// PHOTO DE COUVERTURE (KV)
+// ═════════════════════════════════════════════
+
+async function handleUploadCover(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+  try {
+    const { base64, filename } = await request.json();
+    if (!base64 || !base64.startsWith('data:image/')) {
+      return json({ ok: false, error: 'Format invalide. Envoyez un data URL image.' }, 400);
+    }
+    // Vérifier taille approximative (~3MB en base64 ≈ 4MB)
+    if (base64.length > 4.5 * 1024 * 1024) {
+      return json({ ok: false, error: 'Image trop lourde (max 3 Mo).' }, 400);
+    }
+    const kvKey = `hotel:${slug}:cover_photo`;
+    await env.CONFIG_KV.put(kvKey, base64);
+    const photoUrl = `/${slug}/cover-photo`;
+    return json({ ok: true, url: photoUrl });
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
+  }
+}
+
+async function handleGetCoverPhoto(env, slug) {
+  try {
+    const data = await env.CONFIG_KV.get(`hotel:${slug}:cover_photo`);
+    if (!data) return new Response('Not found', { status: 404 });
+    // Extraire le mime type du data URL (ex: data:image/jpeg;base64,...)
+    const mime = data.match(/^data:([^;]+);base64,/)?.[1] || 'image/jpeg';
+    const b64  = data.replace(/^data:[^;]+;base64,/, '');
+    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    return new Response(bytes, {
+      headers: {
+        'Content-Type': mime,
+        'Cache-Control': 'public, max-age=86400',
+      }
+    });
+  } catch (e) {
+    return new Response('Error', { status: 500 });
   }
 }
 

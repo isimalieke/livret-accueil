@@ -1712,6 +1712,7 @@ function stayWhatsApp(s, link) {
   var hotel    = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
   var roomLine = s.room ? '\n🛏️ Votre chambre : ' + s.room + '\n' : '';
   var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
+    + '🏨 Bienvenue chez ' + hotel + ' !\n\n'
     + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'
@@ -1852,6 +1853,7 @@ function shareGuestLinkWhatsApp() {
   var greeting = _waGreeting('', d.nom); // section legacy : pas de civilité
   var roomLine = d.roomTxt ? d.roomTxt + '\n' : '';
   var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
+    + '🏨 Bienvenue chez ' + d.hotel + ' !\n\n'
     + d.hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'

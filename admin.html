@@ -651,6 +651,16 @@ input, textarea, select {
           <button onclick="shareGuestLinkEmail()" style="flex:1;background:#053372;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">✉️ Email</button>
         </div>
       </div>
+
+      <!-- Bloc permanent — renvoyer le lien en cours de séjour -->
+      <div id="resend-link-box" style="display:none;margin-top:14px;background:#faf5eb;border:1px solid #e8d5a3;border-radius:10px;padding:13px 16px">
+        <div style="font-size:12px;font-weight:600;color:#92610a;margin-bottom:4px">📤 Renvoyer le lien au voyageur</div>
+        <div style="font-size:11px;color:#a07520;margin-bottom:10px" id="resend-guest-label">—</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="shareGuestLinkWhatsApp()" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">📱 WhatsApp</button>
+          <button onclick="shareGuestLinkEmail()" style="flex:1;background:#053372;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">✉️ Email</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -851,6 +861,7 @@ async function loadSubscriptionBanner() {
     document.getElementById('admin-panel').style.display = 'block';
     initForm();
     loadSubscriptionBanner();
+    loadGuestStay();
     // Afficher la bannière de confirmation d'email si redirection depuis verify-email
     var vp = new URLSearchParams(window.location.search);
     if (vp.get('verified') === '1') {
@@ -896,6 +907,7 @@ async function checkPwd() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       initForm();
+      loadGuestStay();
     } else if (data.code === 'EMAIL_NOT_VERIFIED') {
       document.getElementById('login-error').innerHTML = '📧 ' + (data.error || 'Email non vérifié') + '<br><small style="opacity:.8">Vous pouvez <a href="#" onclick="resendVerification(event)" style="color:inherit;text-decoration:underline">renvoyer l\'email de confirmation</a>.</small>';
       document.getElementById('login-error').style.display = 'block';
@@ -1559,6 +1571,46 @@ async function saveOnline(silent) {
   }
 }
 
+async function loadGuestStay() {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  if (!slug || !_jwt) return;
+  try {
+    var resp = await fetch('/' + slug + '/guest-stay', {
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    var data = await resp.json();
+    if (!data.ok || !data.stay) return;
+    var s = data.stay;
+    // Remplir les champs
+    var nomEl = document.getElementById('guest-nom');
+    var emailEl = document.getElementById('guest-email');
+    var dateEl = document.getElementById('guest-checkout-date');
+    var roomEl = document.getElementById('guest-room');
+    if (nomEl && s.nom)      nomEl.value = s.nom;
+    if (emailEl && s.email)  emailEl.value = s.email;
+    if (dateEl && s.checkout) dateEl.value = s.checkout;
+    if (roomEl && s.room) {
+      for (var i = 0; i < roomEl.options.length; i++) {
+        if (roomEl.options[i].value === s.room) { roomEl.selectedIndex = i; break; }
+      }
+    }
+    // Afficher le bloc permanent de renvoi
+    _showResendBox(s);
+  } catch(e) {}
+}
+
+function _showResendBox(s) {
+  var box = document.getElementById('resend-link-box');
+  var lbl = document.getElementById('resend-guest-label');
+  if (!box) return;
+  var parts = [];
+  if (s.nom)   parts.push('👤 ' + s.nom);
+  if (s.room)  parts.push('🛏️ ' + s.room);
+  if (s.email) parts.push('✉️ ' + s.email);
+  if (lbl) lbl.textContent = parts.join('  ·  ') || '—';
+  box.style.display = 'block';
+}
+
 async function saveGuestStay() {
   var nom    = (document.getElementById('guest-nom') || {}).value || '';
   var email  = (document.getElementById('guest-email') || {}).value || '';
@@ -1583,6 +1635,8 @@ async function saveGuestStay() {
     if (data.ok) {
       msg.textContent = '✅ Séjour enregistré. Le rappel sera envoyé le ' + new Date(date + 'T00:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'long' }) + ' à 8h00.';
       msg.style.background = '#f0fdf4'; msg.style.color = '#15803d';
+      // Afficher le bloc permanent
+      _showResendBox({ nom: nom.trim(), email: email.trim(), room: room.trim() });
       // Afficher le lien à partager
       if (linkBox) {
         var base = window.location.origin + '/' + slug;
@@ -1617,12 +1671,15 @@ function copyGuestLink() {
 }
 
 function _guestShareData() {
-  var link  = (document.getElementById('guest-link-val') || {}).value || '';
   var nom   = ((document.getElementById('guest-nom') || {}).value || '').trim();
   var hotel = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
   var room  = ((document.getElementById('guest-room') || {}).value || '').trim();
+  // Construire le lien depuis le slug courant
+  var slug  = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var base  = window.location.origin + '/' + slug;
+  var link  = (document.getElementById('guest-link-val') || {}).value || (room ? base + '?room=' + encodeURIComponent(room) : base);
   var roomTxt = room ? '\n🛏️ Chambre : ' + room : '';
-  return { link: link, nom: nom, hotel: hotel, roomTxt: roomTxt };
+  return { link: link, nom: nom, hotel: hotel, roomTxt: roomTxt, email: ((document.getElementById('guest-email') || {}).value || '').trim() };
 }
 
 function shareGuestLinkWhatsApp() {
@@ -1640,7 +1697,7 @@ function shareGuestLinkWhatsApp() {
 function shareGuestLinkEmail() {
   var d = _guestShareData();
   if (!d.link) return;
-  var email = ((document.getElementById('guest-email') || {}).value || '').trim();
+  var email = d.email;
   var prenom = d.nom ? d.nom.split(' ')[0] : '';
   var subject = encodeURIComponent('Votre livret d\'accueil — ' + d.hotel);
   var body = encodeURIComponent(

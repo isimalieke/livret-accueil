@@ -154,6 +154,9 @@ export default {
     }
 
     // ── /{slug}/guest-stay ──
+    if (sub === 'guest-stay' && request.method === 'GET') {
+      return handleGetGuestStay(request, env, slug);
+    }
     if (sub === 'guest-stay' && request.method === 'POST') {
       return handleSaveGuestStay(request, env, slug);
     }
@@ -1054,6 +1057,22 @@ async function handleSearchTickets(request, env, slug) {
 // ═════════════════════════════════════════════
 // SÉJOUR EN COURS (KV — inchangé)
 // ═════════════════════════════════════════════
+
+async function handleGetGuestStay(request, env, slug) {
+  const token   = getToken(request);
+  const payload = await verifyJWT(token, env);
+  const secret  = request.headers.get('X-Auth-Secret') || '';
+  const isSuperAdmin = env.AUTH_SECRET && secret === env.AUTH_SECRET;
+  const isHotelier   = payload && payload.slug === slug && (payload.role === 'hotelier' || payload.role === 'gestionnaire');
+  if (!isSuperAdmin && !isHotelier) return json({ ok: false, error: 'Non autorisé' }, 401);
+  try {
+    const raw = await env.CONFIG_KV.get(`hotel:${slug}:current_stay`);
+    if (!raw) return json({ ok: true, stay: null });
+    return json({ ok: true, stay: JSON.parse(raw) });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
 
 async function handleSaveGuestStay(request, env, slug) {
   const secret = request.headers.get('X-Auth-Secret') || '';

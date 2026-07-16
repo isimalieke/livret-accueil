@@ -551,9 +551,28 @@ body.lang-en .en-o { display:block; }
 .conv-tbl-row:last-child { border-bottom:none; }
 .conv-tbl-cur { font-weight:600; color:var(--text); }
 .conv-tbl-val { color:var(--cover); font-weight:700; }
+
+/* ══ FOND PHOTO GLOBAL ══ */
+#global-photo-bg {
+  position:fixed; inset:0; z-index:-1;
+  background-size:cover; background-position:center;
+  filter:blur(22px) brightness(0.30);
+  opacity:0; transition:opacity 1.2s ease;
+  pointer-events:none;
+}
+body.has-cover-photo { background:transparent; }
+body.has-cover-photo .main { background:transparent; }
+body.has-cover-photo .sub-list-item {
+  background:rgba(255,255,255,0.93);
+  backdrop-filter:blur(2px);
+}
+body.has-cover-photo .sub-list { background:transparent; }
 </style>
 </head>
 <body class="lang-fr">
+
+<!-- Fond photo global (affiché dans tous les écrans si photo définie) -->
+<div id="global-photo-bg"></div>
 
 <!-- ── AUTH ── -->
 <div id="auth-screen" style="display:none">
@@ -1853,6 +1872,13 @@ function applyConfig() {
     // Si cover_photo est une URL externe (pas cover.jpg), l'appliquer aussi à l'auth bg
     if (typeof window._setAuthBg === 'function' && !h.cover_photo.endsWith('/cover.jpg')) {
       window._setAuthBg(h.cover_photo);
+    }
+    // Fond photo global — tous les écrans du livret
+    var globalBg = document.getElementById('global-photo-bg');
+    if (globalBg) {
+      globalBg.style.backgroundImage = 'url(' + h.cover_photo + ')';
+      setTimeout(function() { globalBg.style.opacity = '1'; }, 300);
+      document.body.classList.add('has-cover-photo');
     }
   }
 

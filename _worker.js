@@ -193,8 +193,8 @@ export default {
       return fetchAsset(env, url.origin + '/ticket.html');
     }
 
-    // ── /{slug} ou /{slug}/ ──
-    if (parts.length <= 2) return fetchAsset(env, url.origin + '/index.html');
+    // ── /{slug} ou /{slug}/ — injection OG tags ──
+    if (parts.length <= 2) return serveLivretWithOG(env, slug, url);
 
     return fetchAsset(env, request.url);
   },
@@ -1390,6 +1390,53 @@ async function sendTicketReplyToGuest(env, ticket, hotelNom, replyText, slug) {
 async function fetchAsset(env, urlString) {
   try { return await env.ASSETS.fetch(new Request(urlString)); }
   catch (_) { return new Response('Not found', { status: 404 }); }
+}
+
+// Sert index.html avec OG meta tags dynamiques (aperçu WhatsApp/iMessage)
+async function serveLivretWithOG(env, slug, url) {
+  const assetResp = await fetchAsset(env, url.origin + '/index.html');
+  if (!assetResp.ok) return assetResp;
+
+  // Infos hôtel depuis D1
+  let nom = '', ville = '', pays = '';
+  try {
+    const hotel = await env.DB.prepare('SELECT nom, ville, pays FROM hotels WHERE slug = ?').bind(slug).first();
+    if (hotel) { nom = hotel.nom || ''; ville = hotel.ville || ''; pays = hotel.pays || ''; }
+  } catch(_) {}
+
+  const loc    = [ville, pays].filter(Boolean).join(' · ');
+  const ogTitle = nom
+    ? `${nom} — Votre livret de séjour`
+    : 'Welkomeo — Livret de séjour numérique';
+  const ogDesc = nom
+    ? `${nom}${loc ? ' (' + loc + ')' : ''} vous souhaite la bienvenue et se réjouit de vous recevoir très bientôt. Retrouvez toutes les informations pratiques de votre séjour.`
+    : 'Votre livret de séjour numérique — WiFi, services, urgences et bons plans.';
+  const ogImage = `${url.origin}/${slug}/cover.jpg`;
+  const ogUrl   = `${url.origin}/${slug}`;
+
+  const esc = s => s.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  const ogTags = [
+    `<meta property="og:type"        content="website">`,
+    `<meta property="og:url"         content="${esc(ogUrl)}">`,
+    `<meta property="og:title"       content="${esc(ogTitle)}">`,
+    `<meta property="og:description" content="${esc(ogDesc)}">`,
+    `<meta property="og:image"       content="${esc(ogImage)}">`,
+    `<meta name="twitter:card"        content="summary_large_image">`,
+    `<meta name="twitter:title"       content="${esc(ogTitle)}">`,
+    `<meta name="twitter:description" content="${esc(ogDesc)}">`,
+    `<meta name="twitter:image"       content="${esc(ogImage)}">`,
+  ].join('\n  ');
+
+  let html = await assetResp.text();
+  html = html.replace('</head>', `  ${ogTags}\n</head>`);
+
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html;charset=UTF-8',
+      'Cache-Control': 'no-store',
+    },
+  });
 }
 
 function json(data, status = 200) {

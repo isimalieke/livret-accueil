@@ -85,8 +85,10 @@ CREATE TABLE IF NOT EXISTS stays (
 );
 
 -- Migration à exécuter une seule fois :
--- npx wrangler d1 execute livret-db --remote --command "CREATE TABLE IF NOT EXISTS stays (id TEXT PRIMARY KEY, hotel_slug TEXT NOT NULL, guest_name TEXT NOT NULL, guest_email TEXT DEFAULT '', guest_phone TEXT DEFAULT '', room TEXT DEFAULT '', checkin TEXT NOT NULL, checkout TEXT NOT NULL, created_at TEXT NOT NULL, FOREIGN KEY (hotel_slug) REFERENCES hotels(slug));"
+-- npx wrangler d1 execute livret-db --remote --command "CREATE TABLE IF NOT EXISTS stays (id TEXT PRIMARY KEY, hotel_slug TEXT NOT NULL, guest_name TEXT NOT NULL, guest_email TEXT DEFAULT '', guest_phone TEXT DEFAULT '', room TEXT DEFAULT '', civility TEXT DEFAULT '', checkin TEXT NOT NULL, checkout TEXT NOT NULL, created_at TEXT NOT NULL, FOREIGN KEY (hotel_slug) REFERENCES hotels(slug));"
 -- npx wrangler d1 execute livret-db --remote --command "CREATE INDEX IF NOT EXISTS idx_stays_hotel ON stays(hotel_slug, checkout);"
+-- Si la table stays existe déjà, ajouter la colonne civility :
+-- npx wrangler d1 execute livret-db --remote --command "ALTER TABLE stays ADD COLUMN civility TEXT DEFAULT '';"
 
 -- Index de performance
 CREATE INDEX IF NOT EXISTS idx_tickets_hotel    ON tickets(hotel_slug, created_at DESC);

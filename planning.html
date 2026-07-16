@@ -377,9 +377,10 @@ function modalWhatsApp() {
   if (!_modalStay) return;
   var link = window.location.origin + '/' + _slug + (_modalStay.room ? '?room=' + encodeURIComponent(_modalStay.room) : '');
   var hotel = _hotelNom || 'votre hôte';
-  var prenom = (_modalStay.guest_name || '').split(' ')[0];
+  var civility = _modalStay.civility || '';
+  var greeting = civility ? civility + ' ' + _modalStay.guest_name : _modalStay.guest_name || '';
   var roomLine = _modalStay.room ? '🛏️ Votre chambre : ' + _modalStay.room + '\n' : '';
-  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+  var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
     + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'

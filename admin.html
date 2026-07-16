@@ -633,15 +633,27 @@ input, textarea, select {
       <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
         <div class="sub-label" style="margin-top:0;margin-bottom:10px">+ Ajouter un séjour</div>
         <div class="row2">
-          <div class="field" style="margin-bottom:8px"><label>Nom du voyageur *</label><input id="ns-nom" placeholder="ex : Marie Dupont"></div>
+          <div class="field" style="margin-bottom:8px">
+            <label>Civilité</label>
+            <select id="ns-civility">
+              <option value="">— Non précisée —</option>
+              <option value="Mme">Mme</option>
+              <option value="M.">M.</option>
+              <option value="Mx.">Mx.</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:8px"><label>Prénom et Nom *</label><input id="ns-nom" placeholder="ex : Marie Dupont"></div>
+        </div>
+        <div class="row2">
           <div class="field" style="margin-bottom:8px"><label>Email</label><input id="ns-email" type="email" placeholder="ex : marie@gmail.com"></div>
+          <div class="field" style="margin-bottom:8px"><label>Téléphone</label><input id="ns-phone" placeholder="ex : +221 77 000 00 00"></div>
         </div>
         <div class="row2">
           <div class="field" style="margin-bottom:8px">
             <label>Chambre</label>
             <select id="ns-room"><option value="">— Non précisée —</option></select>
           </div>
-          <div class="field" style="margin-bottom:8px"><label>Téléphone</label><input id="ns-phone" placeholder="ex : +221 77 000 00 00"></div>
+          <div class="field" style="margin-bottom:8px"><!-- spacer --></div>
         </div>
         <div class="row2">
           <div class="field" style="margin-bottom:8px"><label>Arrivée *</label><input id="ns-checkin" type="date"></div>
@@ -1639,6 +1651,7 @@ function fmtDate(d) {
 
 async function addStay() {
   var slug     = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var civility = (document.getElementById('ns-civility') || {}).value || '';
   var nom      = (document.getElementById('ns-nom') || {}).value || '';
   var email    = (document.getElementById('ns-email') || {}).value || '';
   var phone    = (document.getElementById('ns-phone') || {}).value || '';
@@ -1654,13 +1667,14 @@ async function addStay() {
     var resp = await fetch('/' + slug + '/stays', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
-      body: JSON.stringify({ guestName: nom.trim(), guestEmail: email.trim(), guestPhone: phone.trim(), room: room, checkin: checkin, checkout: checkout })
+      body: JSON.stringify({ guestName: nom.trim(), guestEmail: email.trim(), guestPhone: phone.trim(), room: room, checkin: checkin, checkout: checkout, civility: civility })
     });
     var data = await resp.json();
     if (data.ok) {
       // Réinitialiser le formulaire
       ['ns-nom','ns-email','ns-phone','ns-checkin','ns-checkout'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
       var rEl = document.getElementById('ns-room'); if(rEl) rEl.selectedIndex = 0;
+      var cEl = document.getElementById('ns-civility'); if(cEl) cEl.selectedIndex = 0;
       msg.textContent = '✅ Séjour ajouté.';
       msg.style.background = '#f0fdf4'; msg.style.color = '#15803d'; msg.style.display = 'block';
       setTimeout(function(){ msg.style.display = 'none'; }, 3000);
@@ -1683,11 +1697,16 @@ async function deleteStay(id, btn) {
   } catch(e) { btn.disabled = false; btn.textContent = '✕'; }
 }
 
+function _waGreeting(civility, fullName) {
+  if (civility && fullName) return civility + ' ' + fullName;
+  return fullName || '';
+}
+
 function stayWhatsApp(s, link) {
-  var prenom = (s.guest_name || '').split(' ')[0];
-  var hotel  = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
+  var greeting = _waGreeting(s.civility, s.guest_name);
+  var hotel    = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
   var roomLine = s.room ? '\n🛏️ Votre chambre : ' + s.room + '\n' : '';
-  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+  var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
     + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'
@@ -1825,9 +1844,9 @@ function _guestShareData() {
 function shareGuestLinkWhatsApp() {
   var d = _guestShareData();
   if (!d.link) return;
-  var prenom = d.nom ? d.nom.split(' ')[0] : '';
+  var greeting = _waGreeting('', d.nom); // section legacy : pas de civilité
   var roomLine = d.roomTxt ? d.roomTxt + '\n' : '';
-  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+  var msg = 'Bonjour' + (greeting ? ' ' + greeting : '') + ' 👋\n\n'
     + d.hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
     + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
     + roomLine + '\n'

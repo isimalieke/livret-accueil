@@ -1100,13 +1100,13 @@ async function handleCreateStay(request, env, slug) {
   const p = await stayAuth(request, env, slug);
   if (!p) return json({ ok: false, error: 'Non autorisé' }, 401);
   try {
-    const { guestName, guestEmail, guestPhone, room, checkin, checkout } = await request.json();
+    const { guestName, guestEmail, guestPhone, room, checkin, checkout, civility } = await request.json();
     if (!guestName || !checkin || !checkout) return json({ ok: false, error: 'Nom, arrivée et départ requis' }, 400);
     const id  = crypto.randomUUID();
     const now = new Date().toISOString();
     await env.DB.prepare(
-      'INSERT INTO stays (id, hotel_slug, guest_name, guest_email, guest_phone, room, checkin, checkout, created_at) VALUES (?,?,?,?,?,?,?,?,?)'
-    ).bind(id, slug, guestName, guestEmail||'', guestPhone||'', room||'', checkin, checkout, now).run();
+      'INSERT INTO stays (id, hotel_slug, guest_name, guest_email, guest_phone, room, checkin, checkout, created_at, civility) VALUES (?,?,?,?,?,?,?,?,?,?)'
+    ).bind(id, slug, guestName, guestEmail||'', guestPhone||'', room||'', checkin, checkout, now, civility||'').run();
     return json({ ok: true, id });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);

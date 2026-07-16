@@ -426,7 +426,7 @@ function renderList() {
     html += '<div class="tkt-ico">🎫</div>';
     html += '<div class="tkt-body">';
     html += '<div class="tkt-subj">' + esc(t.subject) + '</div>';
-    html += '<div class="tkt-meta">👤 ' + esc(t.guestName) + (t.guestPhone ? ' · ' + esc(t.guestPhone) : '') + ' · ' + dateStr + ' · #' + t.id + '</div>';
+    html += '<div class="tkt-meta">👤 ' + esc(t.guestName) + (t.guestRoom ? ' · 🛏️ ' + esc(t.guestRoom) : '') + (t.guestPhone ? ' · ' + esc(t.guestPhone) : '') + ' · ' + dateStr + ' · #' + t.id + '</div>';
     html += '</div>';
     html += STATUS_BADGE[t.status] || '';
     html += '</div>';

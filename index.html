@@ -1379,6 +1379,13 @@ body.has-cover-photo [class*="-box"] {
       <label class="en-t">Your email <span style="font-weight:400;color:var(--text2)">(to receive replies)</span></label>
       <input type="email" id="inc-email" placeholder="ex : jean.martin@gmail.com">
     </div>
+    <div class="field" id="inc-room-field" style="display:none">
+      <label class="fr-t">Chambre</label>
+      <label class="en-t">Room</label>
+      <select id="inc-room">
+        <option value="" class="fr-o">-- Choisir une chambre --</option>
+      </select>
+    </div>
     <div class="field">
       <label class="fr-t">Objet du problème</label>
       <label class="en-t">Issue subject</label>
@@ -1637,8 +1644,10 @@ function resetIncident() {
   var btn = document.getElementById('inc-send-btn');
   var suc = document.getElementById('inc-success');
   var pn = document.getElementById('inc-photo-name');
+  var ro = document.getElementById('inc-room');
   if (n) n.value = '';
   if (t) t.value = '';
+  if (ro) ro.value = '';
   if (s) s.value = '';
   if (sa) { sa.value = ''; sa.style.display = 'none'; }
   if (d) d.value = '';
@@ -1652,6 +1661,7 @@ async function sendIncident() {
   var num     = (document.getElementById('inc-tel') || {}).value || '';
   var email   = (document.getElementById('inc-email') || {}).value || '';
   var subject = getIncidentSubject();
+  var room    = (document.getElementById('inc-room') || {}).value || '';
   var desc    = (document.getElementById('inc-desc') || {}).value || '';
   nom     = nom.trim();
   num     = num.trim();
@@ -1674,7 +1684,7 @@ async function sendIncident() {
     var resp = await fetch('/' + _slug + '/incident', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guestName: nom, guestPhone: tel, guestEmail: email, subject: subject, message: desc }),
+      body: JSON.stringify({ guestName: nom, guestPhone: tel, guestEmail: email, guestRoom: room, subject: subject, message: desc }),
     });
     var data = await resp.json();
     if (data.ok) {
@@ -2099,6 +2109,24 @@ function applyConfig() {
   if (!_avisUrls.google)      _avisUrls.google      = 'https://www.google.com/search?q=' + encodeURIComponent(h.nom + ' ' + h.ville + ' avis');
   if (!_avisUrls.tripadvisor) _avisUrls.tripadvisor = 'https://www.tripadvisor.fr/Search?q=' + encodeURIComponent(h.nom);
   if (!_avisUrls.booking)     _avisUrls.booking     = 'https://www.booking.com/searchresults.fr.html?ss=' + encodeURIComponent(h.nom);
+
+  // Chambres — sélecteur dans le formulaire incident
+  (function() {
+    var sel = document.getElementById('inc-room');
+    var field = document.getElementById('inc-room-field');
+    if (!sel || !field) return;
+    var chambres = C.chambres || [];
+    if (!chambres.length) return;
+    chambres.forEach(function(c) {
+      var label = c.nom || '';
+      if (c.etage) label += ' (' + c.etage + ')';
+      var opt = document.createElement('option');
+      opt.value = c.nom || '';
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+    field.style.display = 'block';
+  })();
 
   // Auth
   initAuth();

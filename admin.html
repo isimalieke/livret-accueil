@@ -285,6 +285,22 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- CHAMBRES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🛏️ Chambres</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="hint" style="margin-bottom:12px">Saisissez vos chambres (numéro ou nom). Elles seront proposées au voyageur lors d'un signalement de problème.</div>
+      <table class="dyn-table">
+        <thead><tr><th>Numéro / Nom</th><th>Étage <span style="font-weight:400;font-size:10px">(optionnel)</span></th><th style="width:30px"></th></tr></thead>
+        <tbody id="chambres-rows"></tbody>
+      </table>
+      <button class="btn-add" onclick="addRow('chambres-rows', chambreTpl)">+ Ajouter une chambre</button>
+      <button class="btn-section-save" onclick="saveSection(this,'chambres')">☁️ Enregistrer les chambres</button>
+    </div>
+  </div>
+
   <!-- ══ VOTRE SÉJOUR ══ -->
   <div class="section-group">Votre séjour</div>
 
@@ -1063,6 +1079,12 @@ function urgenceTpl(d) {
 }
 function cliniqueTpl(d) { return ficheTpl(Object.assign({icon:'🏥'}, d)); // alias compat
 }
+function chambreTpl(d) {
+  d = d || {};
+  return '<td><input placeholder="ex: 101 ou Suite bleue" value="' + esc(d.nom||'') + '"></td>'
+       + '<td><input placeholder="ex: 1er" value="' + esc(d.etage||'') + '"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
 function ambassadeTpl(d) {
   return '<td><input value="' + esc(d.pays||'') + '"></td>'
        + '<td><input value="' + esc(d.adresse||'') + '"></td>'
@@ -1202,6 +1224,9 @@ function initForm() {
     C.ambassades.forEach(function(a){ addRow('ambassades-rows', ambassadeTpl, a); });
   }
 
+  // Chambres
+  (C.chambres||[]).forEach(function(c){ addRow('chambres-rows', chambreTpl, c); });
+
   // Check-out
   sv('co-heure2', C.checkout.heure); sv('co-heure2-en', C.checkout.heure_en);
   sv('co-cles-fr', C.checkout.cles_fr); sv('co-cles-en', C.checkout.cles_en);
@@ -1266,6 +1291,7 @@ function buildConfigContent() {
   var cliniques     = readRows('cliniques-rows',          FICHE);
   var securite      = readRows('securite-rows',           ['numero','label_fr','label_en']);
   var ambassades    = readRows('ambassades-rows',         ['pays','adresse','tel','urgence']);
+  var chambres      = readRows('chambres-rows',           ['nom','etage']);
 
   function j(o) { return JSON.stringify(o, null, 4); }
   function gv(id) { var e = document.getElementById(id); return e ? e.value : ''; }
@@ -1376,6 +1402,9 @@ function buildConfigContent() {
 
   // Ambassades
   js += '  ambassades: ' + j(ambassades) + ',\n\n';
+
+  // Chambres
+  js += '  chambres: ' + j(chambres) + ',\n\n';
 
   // Checkout
   js += '  checkout: {\n';

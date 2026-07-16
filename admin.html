@@ -642,9 +642,13 @@ input, textarea, select {
       <div id="guest-save-msg" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d"></div>
       <div id="guest-link-box" style="display:none;margin-top:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:13px 16px">
         <div style="font-size:12px;font-weight:600;color:#1e40af;margin-bottom:8px">🔗 Lien à envoyer au voyageur</div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
           <input id="guest-link-val" readonly style="flex:1;font-size:12px;background:#fff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 10px;color:#1e3a8a;font-family:monospace">
           <button onclick="copyGuestLink()" style="background:#1e40af;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;white-space:nowrap" id="copy-link-btn">📋 Copier</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button onclick="shareGuestLinkWhatsApp()" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">📱 WhatsApp</button>
+          <button onclick="shareGuestLinkEmail()" style="flex:1;background:#053372;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">✉️ Email</button>
         </div>
       </div>
     </div>
@@ -1610,6 +1614,43 @@ function copyGuestLink() {
     document.execCommand('copy');
     if (btn) { btn.textContent = '✅ Copié !'; setTimeout(function(){ btn.textContent = '📋 Copier'; }, 2000); }
   });
+}
+
+function _guestShareData() {
+  var link  = (document.getElementById('guest-link-val') || {}).value || '';
+  var nom   = ((document.getElementById('guest-nom') || {}).value || '').trim();
+  var hotel = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
+  var room  = ((document.getElementById('guest-room') || {}).value || '').trim();
+  var roomTxt = room ? '\n🛏️ Chambre : ' + room : '';
+  return { link: link, nom: nom, hotel: hotel, roomTxt: roomTxt };
+}
+
+function shareGuestLinkWhatsApp() {
+  var d = _guestShareData();
+  if (!d.link) return;
+  var prenom = d.nom ? d.nom.split(' ')[0] : '';
+  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+    + d.hotel + ' vous envoie votre livret d\'accueil numérique.' + d.roomTxt + '\n\n'
+    + '🔗 ' + d.link + '\n\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans...\n\n'
+    + 'À très bientôt !';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function shareGuestLinkEmail() {
+  var d = _guestShareData();
+  if (!d.link) return;
+  var email = ((document.getElementById('guest-email') || {}).value || '').trim();
+  var prenom = d.nom ? d.nom.split(' ')[0] : '';
+  var subject = encodeURIComponent('Votre livret d\'accueil — ' + d.hotel);
+  var body = encodeURIComponent(
+    'Bonjour' + (prenom ? ' ' + prenom : '') + ',\n\n'
+    + d.hotel + ' vous envoie votre livret d\'accueil numérique.' + (d.roomTxt ? d.roomTxt.replace('🛏️', '') : '') + '\n\n'
+    + 'Accédez à votre livret ici :\n' + d.link + '\n\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans, transports...\n\n'
+    + 'À très bientôt !\n' + d.hotel
+  );
+  window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
 }
 
 function showMsg(id, text, isError) {

@@ -153,6 +153,11 @@ export default {
       return handleCreateTicket(request, env, slug);
     }
 
+    // ── /{slug}/send-guest-link ──
+    if (sub === 'send-guest-link' && request.method === 'POST') {
+      return handleSendGuestLink(request, env, slug, url);
+    }
+
     // ── /{slug}/guest-stay ──
     if (sub === 'guest-stay' && request.method === 'GET') {
       return handleGetGuestStay(request, env, slug);
@@ -1057,6 +1062,79 @@ async function handleSearchTickets(request, env, slug) {
 // ═════════════════════════════════════════════
 // SÉJOUR EN COURS (KV — inchangé)
 // ═════════════════════════════════════════════
+
+// ═════════════════════════════════════════════
+// ENVOI LIEN LIVRET AU VOYAGEUR (email HTML premium)
+// ═════════════════════════════════════════════
+
+async function handleSendGuestLink(request, env, slug, url) {
+  const token   = getToken(request);
+  const payload = await verifyJWT(token, env);
+  const isAuth  = payload && (payload.slug === slug) && (payload.role === 'hotelier' || payload.role === 'gestionnaire');
+  if (!isAuth) return json({ ok: false, error: 'Non autorisé' }, 401);
+
+  try {
+    const { guestName, guestEmail, room, livretUrl, coverPhoto, hotelNom, hotelVille } = await request.json();
+    if (!guestEmail) return json({ ok: false, error: 'Email requis' }, 400);
+    if (!env.BREVO_API_KEY) return json({ ok: false, error: 'Email non configuré' }, 500);
+
+    // Rendre la photo absolue si relative
+    const origin = url.origin;
+    const photoUrl = coverPhoto
+      ? (coverPhoto.startsWith('http') ? coverPhoto : origin + coverPhoto)
+      : null;
+
+    const html = buildGuestLivretEmail({ guestName, room, livretUrl, coverPhoto: photoUrl, hotelNom, hotelVille });
+    const from  = `${hotelNom || 'Welkomeo'} <noreply@welkomeo.com>`;
+    const r = await resendEmail(env, guestEmail, `Votre livret d'accueil — ${hotelNom}`, html, from);
+
+    if (r && (r.status === 200 || r.status === 201)) return json({ ok: true });
+    const errBody = r ? await r.text().catch(() => '') : '';
+    return json({ ok: false, error: 'Erreur Brevo: ' + errBody }, 500);
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+function buildGuestLivretEmail({ guestName, room, livretUrl, coverPhoto, hotelNom, hotelVille }) {
+  const prenom   = guestName ? guestName.split(' ')[0] : '';
+  const roomLine = room ? `en <strong>chambre ${room}</strong>` : '';
+  const loc      = hotelVille ? `<div style="color:rgba(255,255,255,0.55);font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-top:8px">${hotelVille}</div>` : '';
+
+  const header = coverPhoto
+    ? `<div style="position:relative;min-height:210px;background:url(${coverPhoto}) center/cover no-repeat">
+         <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,20,50,0.45) 0%,rgba(5,20,50,0.65) 100%)"></div>
+         <div style="position:relative;padding:44px 24px 36px;text-align:center">
+           <div style="color:#c9a84c;font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;font-weight:600">Livret d'accueil</div>
+           <div style="color:#fff;font-size:26px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,'Times New Roman',serif;font-weight:400">${hotelNom}</div>
+           ${loc}
+           <div style="width:32px;height:1px;background:#c9a84c;margin:16px auto 0;opacity:0.7"></div>
+         </div>
+       </div>`
+    : `<div style="background:#053372;padding:40px 24px 32px;text-align:center">
+         <div style="color:#c9a84c;font-size:9px;letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;font-weight:600">Livret d'accueil</div>
+         <div style="color:#fff;font-size:24px;letter-spacing:4px;text-transform:uppercase;font-family:Georgia,'Times New Roman',serif;font-weight:400">${hotelNom}</div>
+         ${loc}
+         <div style="width:32px;height:1px;background:#c9a84c;margin:16px auto 0;opacity:0.7"></div>
+       </div>`;
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:24px 12px;background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.12)">
+  ${header}
+  <div style="padding:28px 24px 20px">
+    <p style="font-size:16px;font-weight:600;color:#1c1409;margin:0 0 14px">Bonjour${prenom ? ' ' + prenom : ''} 👋</p>
+    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 16px">${hotelNom} vous envoie votre livret d'accueil numérique${roomLine ? ' — vous êtes attendu(e) ' + roomLine : ''}.</p>
+    <p style="font-size:14px;color:#475569;line-height:1.75;margin:0 0 26px">Retrouvez-y toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans, transports, urgences…</p>
+    <a href="${livretUrl}" style="display:block;background:#053372;color:#fff;text-decoration:none;text-align:center;padding:16px 24px;border-radius:10px;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;border-bottom:3px solid #c9a84c">Accéder à mon livret →</a>
+    <p style="font-size:11px;color:#94a3b8;text-align:center;margin:0">Ou copiez ce lien : <a href="${livretUrl}" style="color:#053372">${livretUrl}</a></p>
+  </div>
+  <div style="border-top:1px solid #f1f5f9;padding:14px 24px;text-align:center">
+    <p style="font-size:12px;color:#94a3b8;margin:0">À très bientôt — <strong style="color:#1c1409">${hotelNom}</strong></p>
+  </div>
+</div>
+</body></html>`;
+}
 
 async function handleGetGuestStay(request, env, slug) {
   const token   = getToken(request);

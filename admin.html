@@ -1694,20 +1694,39 @@ function shareGuestLinkWhatsApp() {
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function shareGuestLinkEmail() {
+async function shareGuestLinkEmail() {
   var d = _guestShareData();
   if (!d.link) return;
-  var email = d.email;
-  var prenom = d.nom ? d.nom.split(' ')[0] : '';
-  var subject = encodeURIComponent('Votre livret d\'accueil — ' + d.hotel);
-  var body = encodeURIComponent(
-    'Bonjour' + (prenom ? ' ' + prenom : '') + ',\n\n'
-    + d.hotel + ' vous envoie votre livret d\'accueil numérique.' + (d.roomTxt ? d.roomTxt.replace('🛏️', '') : '') + '\n\n'
-    + 'Accédez à votre livret ici :\n' + d.link + '\n\n'
-    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans, transports...\n\n'
-    + 'À très bientôt !\n' + d.hotel
-  );
-  window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+  if (!d.email) { alert('Veuillez renseigner l\'email de l\'invité.'); return; }
+
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var coverPhoto = (typeof CONFIG !== 'undefined' && CONFIG.hotel) ? (CONFIG.hotel.cover_photo || '') : '';
+  var hotelVille = (typeof CONFIG !== 'undefined' && CONFIG.hotel) ? ((CONFIG.hotel.ville || '') + (CONFIG.hotel.pays ? ' · ' + CONFIG.hotel.pays : '')) : '';
+  var room = ((document.getElementById('guest-room') || {}).value || '').trim();
+
+  // Bouton feedback
+  var btns = document.querySelectorAll('button[onclick*="shareGuestLinkEmail"]');
+  btns.forEach(function(b){ b.disabled = true; b.textContent = '⏳ Envoi…'; });
+
+  try {
+    var resp = await fetch('/' + slug + '/send-guest-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({
+        guestName:  d.nom,
+        guestEmail: d.email,
+        room:       room,
+        livretUrl:  d.link,
+        coverPhoto: coverPhoto,
+        hotelNom:   d.hotel,
+        hotelVille: hotelVille
+      })
+    });
+    var data = await resp.json();
+    btns.forEach(function(b){ b.disabled = false; b.textContent = data.ok ? '✅ Envoyé !' : '❌ Erreur'; setTimeout(function(){ b.textContent = '✉️ Email'; }, 3000); });
+  } catch(e) {
+    btns.forEach(function(b){ b.disabled = false; b.textContent = '❌ Erreur'; setTimeout(function(){ b.textContent = '✉️ Email'; }, 3000); });
+  }
 }
 
 function showMsg(id, text, isError) {

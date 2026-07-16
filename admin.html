@@ -47,6 +47,7 @@ body { font-family: system-ui, sans-serif; background: var(--gray); color: var(-
 
 /* SECTIONS */
 .section { background:white; border-radius:10px; margin-bottom:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.section-group { font-size:10px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:2px; padding:22px 2px 8px; border-bottom:2px solid var(--blue); margin-bottom:12px; opacity:0.7; }
 .section-head { padding:14px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; border-bottom:1px solid transparent; }
 .section-head:hover { background:#fafafa; }
 .section-head.open { border-bottom-color:var(--border); }
@@ -195,6 +196,9 @@ input, textarea, select {
     <a id="sub-pay-btn" href="#" style="display:none;flex-shrink:0;background:var(--blue);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">💳 S'abonner</a>
   </div>
 
+  <!-- ══ IDENTITÉ ══ -->
+  <div class="section-group">Identité de l'établissement</div>
+
   <!-- 1. ÉTABLISSEMENT -->
   <div class="section">
     <div class="section-head open" onclick="toggle(this)">
@@ -256,6 +260,9 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- ══ VOTRE SÉJOUR ══ -->
+  <div class="section-group">Votre séjour</div>
+
   <!-- 3a. WIFI -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
@@ -302,53 +309,6 @@ input, textarea, select {
         <button class="btn-add" onclick="addRow('regles-rows', reglesTpl)">+ Ajouter une règle</button>
       </div>
       <div class="hint">Ces règles sont affichées dans la section "WiFi &amp; Infos" du livret de l'invité.</div>
-    </div>
-  </div>
-
-  <!-- 4. ACCÈS VOYAGEUR -->
-  <div class="section">
-    <div class="section-head" onclick="toggle(this)">
-      <h2>🔐 Accès voyageur</h2><span class="chevron">▼</span>
-    </div>
-    <div class="section-body">
-      <div style="display:flex; align-items:center; gap:14px; background:#f0f4ff; border:1px solid #ccd6f6; border-radius:8px; padding:14px 16px; margin-bottom:18px;">
-        <label class="switch">
-          <input type="checkbox" id="acc-actif">
-          <span class="slider"></span>
-        </label>
-        <div>
-          <div style="font-weight:600; font-size:14px; color:#053372">Protection par mot de passe</div>
-          <div style="font-size:12px; color:#666; margin-top:2px">Activez pour un séjour en cours. Désactivez pour laisser le livret libre d'accès.</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Mot de passe voyageur</label>
-        <input id="acc-pwd" value="Teranga2024">
-        <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4b. SÉJOUR ACTUEL (rappel check-out) -->
-  <div class="section" id="sejour-section">
-    <div class="section-head" onclick="toggle(this)">
-      <h2>🗓️ Séjour en cours</h2><span class="chevron">▼</span>
-    </div>
-    <div class="section-body" style="display:block">
-      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:13px;color:#15803d;line-height:1.5">
-        <strong>Rappel automatique check-out</strong> — En renseignant l'email et la date de départ de votre invité, un message de rappel lui sera envoyé automatiquement la veille à 8h00.
-      </div>
-      <div class="row2">
-        <div class="field"><label>Prénom / Nom de l'invité</label><input id="guest-nom" placeholder="ex : Marie Dupont"></div>
-        <div class="field"><label>Email de l'invité</label><input id="guest-email" type="email" placeholder="ex : marie@email.com"></div>
-      </div>
-      <div class="row2">
-        <div class="field"><label>Date de check-out</label><input id="guest-checkout-date" type="date"><div class="hint">Le rappel sera envoyé la veille à 8h00.</div></div>
-        <div class="field" style="display:flex;align-items:flex-end">
-          <button class="btn-add" style="width:100%;justify-content:center;background:#15803d;color:#fff;border-color:#15803d" onclick="saveGuestStay()">💾 Enregistrer le séjour</button>
-        </div>
-      </div>
-      <div id="guest-save-msg" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d"></div>
     </div>
   </div>
 
@@ -406,6 +366,9 @@ input, textarea, select {
       <button class="btn-add" onclick="addApplItem()">+ Ajouter un appareil</button>
     </div>
   </div>
+
+  <!-- ══ DÉCOUVRIR ══ -->
+  <div class="section-group">Découvrir</div>
 
   <!-- 8. RESTAURANTS -->
   <div class="section">
@@ -505,35 +468,29 @@ input, textarea, select {
     </div>
   </div>
 
-  <!-- 13. URGENCES MÉDICALES -->
+  <!-- ══ URGENCES ══ -->
+  <div class="section-group">Urgences</div>
+
+  <!-- 13. URGENCES & SÉCURITÉ (fusionné) -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
-      <h2>🏥 Urgences médicales</h2><span class="chevron">▼</span>
+      <h2>🆘 Urgences & Sécurité</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="sub-label">Numéros d'urgence médicale</div>
+      <div class="sub-label">Numéros médicaux</div>
       <div class="field">
         <table class="dyn-table"><thead><tr><th>Numéro</th><th>Libellé FR</th><th>Label EN</th><th style="width:30px"></th></tr></thead>
         <tbody id="urgences-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('urgences-rows', urgenceTpl)">+ Ajouter</button>
       </div>
-      <div class="sub-label">Cliniques</div>
+      <div class="sub-label">Cliniques & hôpitaux</div>
       <div class="field">
         <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
         <tbody id="cliniques-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('cliniques-rows', ficheTpl)">+ Ajouter une clinique</button>
       </div>
-    </div>
-  </div>
-
-  <!-- 14. SÉCURITÉ -->
-  <div class="section">
-    <div class="section-head" onclick="toggle(this)">
-      <h2>🚔 Sécurité & Police</h2><span class="chevron">▼</span>
-    </div>
-    <div class="section-body">
+      <div class="sub-label">Police & Sécurité</div>
       <div class="field">
-        <label>Numéros d'urgence sécurité</label>
         <table class="dyn-table"><thead><tr><th>Numéro</th><th>Libellé FR</th><th>Label EN</th><th style="width:30px"></th></tr></thead>
         <tbody id="securite-rows"></tbody></table>
         <button class="btn-add" onclick="addRow('securite-rows', urgenceTpl)">+ Ajouter</button>
@@ -541,7 +498,7 @@ input, textarea, select {
     </div>
   </div>
 
-  <!-- 15. AMBASSADES -->
+  <!-- 14. AMBASSADES -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
       <h2>🏛️ Ambassades</h2><span class="chevron">▼</span>
@@ -556,10 +513,13 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- ══ DÉPART ══ -->
+  <div class="section-group">Départ</div>
+
   <!-- 16. CHECK-OUT -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
-      <h2>🔑 Check-out</h2><span class="chevron">▼</span>
+      <h2>🚪 Check-out</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
       <div class="row2">
@@ -586,6 +546,56 @@ input, textarea, select {
     </div>
   </div>
 
+
+  <!-- ══ OUTILS ADMIN ══ -->
+  <div class="section-group">Outils admin</div>
+
+  <!-- ACCÈS VOYAGEUR -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🔐 Accès voyageur</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div style="display:flex; align-items:center; gap:14px; background:#f0f4ff; border:1px solid #ccd6f6; border-radius:8px; padding:14px 16px; margin-bottom:18px;">
+        <label class="switch">
+          <input type="checkbox" id="acc-actif">
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div style="font-weight:600; font-size:14px; color:#053372">Protection par mot de passe</div>
+          <div style="font-size:12px; color:#666; margin-top:2px">Activez pour un séjour en cours. Désactivez pour laisser le livret libre d'accès.</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Mot de passe voyageur</label>
+        <input id="acc-pwd" value="Teranga2024">
+        <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SÉJOUR EN COURS -->
+  <div class="section" id="sejour-section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🗓️ Séjour en cours</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body" style="display:block">
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:13px;color:#15803d;line-height:1.5">
+        <strong>Rappel automatique check-out</strong> — En renseignant l'email et la date de départ de votre invité, un message de rappel lui sera envoyé automatiquement la veille à 8h00.
+      </div>
+      <div class="row2">
+        <div class="field"><label>Prénom / Nom de l'invité</label><input id="guest-nom" placeholder="ex : Marie Dupont"></div>
+        <div class="field"><label>Email de l'invité</label><input id="guest-email" type="email" placeholder="ex : marie@email.com"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Date de check-out</label><input id="guest-checkout-date" type="date"><div class="hint">Le rappel sera envoyé la veille à 8h00.</div></div>
+        <div class="field" style="display:flex;align-items:flex-end">
+          <button class="btn-add" style="width:100%;justify-content:center;background:#15803d;color:#fff;border-color:#15803d" onclick="saveGuestStay()">💾 Enregistrer le séjour</button>
+        </div>
+      </div>
+      <div id="guest-save-msg" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d"></div>
+    </div>
+  </div>
 
   <!-- ÉQUIPE — GESTIONNAIRES -->
   <div class="section" id="equipe-section">

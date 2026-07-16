@@ -158,12 +158,19 @@ export default {
       return handleSendGuestLink(request, env, slug, url);
     }
 
-    // ── /{slug}/guest-stay ──
+    // ── /{slug}/guest-stay (legacy KV — conservé pour compat) ──
     if (sub === 'guest-stay' && request.method === 'GET') {
       return handleGetGuestStay(request, env, slug);
     }
     if (sub === 'guest-stay' && request.method === 'POST') {
       return handleSaveGuestStay(request, env, slug);
+    }
+
+    // ── /{slug}/stays — multi-séjours D1 ──
+    if (sub === 'stays') {
+      if (request.method === 'GET')    return handleListStays(request, env, slug);
+      if (request.method === 'POST')   return handleCreateStay(request, env, slug);
+      if (request.method === 'DELETE' && parts[2]) return handleDeleteStay(request, env, slug, parts[2]);
     }
 
     // ── /{slug}/paiement ──
@@ -1060,6 +1067,59 @@ async function handleSearchTickets(request, env, slug) {
 }
 
 // ═════════════════════════════════════════════
+// SÉJOURS MULTI-VOYAGEURS (D1)
+// ═════════════════════════════════════════════
+
+function stayAuth(request, env, slug) {
+  return getToken(request)
+    ? verifyJWT(getToken(request), env).then(p =>
+        p && p.slug === slug && (p.role === 'hotelier' || p.role === 'gestionnaire') ? p : null)
+    : Promise.resolve(null);
+}
+
+async function handleListStays(request, env, slug) {
+  const p = await stayAuth(request, env, slug);
+  if (!p) return json({ ok: false, error: 'Non autorisé' }, 401);
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const rows = await env.DB.prepare(
+      'SELECT * FROM stays WHERE hotel_slug = ? AND checkout >= ? ORDER BY checkout ASC, room ASC'
+    ).bind(slug, today).all();
+    return json({ ok: true, stays: rows.results });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+async function handleCreateStay(request, env, slug) {
+  const p = await stayAuth(request, env, slug);
+  if (!p) return json({ ok: false, error: 'Non autorisé' }, 401);
+  try {
+    const { guestName, guestEmail, guestPhone, room, checkin, checkout } = await request.json();
+    if (!guestName || !checkin || !checkout) return json({ ok: false, error: 'Nom, arrivée et départ requis' }, 400);
+    const id  = crypto.randomUUID();
+    const now = new Date().toISOString();
+    await env.DB.prepare(
+      'INSERT INTO stays (id, hotel_slug, guest_name, guest_email, guest_phone, room, checkin, checkout, created_at) VALUES (?,?,?,?,?,?,?,?,?)'
+    ).bind(id, slug, guestName, guestEmail||'', guestPhone||'', room||'', checkin, checkout, now).run();
+    return json({ ok: true, id });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+async function handleDeleteStay(request, env, slug, stayId) {
+  const p = await stayAuth(request, env, slug);
+  if (!p) return json({ ok: false, error: 'Non autorisé' }, 401);
+  try {
+    await env.DB.prepare('DELETE FROM stays WHERE id = ? AND hotel_slug = ?').bind(stayId, slug).run();
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+// ═════════════════════════════════════════════
 // SÉJOUR EN COURS (KV — inchangé)
 // ═════════════════════════════════════════════
 
@@ -1260,13 +1320,28 @@ async function runCheckoutReminders(env) {
   try {
     const hotels = await env.DB.prepare('SELECT slug, nom FROM hotels').all();
     for (const h of hotels.results) {
+      // ── Legacy KV (séjour unique) ──
       try {
         const stayRaw = await env.CONFIG_KV.get(`hotel:${h.slug}:current_stay`);
-        if (!stayRaw) continue;
-        const stay = JSON.parse(stayRaw);
-        if (stay.checkout !== tomorrowStr) continue;
-        await sendCheckoutReminder(env, stay, h.nom, h.slug);
-        await env.CONFIG_KV.delete(`hotel:${h.slug}:current_stay`);
+        if (stayRaw) {
+          const stay = JSON.parse(stayRaw);
+          if (stay.checkout === tomorrowStr && stay.email) {
+            await sendCheckoutReminder(env, { nom: stay.nom, email: stay.email, checkout: stay.checkout }, h.nom, h.slug);
+            await env.CONFIG_KV.delete(`hotel:${h.slug}:current_stay`);
+          }
+        }
+      } catch (_) {}
+
+      // ── D1 stays (multi-voyageurs) ──
+      try {
+        const rows = await env.DB.prepare(
+          'SELECT * FROM stays WHERE hotel_slug = ? AND checkout = ? AND guest_email != ?'
+        ).bind(h.slug, tomorrowStr, '').all();
+        for (const stay of rows.results) {
+          try {
+            await sendCheckoutReminder(env, { nom: stay.guest_name, email: stay.guest_email, checkout: stay.checkout }, h.nom, h.slug);
+          } catch (_) {}
+        }
       } catch (_) {}
     }
   } catch (_) {}

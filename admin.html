@@ -615,52 +615,40 @@ input, textarea, select {
     </div>
   </div>
 
-  <!-- SÉJOUR EN COURS -->
+  <!-- SÉJOURS EN COURS -->
   <div class="section" id="sejour-section">
-    <div class="section-head" onclick="toggle(this)">
-      <h2>🗓️ Séjour en cours</h2><span class="chevron">▼</span>
+    <div class="section-head" onclick="toggle(this); loadStays()">
+      <h2>🗓️ Séjours en cours</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body" style="display:block">
-      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:13px;color:#15803d;line-height:1.5">
-        <strong>Rappel automatique check-out</strong> — En renseignant l'email et la date de départ de votre invité, un message de rappel lui sera envoyé automatiquement la veille à 8h00.
-      </div>
-      <div class="row2">
-        <div class="field"><label>Prénom / Nom de l'invité</label><input id="guest-nom" placeholder="ex : Marie Dupont"></div>
-        <div class="field"><label>Email de l'invité</label><input id="guest-email" type="email" placeholder="ex : marie@email.com"></div>
-      </div>
-      <div class="row2">
-        <div class="field"><label>Date de check-out</label><input id="guest-checkout-date" type="date"><div class="hint">Le rappel sera envoyé la veille à 8h00.</div></div>
-        <div class="field" id="guest-room-field" style="display:none">
-          <label>Chambre attribuée</label>
-          <select id="guest-room">
-            <option value="">— Non précisée —</option>
-          </select>
-          <div class="hint">Pré-remplie dans le formulaire de signalement du voyageur.</div>
-        </div>
-      </div>
-      <button class="btn-add" style="width:100%;justify-content:center;background:#15803d;color:#fff;border-color:#15803d;margin-top:4px" onclick="saveGuestStay()">💾 Enregistrer le séjour</button>
-      <div id="guest-save-msg" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;font-size:13px;color:#15803d"></div>
-      <div id="guest-link-box" style="display:none;margin-top:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:13px 16px">
-        <div style="font-size:12px;font-weight:600;color:#1e40af;margin-bottom:8px">🔗 Lien à envoyer au voyageur</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <input id="guest-link-val" readonly style="flex:1;font-size:12px;background:#fff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 10px;color:#1e3a8a;font-family:monospace">
-          <button onclick="copyGuestLink()" style="background:#1e40af;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;white-space:nowrap" id="copy-link-btn">📋 Copier</button>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button onclick="shareGuestLinkWhatsApp()" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">📱 WhatsApp</button>
-          <button onclick="shareGuestLinkEmail()" style="flex:1;background:#053372;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">✉️ Email</button>
-        </div>
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:#15803d">
+        <strong>Rappel automatique check-out</strong> — si l'email est renseigné, un rappel est envoyé automatiquement la veille à 8h00.
       </div>
 
-      <!-- Bloc permanent — renvoyer le lien en cours de séjour -->
-      <div id="resend-link-box" style="display:none;margin-top:14px;background:#faf5eb;border:1px solid #e8d5a3;border-radius:10px;padding:13px 16px">
-        <div style="font-size:12px;font-weight:600;color:#92610a;margin-bottom:4px">📤 Renvoyer le lien au voyageur</div>
-        <div style="font-size:11px;color:#a07520;margin-bottom:10px" id="resend-guest-label">—</div>
-        <div style="display:flex;gap:8px">
-          <button onclick="shareGuestLinkWhatsApp()" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">📱 WhatsApp</button>
-          <button onclick="shareGuestLinkEmail()" style="flex:1;background:#053372;color:#fff;border:none;border-radius:6px;padding:9px 10px;font-size:12px;font-weight:600;cursor:pointer">✉️ Email</button>
+      <!-- Formulaire ajout séjour -->
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div class="sub-label" style="margin-top:0;margin-bottom:10px">+ Ajouter un séjour</div>
+        <div class="row2">
+          <div class="field" style="margin-bottom:8px"><label>Nom du voyageur *</label><input id="ns-nom" placeholder="ex : Marie Dupont"></div>
+          <div class="field" style="margin-bottom:8px"><label>Email</label><input id="ns-email" type="email" placeholder="ex : marie@gmail.com"></div>
         </div>
+        <div class="row2">
+          <div class="field" style="margin-bottom:8px">
+            <label>Chambre</label>
+            <select id="ns-room"><option value="">— Non précisée —</option></select>
+          </div>
+          <div class="field" style="margin-bottom:8px"><label>Téléphone</label><input id="ns-phone" placeholder="ex : +221 77 000 00 00"></div>
+        </div>
+        <div class="row2">
+          <div class="field" style="margin-bottom:8px"><label>Arrivée *</label><input id="ns-checkin" type="date"></div>
+          <div class="field" style="margin-bottom:8px"><label>Départ *</label><input id="ns-checkout" type="date"></div>
+        </div>
+        <button onclick="addStay()" style="background:#15803d;color:#fff;border:none;border-radius:6px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;width:100%">+ Enregistrer ce séjour</button>
+        <div id="ns-msg" style="display:none;margin-top:8px;font-size:12px;padding:8px 12px;border-radius:6px"></div>
       </div>
+
+      <!-- Liste des séjours actifs -->
+      <div id="stays-list"><div style="text-align:center;color:#94a3b8;font-size:13px;padding:16px 0">⏳ Chargement…</div></div>
     </div>
   </div>
 
@@ -862,6 +850,7 @@ async function loadSubscriptionBanner() {
     initForm();
     loadSubscriptionBanner();
     loadGuestStay();
+    loadStays();
     // Afficher la bannière de confirmation d'email si redirection depuis verify-email
     var vp = new URLSearchParams(window.location.search);
     if (vp.get('verified') === '1') {
@@ -908,6 +897,7 @@ async function checkPwd() {
       document.getElementById('admin-panel').style.display = 'block';
       initForm();
       loadGuestStay();
+      loadStays();
     } else if (data.code === 'EMAIL_NOT_VERIFIED') {
       document.getElementById('login-error').innerHTML = '📧 ' + (data.error || 'Email non vérifié') + '<br><small style="opacity:.8">Vous pouvez <a href="#" onclick="resendVerification(event)" style="color:inherit;text-decoration:underline">renvoyer l\'email de confirmation</a>.</small>';
       document.getElementById('login-error').style.display = 'block';
@@ -1275,6 +1265,21 @@ function initForm() {
     field.style.display = 'block';
   })();
 
+  // Sélecteur chambre dans + Ajouter un séjour
+  (function() {
+    var sel = document.getElementById('ns-room');
+    if (!sel) return;
+    while (sel.options.length > 1) sel.remove(1);
+    (C.chambres || []).forEach(function(c) {
+      var label = c.nom || '';
+      if (c.etage) label += ' (' + c.etage + ')';
+      var opt = document.createElement('option');
+      opt.value = c.nom || '';
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+  })();
+
   // Check-out
   sv('co-heure2', C.checkout.heure); sv('co-heure2-en', C.checkout.heure_en);
   sv('co-cles-fr', C.checkout.cles_fr); sv('co-cles-en', C.checkout.cles_en);
@@ -1569,6 +1574,133 @@ async function saveOnline(silent) {
     if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
     return false;
   }
+}
+
+// ══ SÉJOURS MULTI-VOYAGEURS ══
+
+var _staysLoaded = false;
+
+async function loadStays() {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  if (!slug || !_jwt) return;
+  var wrap = document.getElementById('stays-list');
+  if (!wrap) return;
+  try {
+    var resp = await fetch('/' + slug + '/stays', { headers: { 'Authorization': 'Bearer ' + _jwt } });
+    var data = await resp.json();
+    if (!data.ok) { wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:12px">Erreur chargement.</div>'; return; }
+    _staysLoaded = true;
+    renderStays(data.stays || [], slug);
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#ef4444;font-size:13px;padding:12px">Erreur connexion.</div>';
+  }
+}
+
+function renderStays(stays, slug) {
+  var wrap = document.getElementById('stays-list');
+  if (!stays.length) {
+    wrap.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:20px 0">Aucun séjour en cours.</div>';
+    return;
+  }
+  var origin = window.location.origin;
+  var hotel  = (typeof CONFIG !== 'undefined' && CONFIG.hotel) ? CONFIG.hotel : {};
+  var html = '';
+  stays.forEach(function(s) {
+    var link = origin + '/' + slug + (s.room ? '?room=' + encodeURIComponent(s.room) : '');
+    var dates = fmtDate(s.checkin) + ' → ' + fmtDate(s.checkout);
+    html += '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
+      + (s.room ? '<span style="background:#053372;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px">🛏️ ' + esc(s.room) + '</span>' : '')
+      + '<span style="font-size:14px;font-weight:600;color:var(--text)">' + esc(s.guest_name) + '</span>'
+      + '<span style="font-size:11px;color:#94a3b8;margin-left:auto">' + dates + '</span>'
+      + '</div>'
+      + (s.guest_email ? '<div style="font-size:11px;color:#64748b;margin-bottom:6px">✉️ ' + esc(s.guest_email) + (s.guest_phone ? ' · 📞 ' + esc(s.guest_phone) : '') + '</div>' : '')
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      + '<button onclick="stayWhatsApp(' + JSON.stringify(s).replace(/"/g,'&quot;') + ',\'' + link + '\')" style="flex:1;min-width:80px;background:#25d366;color:#fff;border:none;border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">📱 WhatsApp</button>'
+      + '<button onclick="stayEmail(' + JSON.stringify(s).replace(/"/g,'&quot;') + ',\'' + link + '\',\'' + esc(hotel.nom||'') + '\',\'' + esc((hotel.ville||'')+(hotel.pays?' · '+hotel.pays:'')) + '\')" style="flex:1;min-width:80px;background:#053372;color:#fff;border:none;border-radius:6px;padding:7px 8px;font-size:11px;font-weight:600;cursor:pointer">✉️ Email</button>'
+      + '<button onclick="deleteStay(\'' + s.id + '\',this)" style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:7px 10px;font-size:11px;cursor:pointer">✕</button>'
+      + '</div>'
+      + '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  var parts = d.split('-');
+  return parts[2] + '/' + parts[1] + '/' + parts[0].slice(2);
+}
+
+async function addStay() {
+  var slug     = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var nom      = (document.getElementById('ns-nom') || {}).value || '';
+  var email    = (document.getElementById('ns-email') || {}).value || '';
+  var phone    = (document.getElementById('ns-phone') || {}).value || '';
+  var room     = (document.getElementById('ns-room') || {}).value || '';
+  var checkin  = (document.getElementById('ns-checkin') || {}).value || '';
+  var checkout = (document.getElementById('ns-checkout') || {}).value || '';
+  var msg      = document.getElementById('ns-msg');
+  if (!nom.trim() || !checkin || !checkout) {
+    msg.textContent = '⚠️ Nom, arrivée et départ sont obligatoires.';
+    msg.style.background = '#fdecea'; msg.style.color = '#b71c1c'; msg.style.display = 'block'; return;
+  }
+  try {
+    var resp = await fetch('/' + slug + '/stays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ guestName: nom.trim(), guestEmail: email.trim(), guestPhone: phone.trim(), room: room, checkin: checkin, checkout: checkout })
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      // Réinitialiser le formulaire
+      ['ns-nom','ns-email','ns-phone','ns-checkin','ns-checkout'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+      var rEl = document.getElementById('ns-room'); if(rEl) rEl.selectedIndex = 0;
+      msg.textContent = '✅ Séjour ajouté.';
+      msg.style.background = '#f0fdf4'; msg.style.color = '#15803d'; msg.style.display = 'block';
+      setTimeout(function(){ msg.style.display = 'none'; }, 3000);
+      loadStays();
+    } else {
+      msg.textContent = '❌ ' + (data.error || 'Erreur'); msg.style.background = '#fdecea'; msg.style.color = '#b71c1c'; msg.style.display = 'block';
+    }
+  } catch(e) {
+    msg.textContent = '❌ Erreur connexion.'; msg.style.background = '#fdecea'; msg.style.color = '#b71c1c'; msg.style.display = 'block';
+  }
+}
+
+async function deleteStay(id, btn) {
+  if (!confirm('Supprimer ce séjour ?')) return;
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await fetch('/' + slug + '/stays/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _jwt } });
+    loadStays();
+  } catch(e) { btn.disabled = false; btn.textContent = '✕'; }
+}
+
+function stayWhatsApp(s, link) {
+  var prenom = (s.guest_name || '').split(' ')[0];
+  var hotel  = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
+  var room   = s.room ? '\n🛏️ Chambre : ' + s.room : '';
+  var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
+    + hotel + ' vous envoie votre livret d\'accueil numérique.' + room + '\n\n'
+    + '🔗 ' + link + '\n\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans...\n\nÀ très bientôt !';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+async function stayEmail(s, link, hotelNom, hotelVille) {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var coverPhoto = (typeof CONFIG !== 'undefined' && CONFIG.hotel) ? (CONFIG.hotel.cover_photo || '') : '';
+  if (!s.guest_email) { alert('Aucun email renseigné pour ce voyageur.'); return; }
+  try {
+    var resp = await fetch('/' + slug + '/send-guest-link', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ guestName: s.guest_name, guestEmail: s.guest_email, room: s.room, livretUrl: link, coverPhoto: coverPhoto, hotelNom: hotelNom, hotelVille: hotelVille })
+    });
+    var data = await resp.json();
+    alert(data.ok ? '✅ Email envoyé à ' + s.guest_email : '❌ Erreur : ' + (data.error || 'inconnue'));
+  } catch(e) { alert('❌ Erreur connexion.'); }
 }
 
 async function loadGuestStay() {

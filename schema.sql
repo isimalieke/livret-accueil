@@ -70,8 +70,27 @@ CREATE TABLE IF NOT EXISTS messages (
   FOREIGN KEY (ticket_id) REFERENCES tickets(id)
 );
 
+-- Séjours (multi-voyageurs par établissement)
+CREATE TABLE IF NOT EXISTS stays (
+  id           TEXT PRIMARY KEY,
+  hotel_slug   TEXT NOT NULL,
+  guest_name   TEXT NOT NULL,
+  guest_email  TEXT DEFAULT '',
+  guest_phone  TEXT DEFAULT '',
+  room         TEXT DEFAULT '',
+  checkin      TEXT NOT NULL,   -- YYYY-MM-DD
+  checkout     TEXT NOT NULL,   -- YYYY-MM-DD
+  created_at   TEXT NOT NULL,
+  FOREIGN KEY (hotel_slug) REFERENCES hotels(slug)
+);
+
+-- Migration à exécuter une seule fois :
+-- npx wrangler d1 execute livret-db --remote --command "CREATE TABLE IF NOT EXISTS stays (id TEXT PRIMARY KEY, hotel_slug TEXT NOT NULL, guest_name TEXT NOT NULL, guest_email TEXT DEFAULT '', guest_phone TEXT DEFAULT '', room TEXT DEFAULT '', checkin TEXT NOT NULL, checkout TEXT NOT NULL, created_at TEXT NOT NULL, FOREIGN KEY (hotel_slug) REFERENCES hotels(slug));"
+-- npx wrangler d1 execute livret-db --remote --command "CREATE INDEX IF NOT EXISTS idx_stays_hotel ON stays(hotel_slug, checkout);"
+
 -- Index de performance
 CREATE INDEX IF NOT EXISTS idx_tickets_hotel    ON tickets(hotel_slug, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_ticket  ON messages(ticket_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_users_hotel      ON users(hotel_slug);
 CREATE INDEX IF NOT EXISTS idx_users_email      ON users(hotel_slug, email);
+CREATE INDEX IF NOT EXISTS idx_stays_hotel      ON stays(hotel_slug, checkout);

@@ -2270,14 +2270,39 @@ document.addEventListener('DOMContentLoaded', function() {
     var list = JSON.parse(localStorage.getItem(key) || '[]');
     if (list.length) renderTicketFollow(slug, list);
   } catch(e) {}
+
+  // Lire ?room= dans l'URL et stocker pour pré-remplir le formulaire incident
+  try {
+    var roomParam = new URLSearchParams(window.location.search).get('room');
+    if (roomParam) {
+      sessionStorage.setItem('livret_guest_room', roomParam);
+      // Nettoyer l'URL sans recharger la page
+      var cleanUrl = window.location.pathname;
+      history.replaceState(null, '', cleanUrl);
+    }
+  } catch(e) {}
 });
 
-// Hook : init convertisseur à la première ouverture
+// Hook : init convertisseur + pré-remplissage chambre incident
 (function() {
   var orig = showPage;
   showPage = function(id) {
     orig(id);
     if (id === 'converter' && !_convInit) { _convInit = true; setTimeout(initConverter, 50); }
+    if (id === 'incident') {
+      try {
+        var room = sessionStorage.getItem('livret_guest_room') || '';
+        if (room) {
+          var sel = document.getElementById('inc-room');
+          if (sel && sel.options.length > 1) {
+            // Chercher l'option correspondante
+            for (var i = 0; i < sel.options.length; i++) {
+              if (sel.options[i].value === room) { sel.selectedIndex = i; break; }
+            }
+          }
+        }
+      } catch(e) {}
+    }
   };
 })();
 </script>

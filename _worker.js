@@ -1065,11 +1065,11 @@ async function handleSaveGuestStay(request, env, slug) {
     return json({ ok: false, error: 'Non autorisé' }, 401);
 
   try {
-    const { nom, email, checkout } = await request.json();
+    const { nom, email, checkout, room } = await request.json();
     if (!email || !checkout) return json({ ok: false, error: 'Email et date de checkout requis' }, 400);
     await env.CONFIG_KV.put(
       `hotel:${slug}:current_stay`,
-      JSON.stringify({ nom: nom||'', email, checkout, saved: new Date().toISOString() })
+      JSON.stringify({ nom: nom||'', email, checkout, room: room||'', saved: new Date().toISOString() })
     );
     return json({ ok: true });
   } catch (e) {

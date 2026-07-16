@@ -132,10 +132,11 @@ input:checked + .slider:before { transform:translateX(22px); }
 #cover-upload-status { font-size:12px; color:var(--muted); margin-top:4px; min-height:16px; }
 
 /* ── Bouton enregistrer par section ── */
-.btn-section-save { display:block; width:100%; margin-top:16px; padding:9px; background:none; border:1px solid var(--gold); color:#7a5e1a; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; transition:background .15s; }
-.btn-section-save:hover { background:rgba(201,168,76,.08); }
-.btn-section-save.saved { border-color:#16a34a; color:#15803d; background:#f0fdf4; }
-.btn-section-save.err   { border-color:#dc2626; color:#dc2626; }
+.btn-section-save { display:block; width:100%; margin-top:16px; padding:10px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:opacity .15s; }
+.btn-section-save:hover { opacity:0.88; }
+.btn-section-save:disabled { opacity:0.6; cursor:default; }
+.btn-section-save.saved { background:#15803d; }
+.btn-section-save.err   { background:#dc2626; }
 
 /* ── Fix iOS/iPad : supprime le flash bleu + autorise la sélection dans les champs ── */
 input, textarea, select {
@@ -1245,10 +1246,9 @@ function buildConfigContent() {
   js += '    pays:        ' + JSON.stringify(gv('h-pays')) + ',\n';
   js += '    adresse:     ' + JSON.stringify(gv('h-adresse')) + ',\n';
   var tels = readTelRows();
-  if (!tels.length) { alert('⚠️ Veuillez saisir au moins 1 numéro de téléphone.'); return null; }
   js += '    telephones:  ' + JSON.stringify(tels) + ',\n';
   // Compat : premier numéro comme champ telephone
-  js += '    telephone:   ' + JSON.stringify((tels[0].dialcode||'') + ' ' + (tels[0].numero||'')) + ',\n';
+  js += '    telephone:   ' + JSON.stringify(tels.length ? ((tels[0].dialcode||'') + ' ' + (tels[0].numero||'')) : '') + ',\n';
   js += '    email:       ' + JSON.stringify(gv('h-email')) + ',\n';
   js += '    hote_nom:    ' + JSON.stringify(gv('h-hote')) + ',\n';
   js += '    cover_photo: ' + JSON.stringify(gv('h-photo')) + ',\n';
@@ -1434,6 +1434,7 @@ async function saveOnline(silent) {
   if (!silent) { btn.disabled = true; btn.textContent = '⏳ Enregistrement…'; }
 
   var js = buildConfigContent();
+  if (!js) { if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; } return false; }
 
   try {
     var resp = await fetch(_configEndpoint, {

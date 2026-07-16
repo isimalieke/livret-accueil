@@ -1686,11 +1686,13 @@ async function deleteStay(id, btn) {
 function stayWhatsApp(s, link) {
   var prenom = (s.guest_name || '').split(' ')[0];
   var hotel  = (typeof CONFIG !== 'undefined' && CONFIG.hotel && CONFIG.hotel.nom) ? CONFIG.hotel.nom : 'votre hôte';
-  var room   = s.room ? '\n🛏️ Chambre : ' + s.room : '';
+  var roomLine = s.room ? '\n🛏️ Votre chambre : ' + s.room + '\n' : '';
   var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
-    + hotel + ' vous envoie votre livret d\'accueil numérique.' + room + '\n\n'
-    + '🔗 ' + link + '\n\n'
-    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans...\n\nÀ très bientôt !';
+    + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
+    + roomLine + '\n'
+    + '👉 ' + link + '\n\n'
+    + 'Nous avons hâte de vous accueillir !';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 
@@ -1824,11 +1826,13 @@ function shareGuestLinkWhatsApp() {
   var d = _guestShareData();
   if (!d.link) return;
   var prenom = d.nom ? d.nom.split(' ')[0] : '';
+  var roomLine = d.roomTxt ? d.roomTxt + '\n' : '';
   var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
-    + d.hotel + ' vous envoie votre livret d\'accueil numérique.' + d.roomTxt + '\n\n'
-    + '🔗 ' + d.link + '\n\n'
-    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, bons plans...\n\n'
-    + 'À très bientôt !';
+    + d.hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
+    + roomLine + '\n'
+    + '👉 ' + d.link + '\n\n'
+    + 'Nous avons hâte de vous accueillir !';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 

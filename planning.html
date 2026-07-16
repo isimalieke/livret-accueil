@@ -378,10 +378,13 @@ function modalWhatsApp() {
   var link = window.location.origin + '/' + _slug + (_modalStay.room ? '?room=' + encodeURIComponent(_modalStay.room) : '');
   var hotel = _hotelNom || 'votre hôte';
   var prenom = (_modalStay.guest_name || '').split(' ')[0];
-  var roomTxt = _modalStay.room ? '\n🛏️ Chambre : ' + _modalStay.room : '';
+  var roomLine = _modalStay.room ? '🛏️ Votre chambre : ' + _modalStay.room + '\n' : '';
   var msg = 'Bonjour' + (prenom ? ' ' + prenom : '') + ' 👋\n\n'
-    + hotel + ' vous envoie votre livret d\'accueil numérique.' + roomTxt + '\n\n'
-    + '🔗 ' + link + '\n\nVous y trouverez toutes les informations utiles pour votre séjour.\n\nÀ très bientôt !';
+    + hotel + ' a le plaisir de vous envoyer votre livret d\'accueil numérique.\n'
+    + 'Vous y trouverez toutes les informations utiles pour votre séjour : WiFi, équipements, recommandations locales et contacts d\'urgence.\n'
+    + roomLine + '\n'
+    + '👉 ' + link + '\n\n'
+    + 'Nous avons hâte de vous accueillir !';
   window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
 }
 

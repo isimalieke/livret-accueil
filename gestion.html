@@ -302,7 +302,13 @@ async function doAuth() {
     showMain();
     loadHotelName();
     loadTickets();
+  } else if (data.code === 'RATE_LIMITED') {
+    document.getElementById('auth-err').textContent = '🔒 ' + (data.error || 'Trop de tentatives. Réessayez dans quelques minutes.');
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('auth-pwd').disabled = true;
+    setTimeout(function(){ document.getElementById('auth-pwd').disabled = false; }, 60000);
   } else {
+    document.getElementById('auth-err').textContent = data.error || 'Email ou mot de passe incorrect.';
     document.getElementById('auth-err').style.display = 'block';
     document.getElementById('auth-pwd').focus();
   }

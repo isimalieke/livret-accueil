@@ -916,6 +916,11 @@ async function checkPwd() {
       initForm();
       loadGuestStay();
       loadStays();
+    } else if (data.code === 'RATE_LIMITED') {
+      document.getElementById('login-error').textContent = '🔒 ' + (data.error || 'Trop de tentatives. Réessayez dans quelques minutes.');
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('pwd-input').disabled = true;
+      setTimeout(function(){ document.getElementById('pwd-input').disabled = false; }, 60000);
     } else if (data.code === 'EMAIL_NOT_VERIFIED') {
       document.getElementById('login-error').innerHTML = '📧 ' + (data.error || 'Email non vérifié') + '<br><small style="opacity:.8">Vous pouvez <a href="#" onclick="resendVerification(event)" style="color:inherit;text-decoration:underline">renvoyer l\'email de confirmation</a>.</small>';
       document.getElementById('login-error').style.display = 'block';

@@ -310,6 +310,38 @@ async function requireAuth(request, env, slug, roles = ['hotelier', 'gestionnair
 }
 
 // ═════════════════════════════════════════════
+// RATE LIMITING — anti brute-force login
+// 5 tentatives max par IP et par email sur 15 min
+// ═════════════════════════════════════════════
+
+const RL_WINDOW = 900;  // 15 minutes
+const RL_MAX    = 5;    // tentatives avant blocage
+
+async function rlCheck(env, key) {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const raw = await env.CONFIG_KV.get(key, 'json');
+    if (!raw || now > raw.reset) return { blocked: false, count: 0 };
+    return { blocked: raw.count >= RL_MAX, count: raw.count, reset: raw.reset };
+  } catch { return { blocked: false, count: 0 }; }
+}
+
+async function rlIncrement(env, key) {
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const raw = await env.CONFIG_KV.get(key, 'json');
+    const entry = (!raw || now > raw.reset)
+      ? { count: 1, reset: now + RL_WINDOW }
+      : { count: raw.count + 1, reset: raw.reset };
+    await env.CONFIG_KV.put(key, JSON.stringify(entry), { expirationTtl: RL_WINDOW });
+  } catch {}
+}
+
+async function rlReset(env, key) {
+  try { await env.CONFIG_KV.delete(key); } catch {}
+}
+
+// ═════════════════════════════════════════════
 // AUTH — LOGIN
 // ═════════════════════════════════════════════
 
@@ -318,17 +350,35 @@ async function handleLogin(request, env, slug) {
     const { email, password } = await request.json();
     if (!email || !password) return json({ ok: false, error: 'Email et mot de passe requis' }, 400);
 
+    const ip       = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const emailKey = `rl:login:email:${email.toLowerCase().trim()}`;
+    const ipKey    = `rl:login:ip:${ip}`;
+
+    // Vérifier rate limit (IP + email en parallèle)
+    const [ipCheck, emailCheck] = await Promise.all([rlCheck(env, ipKey), rlCheck(env, emailKey)]);
+    if (ipCheck.blocked || emailCheck.blocked) {
+      const resetTs = Math.max(ipCheck.reset || 0, emailCheck.reset || 0);
+      const waitMin = Math.max(1, Math.ceil((resetTs - Math.floor(Date.now() / 1000)) / 60));
+      return json({ ok: false, error: `Trop de tentatives. Réessayez dans ${waitMin} minute(s).`, code: 'RATE_LIMITED' }, 429);
+    }
+
     const user = await env.DB.prepare(
       'SELECT * FROM users WHERE hotel_slug = ? AND email = ? AND active = 1'
     ).bind(slug, email.toLowerCase().trim()).first();
 
-    if (!user || !(await verifyPassword(password, user.password_hash)))
+    if (!user || !(await verifyPassword(password, user.password_hash))) {
+      // Incrémenter les compteurs sur échec
+      await Promise.all([rlIncrement(env, ipKey), rlIncrement(env, emailKey)]);
       return json({ ok: false, error: 'Email ou mot de passe incorrect' }, 401);
+    }
 
-    // Bloquer si email non vérifié (colonne peut valoir 0 ou NULL pour anciens comptes sans migration)
+    // Bloquer si email non vérifié
     if (user.email_verified === 0) {
       return json({ ok: false, error: 'Votre adresse email n\'est pas encore vérifiée. Consultez votre boîte mail.', code: 'EMAIL_NOT_VERIFIED', slug }, 403);
     }
+
+    // Succès — réinitialiser les compteurs
+    await Promise.all([rlReset(env, ipKey), rlReset(env, emailKey)]);
 
     const token = await signJWT({
       sub:  user.id,

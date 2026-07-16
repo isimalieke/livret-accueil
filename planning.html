@@ -178,6 +178,11 @@ async function doLogin() {
       localStorage.setItem('livret_jwt_' + _slug, _jwt);
       showPlanningScreen();
       loadStays();
+    } else if (data.code === 'RATE_LIMITED') {
+      err.textContent = '🔒 ' + (data.error || 'Trop de tentatives. Réessayez dans quelques minutes.');
+      err.style.display = 'block';
+      document.getElementById('l-pwd').disabled = true;
+      setTimeout(function(){ document.getElementById('l-pwd').disabled = false; }, 60000);
     } else {
       err.textContent = data.error || 'Identifiants incorrects';
       err.style.display = 'block';

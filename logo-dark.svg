@@ -13,7 +13,7 @@
   <text x="68" y="31"
         font-family="'Cormorant Garamond', Georgia, serif"
         font-size="26" font-weight="500" letter-spacing="1.5"
-        fill="#ffffff">Welkomeo</text>
+        ><tspan fill="#ffffff">Welkom</tspan><tspan fill="#C9A84C">eo</tspan></text>
   <!-- Tagline -->
   <text x="69" y="45"
         font-family="'Inter', Arial, sans-serif"

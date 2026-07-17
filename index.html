@@ -91,12 +91,14 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   text-align:center; padding:28px 16px 20px;
 }
 .back-row-bottom .back-btn-inline {
-  background:#1a1a1a; color:rgba(255,255,255,0.85); border:none;
-  border-radius:8px; padding:14px 48px;
-  font-size:12px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase;
-  cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,0.25);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.9); border-radius:50px; padding:14px 48px;
+  font-size:12px; font-weight:400; letter-spacing:2px; text-transform:uppercase;
+  cursor:pointer; box-shadow:none;
   width:100%; max-width:300px;
-  -webkit-user-select:none; transition:opacity .2s;
+  -webkit-user-select:none; transition:all .2s;
 }
 .back-row-bottom .back-btn-inline:hover { color:#fff; opacity:0.9; }
 .back-row-bottom .back-btn-inline:active { opacity:0.8; }

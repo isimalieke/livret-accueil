@@ -303,7 +303,11 @@ input, textarea, select {
         <thead><tr><th>Numéro / Nom</th><th>Étage <span style="font-weight:400;font-size:10px">(optionnel)</span></th><th style="width:30px"></th></tr></thead>
         <tbody id="chambres-rows"></tbody>
       </table>
-      <button class="btn-add" onclick="addRow('chambres-rows', chambreTpl)">+ Ajouter une chambre</button>
+      <button class="btn-add" onclick="addChambreWithLimit()">+ Ajouter une chambre</button>
+      <div id="room-limit-msg" style="display:none;margin:10px 0;padding:12px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:13px;color:#9a3412;line-height:1.5">
+        ⚠️ Vous avez atteint la limite de votre plan (<span id="room-limit-plan"></span>).
+        <br><a href="#" onclick="openPayModal();return false" style="color:#9a3412;font-weight:600;text-decoration:underline">Passer au plan supérieur →</a>
+      </div>
       <button class="btn-section-save" onclick="saveSectionOnline(this)">☁️ Enregistrer les chambres</button>
     </div>
   </div>
@@ -805,6 +809,7 @@ var _slug = (function() {
 
 // ── JWT ──
 var _jwt = _slug ? (localStorage.getItem('livret_jwt_' + _slug) || '') : '';
+var _currentPlan = 'essentiel'; // mis à jour après fetch /subscription
 
 // ── ENDPOINT CONFIG ──
 var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
@@ -837,7 +842,9 @@ async function loadSubscriptionBanner() {
     var banner = document.getElementById('sub-banner');
     var ico    = document.getElementById('sub-ico');
     var txt    = document.getElementById('sub-txt');
-    var planLabel = d.plan === 'large' ? 'Grand hôtel' : 'Petit établissement';
+    _currentPlan = d.plan || 'essentiel';
+    var planLabels = { starter:'Starter', essentiel:'Essentiel', pro:'Pro', premium:'Premium' };
+    var planLabel = planLabels[d.plan] || d.plan;
 
     var payBtn = document.getElementById('sub-pay-btn');
     if (payBtn) { payBtn.href = '#'; payBtn.onclick = function(e){ e.preventDefault(); openPayModal(); }; }
@@ -1127,6 +1134,22 @@ function urgenceTpl(d) {
 }
 function cliniqueTpl(d) { return ficheTpl(Object.assign({icon:'🏥'}, d)); // alias compat
 }
+var PLAN_ROOM_LIMITS = { starter:3, essentiel:10, pro:20, premium:Infinity };
+var PLAN_UPGRADE_LABEL = { starter:'Starter (max 3)', essentiel:'Essentiel (max 10)', pro:'Pro (max 20)' };
+
+function addChambreWithLimit() {
+  var limit = PLAN_ROOM_LIMITS[_currentPlan] || Infinity;
+  var rows = document.getElementById('chambres-rows').querySelectorAll('tr').length;
+  var msg = document.getElementById('room-limit-msg');
+  if (rows >= limit) {
+    document.getElementById('room-limit-plan').textContent = PLAN_UPGRADE_LABEL[_currentPlan] || _currentPlan;
+    msg.style.display = 'block';
+    return;
+  }
+  msg.style.display = 'none';
+  addRow('chambres-rows', chambreTpl);
+}
+
 function chambreTpl(d) {
   d = d || {};
   return '<td><input placeholder="ex: 101 ou Suite bleue" value="' + esc(d.nom||'') + '"></td>'

@@ -171,6 +171,29 @@ body {
   display:flex; gap:10px; align-items:flex-start; line-height:1.6;
 }
 
+/* Plan selection (step 0) */
+.plan-select-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+.plan-select-card {
+  border:2px solid var(--border); border-radius:14px; padding:18px 16px;
+  cursor:pointer; transition:.15s; background:#fff; position:relative;
+}
+.plan-select-card:hover { border-color:#C9A84C; }
+.plan-select-card.selected { border-color:#1a1a1a; background:#fafaf8; }
+.plan-select-card .ps-name { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; color:#1a1a1a; margin-bottom:2px; }
+.plan-select-card .ps-rooms { font-size:11px; color:#888; letter-spacing:0.5px; margin-bottom:10px; }
+.plan-select-card .ps-price { font-size:18px; font-weight:700; color:#1a1a1a; }
+.plan-select-card .ps-period { font-size:11px; color:#888; font-weight:400; }
+.plan-select-card .ps-badge { position:absolute; top:-1px; right:16px; background:#1a1a1a; color:#C9A84C; font-size:9px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; padding:4px 10px; border-radius:0 0 6px 6px; }
+/* Plan info badge (step 1 when pre-selected) */
+.plan-info-badge {
+  background:#fafaf8; border:1.5px solid #C9A84C; border-radius:10px;
+  padding:12px 16px; margin-bottom:16px; display:flex; align-items:center;
+  justify-content:space-between; gap:12px;
+}
+.plan-info-badge .pib-name { font-family:'Cormorant Garamond',serif; font-size:18px; color:#1a1a1a; }
+.plan-info-badge .pib-rooms { font-size:12px; color:#888; }
+.plan-info-badge a { font-size:12px; color:#C9A84C; text-decoration:underline; white-space:nowrap; }
+
 /* Footer */
 .page-footer {
   text-align:center; padding:20px; font-size:11px;
@@ -202,10 +225,48 @@ body {
 
 <div class="form-wrap">
 
+  <!-- ── STEP 0 : CHOIX DU PLAN ── -->
+  <div class="step-panel" id="step-0">
+    <div class="step-title">Choisissez votre formule</div>
+    <div class="step-sub">15 jours d'essai gratuit sur toutes les formules — sans carte bancaire.</div>
+    <div class="plan-select-grid">
+      <div class="plan-select-card" id="ps-starter" onclick="selectPlan('starter')">
+        <div class="ps-name">Starter</div>
+        <div class="ps-rooms">1 à 3 chambres</div>
+        <span class="ps-price">4 500</span> <span class="ps-period">FCFA / mois</span>
+      </div>
+      <div class="plan-select-card" id="ps-essentiel" onclick="selectPlan('essentiel')">
+        <div class="ps-name">Essentiel</div>
+        <div class="ps-rooms">4 à 10 chambres</div>
+        <span class="ps-price">7 500</span> <span class="ps-period">FCFA / mois</span>
+      </div>
+      <div class="plan-select-card" id="ps-pro" onclick="selectPlan('pro')">
+        <div class="ps-badge">Le plus choisi</div>
+        <div class="ps-name">Pro</div>
+        <div class="ps-rooms">11 à 20 chambres</div>
+        <span class="ps-price">11 000</span> <span class="ps-period">FCFA / mois</span>
+      </div>
+      <div class="plan-select-card" id="ps-premium" onclick="selectPlan('premium')">
+        <div class="ps-name">Premium</div>
+        <div class="ps-rooms">21 chambres et plus</div>
+        <span class="ps-price">16 500</span> <span class="ps-period">FCFA / mois</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#888;text-align:center">Vous pourrez changer de formule à tout moment depuis votre espace admin.</p>
+  </div>
+
   <!-- ── STEP 1 : ÉTABLISSEMENT ── -->
-  <div class="step-panel active" id="step-1">
+  <div class="step-panel" id="step-1">
     <div class="step-title">Votre établissement</div>
     <div class="step-sub">Ces informations apparaîtront sur votre livret d'accueil.</div>
+
+    <div class="plan-info-badge" id="plan-badge" style="display:none">
+      <div>
+        <div class="pib-name" id="pib-name">Plan Essentiel</div>
+        <div class="pib-rooms" id="pib-rooms">4 à 10 chambres</div>
+      </div>
+      <a href="#" onclick="changePlan(event)">Changer de formule</a>
+    </div>
 
     <div class="card-form">
       <div class="field">
@@ -405,6 +466,56 @@ body {
 var currentStep = 1;
 var logoBase64 = '';
 
+var PLAN_INFO = {
+  starter:   { label:'Starter',   rooms:'1 à 3 chambres',      chambres:'1-3'  },
+  essentiel: { label:'Essentiel', rooms:'4 à 10 chambres',     chambres:'4-10' },
+  pro:       { label:'Pro',       rooms:'11 à 20 chambres',    chambres:'11-20'},
+  premium:   { label:'Premium',   rooms:'21 chambres et plus', chambres:'21+'  },
+};
+
+function applyPlan(plan) {
+  var info = PLAN_INFO[plan];
+  if (!info) return;
+  // Pre-fill chambres dropdown
+  var sel = document.getElementById('f-chambres');
+  for (var i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === info.chambres) { sel.selectedIndex = i; break; }
+  }
+  // Show badge
+  document.getElementById('pib-name').textContent = 'Plan ' + info.label;
+  document.getElementById('pib-rooms').textContent = info.rooms;
+  document.getElementById('plan-badge').style.display = 'flex';
+}
+
+function selectPlan(plan) {
+  // Called from step-0 card click
+  applyPlan(plan);
+  goStep(1);
+}
+
+function changePlan(e) {
+  e.preventDefault();
+  document.getElementById('plan-badge').style.display = 'none';
+  goStep(0);
+}
+
+// Init: read ?plan= from URL
+(function() {
+  var params = new URLSearchParams(window.location.search);
+  var plan = params.get('plan');
+  if (plan && PLAN_INFO[plan]) {
+    // Pre-selected: start at step 1
+    currentStep = 1;
+    document.getElementById('step-1').classList.add('active');
+    applyPlan(plan);
+  } else {
+    // No plan: start at step 0
+    currentStep = 0;
+    document.getElementById('step-0').classList.add('active');
+  }
+  updateProgress();
+})();
+
 function togglePwd(inputId, btnId) {
   var inp = document.getElementById(inputId);
   var btn = document.getElementById(btnId);
@@ -427,11 +538,9 @@ function previewLogo(input) {
 }
 
 function goStep(n) {
-  // Validate current step
   if (n > currentStep) {
     if (!validateStep(currentStep)) return;
   }
-
   document.getElementById('step-' + currentStep).classList.remove('active');
   document.getElementById('step-' + n).classList.add('active');
   currentStep = n;
@@ -479,9 +588,8 @@ function validateStep(step) {
 }
 
 function updateProgress() {
-  var pct = { 1:50, 2:100, 3:100 };
-  document.getElementById('progress-fill').style.width = pct[currentStep] + '%';
-
+  var pct = { 0:20, 1:60, 2:100, 3:100 };
+  document.getElementById('progress-fill').style.width = (pct[currentStep] || 100) + '%';
   for (var i = 1; i <= 2; i++) {
     var dot = document.getElementById('dot-' + i);
     if (!dot) continue;

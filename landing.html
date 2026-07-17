@@ -239,14 +239,17 @@
       display: flex; align-items: center; justify-content: center;
       padding: 48px 0 48px; overflow: visible;
     }
+    @keyframes phone-sway {
+      0%, 100% { transform: rotate(4.5deg) translateY(-12px); }
+      50%       { transform: rotate(7.5deg) translateY(-10px); }
+    }
     .phone-wrap {
       position: relative; width: 360px; flex-shrink: 0;
-      transform: rotate(6deg) translateY(-12px);
+      animation: phone-sway 5s ease-in-out infinite;
       filter: drop-shadow(-8px 48px 80px rgba(0,0,0,0.30)) drop-shadow(-2px 12px 28px rgba(0,0,0,0.20));
-      transition: transform .4s ease;
     }
     .phone-wrap:hover {
-      transform: rotate(3deg) translateY(-18px);
+      animation-play-state: paused;
     }
     /* Glow doré derrière le téléphone */
     .phone-wrap::before {
@@ -288,25 +291,25 @@
       width: 88px; height: 26px; background: #111; border-radius: 20px; z-index: 5;
     }
     .pb-topbar {
-      background: #2a1f12; padding: 40px 20px 13px;
+      background: #3a2c18; padding: 40px 20px 13px;
       display: flex; justify-content: space-between; align-items: flex-start;
     }
-    .pb-hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600; letter-spacing: 2.5px; color: #e8dcc8; }
-    .pb-hotel-loc { font-size: 9px; letter-spacing: 2px; color: #8a7a62; margin-top: 3px; }
+    .pb-hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600; letter-spacing: 2.5px; color: #f5ede0; }
+    .pb-hotel-loc { font-size: 9px; letter-spacing: 2px; color: #b09a7a; margin-top: 3px; }
     .pb-lang { display: flex; gap: 4px; margin-top: 2px; }
     .pb-lang span { border-radius: 3px; padding: 3px 8px; font-size: 9px; font-weight: 600; letter-spacing: 0.3px; }
     .pb-lang .active { border: 1px solid #c9a84c; color: #c9a84c; }
     .pb-lang .inactive { border: 1px solid rgba(201,168,76,0.3); color: rgba(201,168,76,0.4); }
     .pb-cover {
       height: 220px;
-      background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url('/hero-jardin.jpg') center/cover no-repeat;
+      background: linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.35)), url('/hero-jardin.jpg') center/cover no-repeat;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
       position: relative;
     }
     .pb-cover-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; letter-spacing: 6px; color: #fff; font-weight: 400; }
     .pb-cover-sub { font-size: 9px; letter-spacing: 2.5px; color: rgba(255,255,255,0.65); }
     .pb-cover-btn { margin-top: 8px; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; padding: 6px 20px; font-size: 10px; color: rgba(255,255,255,0.85); }
-    .pb-tiles { background: #1a1209; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .pb-tiles { background: #241a0e; padding: 12px 12px 16px; display: flex; flex-direction: column; gap: 8px; }
     .pb-tile {
       background: #faf8f4; border-radius: 12px; padding: 13px 14px;
       display: flex; align-items: center; gap: 10px;

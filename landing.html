@@ -466,6 +466,41 @@
     .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 26px; flex-wrap: wrap; gap: 10px; }
     .footer-copy { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 300; }
     .footer-by { font-size: 12px; color: rgba(255,255,255,0.18); font-weight: 300; }
+
+    /* ── TICKER BAND ── */
+    .ticker-band {
+      background: var(--ink);
+      border-top: 1px solid rgba(201,168,76,0.15);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      padding: 13px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .ticker-track {
+      display: inline-flex;
+      animation: ticker-scroll 32s linear infinite;
+    }
+    .ticker-band:hover .ticker-track { animation-play-state: paused; }
+    @keyframes ticker-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.72);
+      padding: 0 20px;
+    }
+    .ticker-item .ticker-sep {
+      color: var(--gold);
+      font-size: 9px;
+      opacity: 0.8;
+    }
     .footer-by a { color: rgba(255,255,255,0.3); transition: color .2s; }
     .footer-by a:hover { color: rgba(255,255,255,0.6); }
     @media (max-width: 600px) {
@@ -528,6 +563,38 @@
     </div>
   </div>
 </section>
+
+<!-- TICKER BAND -->
+<div class="ticker-band" aria-hidden="true">
+  <div class="ticker-track">
+    <!-- premier passage -->
+    <span class="ticker-item">Hôtels boutique <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Maisons d'hôtes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Airbnb & locations courte durée <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Lodges & écolodges <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Villas de luxe <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Chambres d'hôtes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Gîtes ruraux <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Résidences de vacances <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Camps & safaris <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Auberges <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Hôtels-restaurants <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Appartements meublés <span class="ticker-sep">◆</span></span>
+    <!-- duplicata pour boucle seamless -->
+    <span class="ticker-item">Hôtels boutique <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Maisons d'hôtes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Airbnb & locations courte durée <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Lodges & écolodges <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Villas de luxe <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Chambres d'hôtes <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Gîtes ruraux <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Résidences de vacances <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Camps & safaris <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Auberges <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Hôtels-restaurants <span class="ticker-sep">◆</span></span>
+    <span class="ticker-item">Appartements meublés <span class="ticker-sep">◆</span></span>
+  </div>
+</div>
 
 <!-- POUR L'HÔTELIER -->
 <section class="hotelier" id="hotelier">

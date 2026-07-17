@@ -10,7 +10,7 @@
   <meta property="og:description" content="Offrez à vos clients toutes les informations à portée de clic. Personnalisable, bilingue, sans téléchargement." />
   <meta property="og:url" content="https://welkomeo.com" />
   <meta property="og:type" content="website" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,11 +18,15 @@
       --navy:   #053372;
       --navy2:  #031f47;
       --gold:   #C9A84C;
-      --gold2:  #e8c96a;
+      --gold2:  #dfc06a;
+      --black:  #0e0e0e;
+      --ink:    #1c1c1c;
+      --ink2:   #3a3a3a;
+      --mid:    #7a7a7a;
+      --light:  #aaaaaa;
       --cream:  #faf8f4;
-      --cream2: #f0ece4;
-      --text:   #1a1a2e;
-      --mid:    #5a6070;
+      --cream2: #f2ede4;
+      --cream3: #e8e0d2;
       --white:  #ffffff;
     }
 
@@ -31,483 +35,693 @@
     body {
       font-family: 'Inter', -apple-system, sans-serif;
       background: var(--white);
-      color: var(--text);
+      color: var(--ink);
       line-height: 1.65;
       -webkit-font-smoothing: antialiased;
     }
 
     a { color: inherit; text-decoration: none; }
     img { display: block; max-width: 100%; }
-
     .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
 
-    /* ── CONTAINER ── */
-    .container { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+    .container { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 32px; }
 
     /* ═══════════════════════════════
-       NAV
+       NAV — translucide sur photo
     ═══════════════════════════════ */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(5, 51, 114, 0.97);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+      transition: background .4s, border-color .4s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom-color: var(--cream3);
     }
     .nav-inner {
       display: flex; align-items: center; justify-content: space-between;
-      height: 64px;
+      height: 72px;
     }
     .nav-logo {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 22px; font-weight: 600; color: var(--white);
-      letter-spacing: 1px;
+      font-size: 22px; font-weight: 500; color: var(--white);
+      letter-spacing: 1.5px; transition: color .3s;
     }
+    nav.scrolled .nav-logo { color: var(--ink); }
     .nav-logo span { color: var(--gold); }
-    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links { display: flex; align-items: center; gap: 36px; }
     .nav-links a {
-      font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.75);
-      transition: color .2s;
+      font-size: 12px; font-weight: 400; letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.75); transition: color .2s;
     }
-    .nav-links a:hover { color: var(--white); }
+    nav.scrolled .nav-links a { color: var(--mid); }
+    .nav-links a:hover { color: var(--white) !important; }
+    nav.scrolled .nav-links a:hover { color: var(--ink) !important; }
     .nav-cta {
-      background: var(--gold); color: var(--navy2) !important;
-      padding: 9px 20px; border-radius: 6px;
-      font-size: 13px !important; font-weight: 600 !important;
-      transition: background .2s !important;
+      background: transparent !important;
+      border: 1px solid rgba(255,255,255,0.45) !important;
+      color: var(--white) !important;
+      padding: 8px 22px; border-radius: 4px;
+      font-size: 12px !important; font-weight: 400 !important;
+      letter-spacing: 0.5px !important;
+      transition: background .2s, border-color .2s, color .3s !important;
     }
-    .nav-cta:hover { background: var(--gold2) !important; }
-
+    .nav-cta:hover {
+      background: rgba(255,255,255,0.12) !important;
+      border-color: rgba(255,255,255,0.8) !important;
+      color: var(--white) !important;
+    }
+    nav.scrolled .nav-cta {
+      border-color: var(--ink) !important;
+      color: var(--ink) !important;
+    }
+    nav.scrolled .nav-cta:hover {
+      background: var(--ink) !important;
+      color: var(--white) !important;
+    }
     @media (max-width: 640px) {
       .nav-links a:not(.nav-cta) { display: none; }
     }
 
     /* ═══════════════════════════════
-       HERO
+       HERO — PHOTO PLEIN ÉCRAN, LUXE
     ═══════════════════════════════ */
     .hero {
-      background: linear-gradient(135deg, var(--navy2) 0%, var(--navy) 60%, #0a4080 100%);
-      padding: 148px 0 100px;
-      position: relative; overflow: hidden;
+      position: relative;
+      height: 100vh; min-height: 640px;
+      display: flex; align-items: flex-end;
+      overflow: hidden;
     }
-    .hero::before {
+    /*
+      PHOTO DE FOND :
+      Remplace l'url par le chemin de ta photo du jardin.
+      Ex : background-image: url('/hero-jardin.jpg');
+    */
+    .hero-bg {
+      position: absolute; inset: 0;
+      background-color: #1e2e3e;
+      background-image: url('/hero-jardin.jpg');
+      background-size: cover;
+      background-position: center 55%;
+    }
+    /* Dégradé bas pour lisibilité du texte */
+    .hero-bg::after {
       content: '';
       position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
-      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.08) 0%,
+        rgba(0,0,0,0.02) 35%,
+        rgba(0,0,0,0.55) 70%,
+        rgba(0,0,0,0.78) 100%
+      );
     }
-    .hero-inner {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 0 0 72px;
+      width: 100%;
     }
-    .hero-tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.35);
-      color: var(--gold); font-size: 11px; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+    .hero-content-inner {
+      max-width: 680px;
     }
-    .hero-tag::before { content: '✦'; font-size: 9px; }
+    .hero-rule {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+    }
+    .hero-rule-line {
+      width: 40px; height: 1px; background: var(--gold); flex-shrink: 0;
+    }
+    .hero-rule-text {
+      font-size: 11px; font-weight: 400; color: rgba(201,168,76,0.9);
+      letter-spacing: 3px; text-transform: uppercase;
+    }
     .hero h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(38px, 5vw, 58px); font-weight: 500;
-      color: var(--white); line-height: 1.12; margin-bottom: 22px;
+      font-size: clamp(48px, 7vw, 84px); font-weight: 300;
+      color: var(--white); line-height: 1.05; margin-bottom: 28px;
+      letter-spacing: -1px;
     }
-    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero h1 em { font-style: italic; color: rgba(201,168,76,0.95); font-weight: 300; }
     .hero-sub {
-      font-size: 16px; color: rgba(255,255,255,0.72);
-      line-height: 1.7; margin-bottom: 36px; max-width: 440px;
+      font-size: 16px; color: rgba(255,255,255,0.65);
+      line-height: 1.8; margin-bottom: 44px; max-width: 480px;
+      font-weight: 300;
     }
-    .hero-btns { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--gold); color: var(--navy2);
-      padding: 14px 28px; border-radius: 8px;
-      font-size: 15px; font-weight: 600;
+    .hero-btns { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .btn-hero-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: #1a1000;
+      padding: 16px 34px; border-radius: 4px;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
       transition: background .2s, transform .15s;
     }
-    .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
-    .btn-secondary {
+    .btn-hero-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+    .btn-hero-ghost {
       display: inline-flex; align-items: center; gap: 8px;
-      color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-      padding-bottom: 2px; transition: color .2s;
+      color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 300;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 2px;
+      transition: color .2s, border-color .2s;
     }
-    .btn-secondary:hover { color: var(--white); }
-    .hero-note {
-      margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.4);
+    .btn-hero-ghost:hover { color: var(--white); border-color: var(--white); }
+    /* Scroll indicator */
+    .hero-scroll {
+      position: absolute; bottom: 32px; right: 32px; z-index: 2;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
-    .hero-visual {
-      display: flex; justify-content: center; align-items: center;
-      position: relative;
+    .hero-scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.5));
+      animation: scrollPulse 2s ease-in-out infinite;
     }
-    .phone-mock {
-      width: 220px; background: #fdf9f3;
-      border-radius: 36px; border: 2px solid rgba(201,168,76,0.4);
-      box-shadow: 0 32px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(201,168,76,0.1);
-      overflow: hidden; position: relative; z-index: 2;
+    .hero-scroll-text { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase; }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
-    .phone-notch {
-      width: 80px; height: 22px; background: #f0ece4;
-      border-radius: 0 0 14px 14px;
-      margin: 0 auto; position: relative; z-index: 3;
-    }
-    .phone-screen {
-      background: linear-gradient(180deg, #fdf9f3 0%, #f5efe3 100%);
-      padding: 16px 14px 24px;
-    }
-    .ps-top {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 13px; color: var(--gold);
-      text-align: center; margin-bottom: 12px; letter-spacing: 1px;
-    }
-    .ps-hotel {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 500; color: var(--navy);
-      text-align: center; margin-bottom: 4px;
-    }
-    .ps-city { font-size: 10px; color: var(--mid); text-align: center; margin-bottom: 16px; }
-    .ps-tile {
-      background: var(--white); border: 1px solid var(--cream2);
-      border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .ps-ico { font-size: 18px; flex-shrink: 0; }
-    .ps-lbl { font-family: 'Cormorant Garamond', serif; font-size: 13px; color: var(--navy); }
-    .ps-sub { font-size: 9px; color: var(--mid); margin-top: 1px; }
-    .tablet-mock {
-      width: 160px; background: #f5efe3;
-      border-radius: 16px; border: 2px solid rgba(201,168,76,0.35);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
-      overflow: hidden; position: absolute;
-      right: -20px; bottom: -30px; z-index: 1;
-    }
-    .tablet-screen {
-      background: linear-gradient(180deg, #fdf9f3 0%, #f5efe3 100%);
-      padding: 10px 8px;
-      height: 110px;
-    }
-    .ts-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 9px; color: var(--gold);
-      text-align: center; margin-bottom: 8px; letter-spacing: 0.5px;
-    }
-    .ts-tile {
-      background: var(--white); border: 1px solid var(--cream2);
-      border-radius: 6px; padding: 5px 7px; margin-bottom: 4px;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .ts-ico { font-size: 11px; }
-    .ts-lbl { font-size: 8px; color: var(--navy); font-family: 'Cormorant Garamond', serif; }
-
-    @media (max-width: 768px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
-      .hero-visual { display: none; }
-      .hero { padding: 110px 0 72px; }
-    }
-
-    /* ═══════════════════════════════
-       LOGOS / PROOF BAR
-    ═══════════════════════════════ */
-    .proof-bar {
-      background: var(--cream); border-top: 1px solid var(--cream2);
-      border-bottom: 1px solid var(--cream2);
-      padding: 20px 0;
-    }
-    .proof-inner {
-      display: flex; align-items: center; justify-content: center;
-      gap: 12px; flex-wrap: wrap;
-    }
-    .proof-label { font-size: 11px; color: var(--mid); letter-spacing: 0.5px; }
-    .proof-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-    .proof-chip {
-      background: var(--white); border: 1px solid var(--cream2);
-      border-radius: 20px; padding: 5px 14px;
-      font-size: 12px; color: var(--mid); font-weight: 500;
+    @media (max-width: 640px) {
+      .hero { align-items: flex-end; min-height: 100vh; }
+      .hero-scroll { display: none; }
+      .hero h1 { font-size: 48px; }
     }
 
     /* ═══════════════════════════════
        SECTION COMMONS
     ═══════════════════════════════ */
-    section { padding: 88px 0; }
+    section { padding: 108px 0; }
     .s-eyebrow {
-      font-size: 11px; font-weight: 600; color: var(--gold);
-      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 14px;
+      font-size: 10px; font-weight: 500; color: var(--gold);
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px;
+    }
+    .s-eyebrow::before {
+      content: ''; display: block; width: 28px; height: 1px; background: var(--gold);
     }
     .s-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(30px, 4vw, 44px); font-weight: 500;
-      color: var(--text); line-height: 1.18; margin-bottom: 16px;
+      font-size: clamp(34px, 4.5vw, 56px); font-weight: 300;
+      color: var(--ink); line-height: 1.1; margin-bottom: 20px;
+      letter-spacing: -0.5px;
     }
-    .s-title em { font-style: italic; color: var(--navy); }
+    .s-title em { font-style: italic; color: var(--navy); font-weight: 300; }
     .s-sub {
-      font-size: 16px; color: var(--mid); line-height: 1.7;
-      max-width: 560px;
+      font-size: 16px; color: var(--mid); line-height: 1.8;
+      max-width: 540px; font-weight: 300;
+    }
+    .s-rule { width: 40px; height: 1px; background: var(--cream3); margin: 28px 0; }
+
+    /* ═══════════════════════════════
+       CHIFFRES — sobre
+    ═══════════════════════════════ */
+    .numbers {
+      background: var(--cream); padding: 56px 0;
+      border-top: 1px solid var(--cream3); border-bottom: 1px solid var(--cream3);
+    }
+    .numbers-inner {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      divide-x: 1px solid var(--cream3);
+    }
+    .num-item {
+      text-align: center; padding: 8px 24px;
+      border-right: 1px solid var(--cream3);
+    }
+    .num-item:last-child { border-right: none; }
+    .num-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px; font-weight: 300; color: var(--ink);
+      line-height: 1; margin-bottom: 8px;
+    }
+    .num-val span { color: var(--gold); }
+    .num-label { font-size: 12px; color: var(--mid); letter-spacing: 0.3px; font-weight: 300; }
+    @media (max-width: 640px) {
+      .numbers-inner { grid-template-columns: 1fr 1fr; }
+      .num-item:nth-child(2) { border-right: none; }
+      .num-item:nth-child(3) { border-top: 1px solid var(--cream3); }
+      .num-item:nth-child(4) { border-top: 1px solid var(--cream3); border-right: none; }
     }
 
     /* ═══════════════════════════════
-       FEATURES
+       L'HUMAIN — 2 colonnes
+    ═══════════════════════════════ */
+    .intro { background: var(--white); }
+    .intro-inner {
+      display: grid; grid-template-columns: 5fr 4fr;
+      gap: 96px; align-items: center;
+    }
+    .intro-text {}
+    .intro-text .s-sub { margin-bottom: 48px; max-width: 100%; }
+    .intro-points { display: flex; flex-direction: column; gap: 32px; }
+    .intro-point { display: flex; gap: 20px; align-items: flex-start; }
+    .intro-point-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px; font-weight: 400; color: var(--gold);
+      letter-spacing: 1px; min-width: 20px; padding-top: 3px; flex-shrink: 0;
+    }
+    .intro-point-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 400; color: var(--ink);
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    .intro-point-desc { font-size: 14px; color: var(--mid); line-height: 1.75; font-weight: 300; }
+    .intro-photo {
+      position: relative;
+    }
+    .intro-photo-frame {
+      width: 100%; aspect-ratio: 3/4;
+      border-radius: 4px; overflow: hidden;
+      background: var(--cream2);
+      /*
+        PHOTO :
+        background-image: url('/photo-hotel.jpg');
+        background-size: cover;
+        background-position: center;
+      */
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intro-photo-ph {
+      text-align: center; padding: 40px;
+    }
+    .intro-photo-ph .ph-icon { font-size: 40px; opacity: 0.2; margin-bottom: 16px; }
+    .intro-photo-ph .ph-text {
+      font-size: 11px; color: var(--light); letter-spacing: 2px;
+      text-transform: uppercase; line-height: 2;
+    }
+    /* Bloc flottant sous la photo */
+    .intro-float {
+      position: absolute; bottom: -24px; left: -24px;
+      background: var(--white); border: 1px solid var(--cream3);
+      border-radius: 4px; padding: 20px 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+      max-width: 200px;
+    }
+    .intro-float-gold {
+      font-size: 10px; font-weight: 500; color: var(--gold);
+      letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .intro-float-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; font-weight: 400; color: var(--ink); line-height: 1.4;
+    }
+    @media (max-width: 860px) {
+      .intro-inner { grid-template-columns: 1fr; gap: 56px; }
+      .intro-photo-frame { aspect-ratio: 16/9; }
+      .intro-float { left: 14px; bottom: -20px; }
+    }
+
+    /* ═══════════════════════════════
+       FONCTIONNALITÉS — épuré
     ═══════════════════════════════ */
     .features { background: var(--cream); }
-    .features-head { text-align: center; margin-bottom: 60px; }
-    .features-head .s-sub { margin: 0 auto; }
+    .features-head {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 64px; align-items: end; margin-bottom: 80px;
+    }
     .features-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px; background: var(--cream3); border: 1px solid var(--cream3);
+      border-radius: 4px; overflow: hidden;
     }
     .feat-card {
-      background: var(--cream); border: 1px solid var(--cream2);
-      border-radius: 16px; padding: 32px 24px;
-      transition: box-shadow .25s, transform .25s;
+      background: var(--cream); padding: 40px 32px;
+      transition: background .2s;
     }
-    .feat-card:hover {
-      box-shadow: 0 12px 40px rgba(5,51,114,0.1);
-      transform: translateY(-3px);
-    }
-    .feat-ico {
-      width: 48px; height: 48px; border-radius: 12px;
-      background: var(--navy); display: flex; align-items: center;
-      justify-content: center; font-size: 22px; margin-bottom: 20px;
+    .feat-card:hover { background: var(--white); }
+    .feat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px; color: var(--gold); letter-spacing: 1px;
+      margin-bottom: 24px;
     }
     .feat-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 600; color: var(--text);
-      margin-bottom: 10px; line-height: 1.25;
+      font-size: 24px; font-weight: 400; color: var(--ink);
+      margin-bottom: 14px; line-height: 1.2;
     }
-    .feat-desc { font-size: 14px; color: var(--mid); line-height: 1.65; }
-
-    @media (max-width: 900px) {
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 540px) {
+    .feat-desc { font-size: 14px; color: var(--mid); line-height: 1.75; font-weight: 300; }
+    @media (max-width: 860px) {
+      .features-head { grid-template-columns: 1fr; gap: 24px; }
       .features-grid { grid-template-columns: 1fr; }
     }
 
     /* ═══════════════════════════════
-       HOW IT WORKS
+       PRODUIT — sombre & produit
     ═══════════════════════════════ */
-    .how { background: var(--cream); }
-    .how-inner {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    .product { background: var(--ink); overflow: hidden; }
+    .product-inner {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
     }
-    .how-steps { display: flex; flex-direction: column; gap: 36px; }
-    .how-step { display: flex; gap: 20px; align-items: flex-start; }
-    .step-num {
-      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
-      background: var(--gold); color: var(--navy2);
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px; font-weight: 700;
+    .product-text .s-eyebrow { color: var(--gold); opacity: 0.8; }
+    .product-text .s-title { color: var(--white); font-weight: 300; }
+    .product-text .s-sub { color: rgba(255,255,255,0.45); font-weight: 300; max-width: 100%; }
+    .product-list {
+      list-style: none; display: flex; flex-direction: column; gap: 16px; margin-top: 36px;
+    }
+    .product-list li {
+      display: flex; align-items: flex-start; gap: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.6); font-weight: 300;
+      padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .product-list li:last-child { border-bottom: none; }
+    .product-list li::before {
+      content: '—'; color: var(--gold); font-size: 14px; flex-shrink: 0; margin-top: 0;
+    }
+    /* Mockup téléphone minimaliste */
+    .product-visual {
+      display: flex; justify-content: center; padding: 24px 0;
+    }
+    .phone-outer {
+      width: 252px; position: relative;
+    }
+    .phone-mock {
+      width: 100%;
+      background: #faf7f2;
+      border-radius: 44px;
+      border: 2px solid rgba(201,168,76,0.3);
+      box-shadow:
+        0 0 0 8px rgba(255,255,255,0.04),
+        0 48px 120px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    .phone-status {
+      height: 44px; background: var(--navy2);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 14px rgba(201,168,76,0.35);
     }
-    .step-content {}
-    .step-title {
+    .phone-notch {
+      width: 72px; height: 18px; background: rgba(0,0,0,0.5);
+      border-radius: 9px;
+    }
+    .phone-screen { background: #faf7f2; }
+    .ps-cover {
+      height: 90px;
+      background: linear-gradient(160deg, var(--navy2) 0%, var(--navy) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px;
+    }
+    .ps-welcome {
+      font-size: 9px; color: rgba(201,168,76,0.8);
+      letter-spacing: 3px; text-transform: uppercase;
       font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 600; margin-bottom: 6px;
     }
-    .step-desc { font-size: 14px; color: var(--mid); line-height: 1.65; }
-    .how-visual {
-      background: #fdf9f3; border-radius: 24px;
-      padding: 32px 28px; border: 1px solid var(--cream2);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.08);
-    }
-    .hv-label {
+    .ps-hotel-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 13px; color: var(--gold);
-      letter-spacing: 1px; text-align: center; margin-bottom: 20px;
+      font-size: 19px; font-weight: 400; color: var(--white);
     }
-    .hv-config { display: flex; flex-direction: column; gap: 12px; }
-    .hv-row {
+    .ps-city { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .ps-body { padding: 14px 14px 24px; }
+    .ps-tile {
       background: var(--white); border: 1px solid var(--cream2);
-      border-radius: 10px; padding: 12px 14px;
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .hv-row-label { font-size: 10px; color: var(--gold); margin-bottom: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
-    .hv-row-val {
+    .ps-ico { font-size: 16px; flex-shrink: 0; }
+    .ps-lbl {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 15px; color: var(--navy);
+      font-size: 13px; color: var(--navy);
     }
-    .hv-badge {
-      display: inline-block; background: rgba(201,168,76,0.12);
-      border: 1px solid rgba(201,168,76,0.4);
-      color: var(--navy); font-size: 10px; font-weight: 700;
-      letter-spacing: 1px; padding: 3px 10px; border-radius: 12px;
-      margin-top: 16px;
-    }
-
+    .ps-sub { font-size: 9px; color: var(--mid); margin-top: 1px; }
     @media (max-width: 768px) {
-      .how-inner { grid-template-columns: 1fr; gap: 48px; }
+      .product-inner { grid-template-columns: 1fr; gap: 48px; }
+      .product-visual { order: -1; }
     }
 
     /* ═══════════════════════════════
-       DEVICES SECTION
+       COMMENT — 3 étapes sobres
     ═══════════════════════════════ */
-    .devices { background: var(--white); overflow: hidden; } /* blanc entre deux sections crème = respiration */
-    .devices-head { text-align: center; margin-bottom: 60px; }
-    .devices-head .s-sub { margin: 0 auto; }
-    .devices-row {
-      display: flex; gap: 20px; align-items: flex-end;
-      justify-content: center; flex-wrap: wrap;
+    .how { background: var(--white); }
+    .how-head { max-width: 520px; margin-bottom: 80px; }
+    .how-steps {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--cream3);
+      border-top: 1px solid var(--cream3);
     }
-    .device-card {
-      background: var(--cream); border: 1px solid var(--cream2);
-      border-radius: 16px; padding: 24px 20px;
-      text-align: center; flex: 1; min-width: 200px; max-width: 280px;
+    .how-step {
+      background: var(--white); padding: 48px 36px;
     }
-    .device-icon { font-size: 40px; margin-bottom: 14px; }
-    .device-name {
+    .how-step-num {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 20px; font-weight: 600; margin-bottom: 8px;
+      font-size: 56px; font-weight: 300; color: var(--cream3);
+      line-height: 1; margin-bottom: 28px;
     }
-    .device-desc { font-size: 13px; color: var(--mid); line-height: 1.6; }
-    .device-highlight {
-      background: var(--white);
-      border: 2px solid var(--gold);
-      box-shadow: 0 8px 28px rgba(201,168,76,0.18);
+    .how-step-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 400; margin-bottom: 12px; color: var(--ink);
     }
-    .device-highlight .device-name { color: var(--navy); }
-    .device-highlight .device-desc { color: var(--mid); }
+    .how-step-desc { font-size: 14px; color: var(--mid); line-height: 1.75; font-weight: 300; }
+    @media (max-width: 640px) {
+      .how-steps { grid-template-columns: 1fr; }
+    }
 
     /* ═══════════════════════════════
-       PRICING
+       POUR QUI — types minimal
+    ═══════════════════════════════ */
+    .types { background: var(--cream); }
+    .types-inner {
+      display: grid; grid-template-columns: 1fr 2fr;
+      gap: 80px; align-items: start;
+    }
+    .types-list {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1px; background: var(--cream3);
+      border: 1px solid var(--cream3); border-radius: 4px; overflow: hidden;
+      margin-top: 0;
+    }
+    .type-item {
+      background: var(--cream); padding: 32px 28px;
+      transition: background .2s;
+    }
+    .type-item:hover { background: var(--white); }
+    .type-icon { font-size: 28px; margin-bottom: 14px; }
+    .type-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 400; color: var(--ink); margin-bottom: 8px;
+    }
+    .type-desc { font-size: 13px; color: var(--mid); line-height: 1.65; font-weight: 300; }
+    @media (max-width: 768px) {
+      .types-inner { grid-template-columns: 1fr; gap: 40px; }
+      .types-list { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════
+       TÉMOIGNAGES — fond crème
+    ═══════════════════════════════ */
+    .testimonials { background: var(--white); }
+    .testi-head { text-align: center; margin-bottom: 72px; }
+    .testi-head .s-eyebrow { justify-content: center; }
+    .testi-head .s-eyebrow::before { display: none; }
+    .testi-head .s-title { margin: 0 auto; }
+    .testi-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--cream3);
+      border: 1px solid var(--cream3); border-radius: 4px; overflow: hidden;
+    }
+    .testi-card {
+      background: var(--white); padding: 40px 32px;
+    }
+    .testi-stars {
+      color: var(--gold); font-size: 11px; letter-spacing: 3px; margin-bottom: 20px;
+    }
+    .testi-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-style: italic; color: var(--ink2);
+      line-height: 1.65; margin-bottom: 28px; font-weight: 300;
+    }
+    .testi-rule { width: 28px; height: 1px; background: var(--gold); margin-bottom: 20px; opacity: 0.6; }
+    .testi-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+    .testi-role { font-size: 12px; color: var(--light); font-weight: 300; }
+    @media (max-width: 768px) {
+      .testi-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════
+       PRICING — épuré
     ═══════════════════════════════ */
     .pricing { background: var(--cream); }
-    .pricing-head { text-align: center; margin-bottom: 56px; }
-    .pricing-head .s-sub { margin: 0 auto; }
-    .trial-banner {
-      background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
-      border-radius: 16px; padding: 28px 36px;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; margin-bottom: 32px; flex-wrap: wrap;
+    .pricing-head { max-width: 520px; margin-bottom: 64px; }
+    /* Toggle */
+    .pricing-toggle-row {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 48px;
     }
-    .trial-left {}
-    .trial-badge {
-      display: inline-block; background: rgba(201,168,76,0.2);
-      border: 1px solid rgba(201,168,76,0.4);
-      color: var(--gold); font-size: 11px; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      padding: 4px 12px; border-radius: 12px; margin-bottom: 10px;
+    .toggle-label {
+      font-size: 13px; color: var(--light); cursor: pointer; transition: color .2s;
+      font-weight: 300;
+    }
+    .toggle-label.active { color: var(--ink); }
+    .toggle-switch {
+      position: relative; width: 44px; height: 24px; cursor: pointer;
+    }
+    .toggle-switch input { display: none; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--ink); border-radius: 12px;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: var(--gold); border-radius: 50%;
+      transition: transform .2s;
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(20px); }
+    .badge-eco {
+      font-size: 10px; color: var(--gold); border: 1px solid rgba(201,168,76,0.4);
+      padding: 3px 10px; border-radius: 3px; letter-spacing: 1px; text-transform: uppercase;
+      font-weight: 500;
+    }
+    /* Banner essai */
+    .trial-banner {
+      background: var(--ink); border-radius: 4px;
+      padding: 32px 40px; margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      flex-wrap: wrap;
+    }
+    .trial-eyebrow {
+      font-size: 10px; color: var(--gold); letter-spacing: 3px;
+      text-transform: uppercase; margin-bottom: 10px; font-weight: 500;
     }
     .trial-title {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; font-weight: 500; color: var(--white); margin-bottom: 6px;
+      font-size: 30px; font-weight: 300; color: var(--white); margin-bottom: 4px;
     }
-    .trial-sub { font-size: 14px; color: rgba(255,255,255,0.6); }
-    .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .trial-sub { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 300; }
+    .btn-trial {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: #1a1000;
+      padding: 14px 30px; border-radius: 4px;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.3px;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .btn-trial:hover { background: var(--gold2); }
+    /* Plans */
+    .plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .plan-card {
-      background: var(--white); border: 1px solid var(--cream2);
-      border-radius: 16px; padding: 32px 28px;
-      position: relative; transition: box-shadow .25s;
+      background: var(--white); border: 1px solid var(--cream3);
+      border-radius: 4px; padding: 40px 36px;
+      position: relative;
     }
-    .plan-card:hover { box-shadow: 0 12px 40px rgba(5,51,114,0.1); }
-    .plan-card.featured {
-      border-color: var(--navy); box-shadow: 0 8px 30px rgba(5,51,114,0.12);
+    .plan-card.featured { border-color: var(--ink); }
+    .plan-badge {
+      position: absolute; top: -1px; left: 40px;
+      background: var(--ink); color: var(--gold);
+      font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 0 0 4px 4px;
     }
-    .plan-badge-featured {
-      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: var(--navy); color: var(--gold);
-      font-size: 10px; font-weight: 700; letter-spacing: 1px;
-      padding: 4px 16px; border-radius: 12px; white-space: nowrap;
-    }
-    .plan-for { font-size: 11px; color: var(--mid); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .plan-for { font-size: 11px; color: var(--light); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; font-weight: 300; }
     .plan-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 26px; font-weight: 600; margin-bottom: 4px;
+      font-size: 36px; font-weight: 300; color: var(--ink); margin-bottom: 4px;
     }
-    .plan-size { font-size: 12px; color: var(--mid); margin-bottom: 20px; }
-    .plan-price-wrap { margin-bottom: 8px; }
+    .plan-size { font-size: 13px; color: var(--light); margin-bottom: 28px; font-weight: 300; }
+    .plan-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
     .plan-price {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 38px; font-weight: 600; color: var(--navy);
+      font-size: 48px; font-weight: 300; color: var(--ink);
+      line-height: 1;
     }
-    .plan-period { font-size: 13px; color: var(--mid); }
-    .plan-annual { font-size: 12px; color: var(--mid); margin-bottom: 24px; }
-    .plan-annual strong { color: var(--navy); }
-    .plan-sep { border: none; border-top: 1px solid var(--cream2); margin: 24px 0; }
-    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .plan-currency { font-size: 14px; color: var(--mid); font-weight: 300; }
+    .plan-annual { font-size: 12px; color: var(--light); margin-bottom: 28px; font-weight: 300; }
+    .plan-annual strong { color: var(--ink); font-weight: 400; }
+    .plan-rule { border: none; border-top: 1px solid var(--cream3); margin: 28px 0; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
     .plan-features li {
-      font-size: 14px; color: var(--mid);
-      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--mid); display: flex; align-items: flex-start; gap: 12px;
+      line-height: 1.5; font-weight: 300;
     }
-    .plan-features li::before {
-      content: '✓'; color: var(--gold); font-weight: 700;
-      flex-shrink: 0; margin-top: 1px;
-    }
+    .plan-features li::before { content: '—'; color: var(--gold); flex-shrink: 0; }
     .plan-cta {
       display: block; width: 100%; text-align: center;
-      padding: 13px; border-radius: 8px;
-      font-size: 14px; font-weight: 600;
-      transition: background .2s, transform .15s;
+      padding: 14px; border-radius: 4px;
+      font-size: 13px; font-weight: 400; letter-spacing: 0.3px;
+      transition: background .2s, color .2s, border-color .2s;
     }
-    .plan-cta-outline {
-      border: 1.5px solid var(--navy); color: var(--navy);
-    }
-    .plan-cta-outline:hover { background: var(--navy); color: var(--white); }
-    .plan-cta-filled {
-      background: var(--navy); color: var(--white);
-    }
-    .plan-cta-filled:hover { background: var(--navy2); transform: translateY(-1px); }
-
+    .plan-cta-outline { border: 1px solid var(--cream3); color: var(--mid); }
+    .plan-cta-outline:hover { border-color: var(--ink); color: var(--ink); }
+    .plan-cta-filled { background: var(--ink); color: var(--white); }
+    .plan-cta-filled:hover { background: var(--ink2); }
     @media (max-width: 640px) {
       .plans-grid { grid-template-columns: 1fr; }
-      .trial-banner { flex-direction: column; text-align: center; }
+      .trial-banner { flex-direction: column; }
     }
 
     /* ═══════════════════════════════
-       CTA FINAL
+       CTA FINAL — sobre, crème foncé
     ═══════════════════════════════ */
     .cta-final {
-      background: var(--cream2);
-      border-top: 1px solid #e0d8cc;
-      padding: 100px 0; text-align: center; position: relative; overflow: hidden;
+      background: var(--ink);
+      padding: 120px 0; text-align: center;
     }
-    .cta-final .s-eyebrow { color: var(--gold); margin-bottom: 14px; }
-    .cta-final .s-title { color: var(--navy); max-width: 600px; margin: 0 auto 16px; }
-    .cta-final .s-sub { color: var(--mid); margin: 0 auto 40px; text-align: center; }
-    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .cta-note { margin-top: 16px; font-size: 13px; color: #9a9080; }
-    .btn-primary-navy {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--navy); color: var(--white);
-      padding: 16px 32px; border-radius: 8px;
-      font-size: 16px; font-weight: 600;
-      transition: background .2s, transform .15s;
+    .cta-final .s-eyebrow { justify-content: center; color: var(--gold); opacity: 0.7; }
+    .cta-final .s-eyebrow::before { background: var(--gold); opacity: 0.5; }
+    .cta-final .s-title { color: var(--white); margin: 0 auto 20px; max-width: 620px; }
+    .cta-final .s-title em { color: var(--gold); }
+    .cta-final .s-sub { color: rgba(255,255,255,0.4); margin: 0 auto 52px; text-align: center; max-width: 440px; }
+    .btn-cta {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--gold); color: #1a1000;
+      padding: 18px 42px; border-radius: 4px;
+      font-size: 14px; font-weight: 500; letter-spacing: 0.3px;
+      transition: background .2s, transform .2s;
     }
-    .btn-primary-navy:hover { background: var(--navy2); transform: translateY(-1px); }
+    .btn-cta:hover { background: var(--gold2); transform: translateY(-2px); }
+    .cta-note { margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.2); font-weight: 300; letter-spacing: 0.3px; }
 
     /* ═══════════════════════════════
        FOOTER
     ═══════════════════════════════ */
     footer {
-      background: var(--navy2); padding: 36px 0;
-      border-top: 1px solid rgba(201,168,76,0.15);
+      background: #0b0b0b; padding: 56px 0 40px;
     }
-    .footer-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 16px;
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr;
+      gap: 56px; padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .footer-logo {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 18px; font-weight: 600; color: var(--white);
-      letter-spacing: 1px;
+      font-size: 22px; font-weight: 400; color: var(--white);
+      letter-spacing: 1.5px; margin-bottom: 14px;
     }
     .footer-logo span { color: var(--gold); }
-    .footer-by { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 12px; color: rgba(255,255,255,0.45); transition: color .2s; }
+    .footer-desc {
+      font-size: 13px; color: rgba(255,255,255,0.25);
+      line-height: 1.75; font-weight: 300; max-width: 240px;
+    }
+    .footer-col-title {
+      font-size: 10px; color: rgba(255,255,255,0.2);
+      letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 20px;
+    }
+    .footer-links { display: flex; flex-direction: column; gap: 12px; }
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.4); transition: color .2s; font-weight: 300; }
     .footer-links a:hover { color: rgba(255,255,255,0.8); }
-
+    .footer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.2); font-weight: 300; }
+    .footer-by { font-size: 12px; color: rgba(255,255,255,0.2); font-weight: 300; }
+    .footer-by a { color: rgba(255,255,255,0.3); transition: color .2s; }
+    .footer-by a:hover { color: rgba(255,255,255,0.6); }
+    @media (max-width: 640px) {
+      .footer-top { grid-template-columns: 1fr; gap: 36px; }
+      .footer-bottom { flex-direction: column; gap: 8px; }
+    }
   </style>
 </head>
 <body>
 
 <!-- ── NAV ── -->
-<nav>
+<nav id="main-nav">
   <div class="container">
     <div class="nav-inner">
-      <a href="/"><img src="/logo-dark.svg" alt="Welkomeo" style="height:38px;display:block"></a>
+      <a href="/">
+        <img src="/logo-dark.svg" alt="Welkomeo" style="height:34px;display:block"
+          onerror="this.outerHTML='<span class=\'nav-logo\'>Welkom<span>eo</span></span>'">
+      </a>
       <div class="nav-links">
         <a href="#fonctionnalites">Fonctionnalités</a>
         <a href="#comment">Comment ça marche</a>
         <a href="#tarifs">Tarifs</a>
-        <a href="/register" class="nav-cta">Essai gratuit →</a>
+        <a href="/register" class="nav-cta">Essai gratuit</a>
       </div>
     </div>
   </div>
@@ -515,231 +729,273 @@
 
 <!-- ── HERO ── -->
 <section class="hero">
+  <div class="hero-bg"></div>
+
   <div class="container">
-    <div class="hero-inner">
-      <div class="hero-content">
-        <div class="hero-tag">Livret d'accueil digital</div>
-        <h1>Le livret d'accueil qui<br><em>accompagne vos clients</em><br>partout.</h1>
+    <div class="hero-content">
+      <div class="hero-content-inner">
+        <div class="hero-rule">
+          <div class="hero-rule-line"></div>
+          <span class="hero-rule-text">Livret d'accueil digital</span>
+        </div>
+        <h1>L'accueil parfait<br>commence avant<br><em>l'arrivée.</em></h1>
         <p class="hero-sub">
-          Guidez vos clients pour une expérience personnalisée — bonnes adresses, informations pratiques, WiFi, règles de la maison. Tout est disponible depuis leur smartphone, à tout moment, sans rien télécharger.
+          Un livret digital personnalisé pour accompagner vos clients tout au long de leur séjour — WiFi, bonnes adresses, informations pratiques. Accessible sur smartphone, sans téléchargement.
         </p>
         <div class="hero-btns">
-          <a href="/register" class="btn-primary">Essayer gratuitement 15 jours →</a>
-          <a href="#comment" class="btn-secondary">Voir comment ça marche</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="phone-mock">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="ps-top">✦ Bienvenue ✦</div>
-            <div class="ps-hotel">Hôtel Les Baobabs</div>
-            <div class="ps-city">Saly, Sénégal</div>
-            <div class="ps-tile">
-              <div class="ps-ico">🛎️</div>
-              <div><div class="ps-lbl">Informations pratiques</div><div class="ps-sub">Check-in · Check-out · WiFi</div></div>
-            </div>
-            <div class="ps-tile">
-              <div class="ps-ico">🗺️</div>
-              <div><div class="ps-lbl">Bonnes adresses</div><div class="ps-sub">Restaurants · Activités</div></div>
-            </div>
-            <div class="ps-tile">
-              <div class="ps-ico">🌐</div>
-              <div><div class="ps-lbl">EN · FR</div><div class="ps-sub">Interface bilingue</div></div>
-            </div>
-            <div class="ps-tile">
-              <div class="ps-ico">📩</div>
-              <div><div class="ps-lbl">Nous contacter</div><div class="ps-sub">Message direct à l'hôtel</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="tablet-mock">
-          <div class="tablet-screen">
-            <div class="ts-label">Welkomeo</div>
-            <div class="ts-tile"><div class="ts-ico">🛎️</div><div class="ts-lbl">Infos pratiques</div></div>
-            <div class="ts-tile"><div class="ts-ico">🗺️</div><div class="ts-lbl">Bonnes adresses</div></div>
-            <div class="ts-tile"><div class="ts-ico">🌐</div><div class="ts-lbl">EN · FR</div></div>
-          </div>
+          <a href="/register" class="btn-hero-primary">Essayer gratuitement 15 jours</a>
+          <a href="#comment" class="btn-hero-ghost">Voir comment ça marche →</a>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    <span class="hero-scroll-text">Défiler</span>
+  </div>
 </section>
 
-<!-- ── PROOF BAR ── -->
-<div class="proof-bar">
+<!-- ── CHIFFRES ── -->
+<div class="numbers">
   <div class="container">
-    <div class="proof-inner">
-      <span class="proof-label">Conçu pour</span>
-      <div class="proof-chips">
-        <span class="proof-chip">🏨 Hôtels</span>
-        <span class="proof-chip">🏡 Maisons d'hôtes</span>
-        <span class="proof-chip">🏢 Appartements meublés</span>
-        <span class="proof-chip">🌿 Lodges &amp; Écolodges</span>
-        <span class="proof-chip">✦ Boutique hôtels</span>
+    <div class="numbers-inner">
+      <div class="num-item">
+        <div class="num-val">50<span>+</span></div>
+        <div class="num-label">Établissements</div>
+      </div>
+      <div class="num-item">
+        <div class="num-val">10 <span style="font-size:28px">min</span></div>
+        <div class="num-label">Pour être opérationnel</div>
+      </div>
+      <div class="num-item">
+        <div class="num-val">2</div>
+        <div class="num-label">Langues (FR · EN)</div>
+      </div>
+      <div class="num-item">
+        <div class="num-val">0</div>
+        <div class="num-label">Appli à installer</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── FEATURES ── -->
-<section class="features" id="fonctionnalites">
+<!-- ── L'HUMAIN ── -->
+<section class="intro" id="fonctionnalites">
+  <div class="container">
+    <div class="intro-inner">
+      <div class="intro-text">
+        <div class="s-eyebrow">L'essentiel</div>
+        <h2 class="s-title">Un lien humain,<br><em>renforcé par le digital.</em></h2>
+        <p class="s-sub">Welkomeo ne remplace pas votre accueil — il le prolonge. Vos clients se sentent accompagnés à chaque instant, même quand vous n'êtes pas à leurs côtés.</p>
+        <div class="s-rule"></div>
+        <div class="intro-points">
+          <div class="intro-point">
+            <div class="intro-point-num">01</div>
+            <div>
+              <div class="intro-point-title">Toutes les informations essentielles</div>
+              <p class="intro-point-desc">WiFi, check-in/check-out, règles de la maison, équipements — disponibles 24h/24 sur le smartphone de vos clients.</p>
+            </div>
+          </div>
+          <div class="intro-point">
+            <div class="intro-point-num">02</div>
+            <div>
+              <div class="intro-point-title">Vos recommandations locales</div>
+              <p class="intro-point-desc">Partagez vos bonnes adresses, activités et prestataires de confiance. Votre expertise, valorisée.</p>
+            </div>
+          </div>
+          <div class="intro-point">
+            <div class="intro-point-num">03</div>
+            <div>
+              <div class="intro-point-title">Contact direct avec l'établissement</div>
+              <p class="intro-point-desc">Vos clients peuvent vous envoyer un message ou signaler un problème directement depuis le livret.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="intro-photo">
+        <div class="intro-photo-frame">
+          <!--
+            Remplace ce div par une balise <img> pour afficher une vraie photo :
+            <img src="/photo-hotel.jpg" alt="Établissement" style="width:100%;height:100%;object-fit:cover">
+          -->
+          <div class="intro-photo-ph">
+            <div class="ph-icon">📸</div>
+            <div class="ph-text">Votre photo ici<br><span style="font-size:10px;opacity:0.7;display:block;margin-top:4px">Hôtelier · Équipe · Établissement</span></div>
+          </div>
+        </div>
+        <div class="intro-float">
+          <div class="intro-float-gold">L'hospitalité</div>
+          <div class="intro-float-text">Réinventée pour l'ère digitale</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FONCTIONNALITÉS ── -->
+<section class="features">
   <div class="container">
     <div class="features-head">
-      <div class="s-eyebrow">Fonctionnalités</div>
-      <h2 class="s-title">Tout ce dont vos clients ont besoin,<br><em>en un seul endroit.</em></h2>
+      <div>
+        <div class="s-eyebrow">Fonctionnalités</div>
+        <h2 class="s-title">Tout ce dont vos clients ont besoin.</h2>
+      </div>
       <p class="s-sub">Un livret complet, toujours à jour, que vous personnalisez en quelques minutes depuis votre tableau de bord.</p>
     </div>
     <div class="features-grid">
       <div class="feat-card">
-        <div class="feat-ico">✏️</div>
+        <div class="feat-num">01</div>
         <div class="feat-title">100 % personnalisable</div>
-        <p class="feat-desc">Ajoutez votre logo, vos couleurs, vos textes, vos photos. Chaque livret reflète l'identité unique de votre établissement.</p>
+        <p class="feat-desc">Logo, couleurs, textes, photos. Chaque livret reflète l'identité unique de votre établissement, sans compétences techniques.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-ico">📱</div>
+        <div class="feat-num">02</div>
         <div class="feat-title">Tous les appareils</div>
-        <p class="feat-desc">Smartphone, tablette, ordinateur — votre livret s'adapte parfaitement à chaque écran, sans téléchargement, depuis un simple lien ou QR code.</p>
+        <p class="feat-desc">Smartphone, tablette, ordinateur — votre livret s'adapte à chaque écran. Un simple lien ou QR code, sans téléchargement.</p>
       </div>
       <div class="feat-card">
-        <div class="feat-ico">🌐</div>
+        <div class="feat-num">03</div>
         <div class="feat-title">Interface bilingue</div>
         <p class="feat-desc">Chaque page est disponible en français et en anglais. Vos clients internationaux naviguent dans leur langue en un clic.</p>
       </div>
-      <div class="feat-card">
-        <div class="feat-ico">🗺️</div>
-        <div class="feat-title">Bonnes adresses</div>
-        <p class="feat-desc">Recommandez vos restaurants, activités, plages, prestataires de confiance. Un vrai guide local, mis à jour en temps réel.</p>
-      </div>
     </div>
   </div>
 </section>
 
-<!-- ── PHOTO HUMAINE ── -->
-<section style="background:var(--white);padding:80px 0;">
+<!-- ── PRODUIT ── -->
+<section class="product">
   <div class="container">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;">
-      <!-- Placeholder photo -->
-      <div style="position:relative;">
-        <div style="
-          width:100%; aspect-ratio:4/3; border-radius:20px;
-          background: linear-gradient(135deg, var(--cream2) 0%, var(--cream) 100%);
-          border: 2px dashed rgba(201,168,76,0.4);
-          display:flex; flex-direction:column; align-items:center; justify-content:center;
-          gap:12px;
-        ">
-          <div style="font-size:48px; opacity:0.4;">📸</div>
-          <div style="font-size:12px; color:var(--mid); text-align:center; letter-spacing:1px; text-transform:uppercase;">
-            Votre photo ici<br>
-            <span style="font-size:10px; opacity:0.6">Hôtelier · Équipe · Établissement</span>
+    <div class="product-inner">
+      <div class="product-text">
+        <div class="s-eyebrow">Le produit</div>
+        <h2 class="s-title">Simple pour vous.<br><em>Parfait pour eux.</em></h2>
+        <p class="s-sub">Conçu pour les hôteliers, pas pour les développeurs. Remplissez, enregistrez — le livret se met à jour instantanément.</p>
+        <ul class="product-list">
+          <li>Livret accessible via lien personnalisé ou QR code imprimable</li>
+          <li>Envoi par WhatsApp ou email en un clic depuis le tableau de bord</li>
+          <li>Gestion des séjours, des chambres et des vacanciers</li>
+          <li>Système de tickets pour les demandes et incidents clients</li>
+          <li>Mise à jour en temps réel, visible immédiatement par vos clients</li>
+        </ul>
+      </div>
+      <div class="product-visual">
+        <div class="phone-outer">
+          <div class="phone-mock">
+            <div class="phone-status">
+              <div class="phone-notch"></div>
+            </div>
+            <div class="phone-screen">
+              <div class="ps-cover">
+                <div class="ps-welcome">Bienvenue</div>
+                <div class="ps-hotel-name">Hôtel Les Baobabs</div>
+                <div class="ps-city">Saly, Sénégal</div>
+              </div>
+              <div class="ps-body">
+                <div class="ps-tile"><div class="ps-ico">🛎️</div><div><div class="ps-lbl">Informations pratiques</div><div class="ps-sub">Check-in · WiFi · Équipements</div></div></div>
+                <div class="ps-tile"><div class="ps-ico">🗺️</div><div><div class="ps-lbl">Bonnes adresses</div><div class="ps-sub">Restaurants · Activités</div></div></div>
+                <div class="ps-tile"><div class="ps-ico">🌐</div><div><div class="ps-lbl">EN · FR</div><div class="ps-sub">Interface bilingue</div></div></div>
+                <div class="ps-tile"><div class="ps-ico">📩</div><div><div class="ps-lbl">Nous contacter</div><div class="ps-sub">Message direct à l'hôtel</div></div></div>
+              </div>
+            </div>
           </div>
         </div>
-        <!-- Badge décoratif -->
-        <div style="
-          position:absolute; bottom:-16px; right:24px;
-          background:var(--navy); color:var(--gold);
-          font-family:'Cormorant Garamond',serif;
-          font-size:13px; font-weight:500; letter-spacing:0.5px;
-          padding:10px 18px; border-radius:10px;
-          box-shadow: 0 8px 24px rgba(5,51,114,0.2);
-        ">✦ L'hospitalité, réinventée</div>
-      </div>
-      <!-- Texte -->
-      <div>
-        <div class="s-eyebrow">L'humain au cœur</div>
-        <h2 class="s-title">Un lien humain,<br><em>renforcé par le digital.</em></h2>
-        <p style="font-size:16px;color:var(--mid);line-height:1.75;margin-bottom:20px;">
-          Welkomeo ne remplace pas votre accueil — il le prolonge. Vos clients se sentent accompagnés à chaque instant de leur séjour, même quand vous n'êtes pas à leurs côtés.
-        </p>
-        <p style="font-size:16px;color:var(--mid);line-height:1.75;">
-          Un sourire à l'arrivée, un livret digital pour le reste du séjour — c'est ça, l'hospitalité moderne.
-        </p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── HOW IT WORKS ── -->
+<!-- ── COMMENT ── -->
 <section class="how" id="comment">
   <div class="container">
-    <div class="how-inner">
-      <div>
-        <div class="s-eyebrow">Simple &amp; rapide</div>
-        <h2 class="s-title">Opérationnel en<br><em>moins de 10 minutes.</em></h2>
-        <p class="s-sub" style="margin-bottom:40px">Pas de compétences techniques requises. Vous remplissez, nous affichons.</p>
-        <div class="how-steps">
-          <div class="how-step">
-            <div class="step-num">1</div>
-            <div class="step-content">
-              <div class="step-title">Créez votre compte</div>
-              <p class="step-desc">Renseignez vos informations d'établissement en 3 minutes. Votre espace est prêt instantanément.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <div class="step-num">2</div>
-            <div class="step-content">
-              <div class="step-title">Personnalisez votre livret</div>
-              <p class="step-desc">WiFi, check-in/out, règles de la maison, activités, bonnes adresses — vous remplissez chaque rubrique à votre rythme.</p>
-            </div>
-          </div>
-          <div class="how-step">
-            <div class="step-num">3</div>
-            <div class="step-content">
-              <div class="step-title">Partagez avec vos clients</div>
-              <p class="step-desc">Un lien ou un QR code imprimable à déposer dans chaque chambre. Vos clients accèdent au livret sans rien télécharger.</p>
-            </div>
-          </div>
-        </div>
+    <div class="how-head">
+      <div class="s-eyebrow">Simple &amp; rapide</div>
+      <h2 class="s-title">Opérationnel en <em>10 minutes.</em></h2>
+      <p class="s-sub">Pas de compétences techniques requises.</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-title">Créez votre compte</div>
+        <p class="how-step-desc">Renseignez votre établissement en 3 minutes. Votre espace est prêt instantanément, sans installation.</p>
       </div>
-      <div class="how-visual">
-        <div class="hv-label">✦ Votre tableau de bord ✦</div>
-        <div class="hv-config">
-          <div class="hv-row">
-            <div class="hv-row-label">Nom de l'établissement</div>
-            <div class="hv-row-val">Hôtel Les Baobabs</div>
-          </div>
-          <div class="hv-row">
-            <div class="hv-row-label">Code WiFi</div>
-            <div class="hv-row-val">Baobabs2024 ·  Réseau : Hotel_Guest</div>
-          </div>
-          <div class="hv-row">
-            <div class="hv-row-label">Message de bienvenue</div>
-            <div class="hv-row-val" style="font-size:13px;font-style:italic;color:rgba(245,230,200,0.7)">"Bienvenue à l'Hôtel Les Baobabs. Nous sommes heureux de vous accueillir…"</div>
-          </div>
-          <div class="hv-row">
-            <div class="hv-row-label">Bonne adresse ajoutée</div>
-            <div class="hv-row-val">🍽️ Restaurant Le Lagon · 2 km</div>
-          </div>
-        </div>
-        <div class="hv-badge">✓ ENREGISTRÉ · VISIBLE IMMÉDIATEMENT</div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-title">Personnalisez votre livret</div>
+        <p class="how-step-desc">WiFi, check-in/out, règles, activités, bonnes adresses — remplissez chaque rubrique à votre rythme.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-title">Partagez avec vos clients</div>
+        <p class="how-step-desc">Un lien ou un QR code à déposer en chambre. Vos clients accèdent au livret sans rien télécharger.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── DEVICES ── -->
-<section class="devices">
+<!-- ── POUR QUI ── -->
+<section class="types">
   <div class="container">
-    <div class="devices-head">
-      <div class="s-eyebrow">Accessibilité totale</div>
-      <h2 class="s-title">Votre livret, <em>partout,</em> tout le temps.</h2>
-      <p class="s-sub">Aucune application à installer. Un simple lien, scannable depuis un QR code ou envoyé par WhatsApp, suffit.</p>
+    <div class="types-inner">
+      <div>
+        <div class="s-eyebrow">Pour qui</div>
+        <h2 class="s-title">Tous les établissements <em>d'hébergement.</em></h2>
+        <p class="s-sub">De 5 à 80 chambres — Welkomeo s'adapte à la taille et à l'identité de votre établissement.</p>
+      </div>
+      <div class="types-list">
+        <div class="type-item">
+          <div class="type-icon">🏨</div>
+          <div class="type-name">Hôtels</div>
+          <p class="type-desc">Gestion multi-chambres, séjours personnalisés.</p>
+        </div>
+        <div class="type-item">
+          <div class="type-icon">🏡</div>
+          <div class="type-name">Maisons d'hôtes</div>
+          <p class="type-desc">Interface chaleureuse, ton personnalisé.</p>
+        </div>
+        <div class="type-item">
+          <div class="type-icon">🌿</div>
+          <div class="type-name">Lodges & Écolodges</div>
+          <p class="type-desc">Recommandations nature, activités locales.</p>
+        </div>
+        <div class="type-item">
+          <div class="type-icon">🏢</div>
+          <div class="type-name">Appart. meublés</div>
+          <p class="type-desc">Accès, équipements, contacts d'urgence.</p>
+        </div>
+      </div>
     </div>
-    <div class="devices-row">
-      <div class="device-card">
-        <div class="device-icon">📱</div>
-        <div class="device-name">Smartphone</div>
-        <p class="device-desc">L'expérience principale. Interface mobile-first, navigation intuitive, lecture confortable.</p>
+  </div>
+</section>
+
+<!-- ── TÉMOIGNAGES ── -->
+<section class="testimonials">
+  <div class="container">
+    <div class="testi-head">
+      <div class="s-eyebrow">Témoignages</div>
+      <h2 class="s-title">Ils font confiance<br><em>à Welkomeo.</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">« Mes clients posaient toujours les mêmes questions sur le WiFi et les horaires. Depuis Welkomeo, tout est dans le livret — je gagne un temps précieux. »</p>
+        <div class="testi-rule"></div>
+        <div class="testi-name">Aminata M.</div>
+        <div class="testi-role">Maison d'hôtes · Dakar</div>
       </div>
-      <div class="device-card device-highlight">
-        <div class="device-icon">💻</div>
-        <div class="device-name">Ordinateur</div>
-        <p class="device-desc">Consultation depuis la réception, vérification avant l'arrivée, affichage en grand format.</p>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">« L'interface est vraiment simple. J'ai tout configuré en une demi-heure. Nos clients étrangers adorent avoir tout en anglais sans effort supplémentaire. »</p>
+        <div class="testi-rule"></div>
+        <div class="testi-name">Kofi D.</div>
+        <div class="testi-role">Boutique Hôtel · Abidjan</div>
       </div>
-      <div class="device-card">
-        <div class="device-icon">📟</div>
-        <div class="device-name">Tablette</div>
-        <p class="device-desc">Parfait pour une tablette en chambre ou à la réception. Affichage plein écran optimisé.</p>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">« Le QR code en chambre a tout changé. Les pensionnaires scannent à l'arrivée, ont toutes les infos. Moins d'appels, et de très bons retours. »</p>
+        <div class="testi-rule"></div>
+        <div class="testi-name">Fatou B.</div>
+        <div class="testi-role">Lodge Éco · Saly</div>
       </div>
     </div>
   </div>
@@ -750,28 +1006,41 @@
   <div class="container">
     <div class="pricing-head">
       <div class="s-eyebrow">Tarifs</div>
-      <h2 class="s-title">Simple, <em>transparent,</em> sans surprise.</h2>
-      <p class="s-sub">Essayez gratuitement pendant 15 jours, sans engagement.</p>
+      <h2 class="s-title">Simple, <em>transparent,</em><br>sans surprise.</h2>
+      <p class="s-sub">15 jours d'essai gratuit — sans engagement et sans carte bancaire.</p>
     </div>
+
+    <div class="pricing-toggle-row">
+      <span class="toggle-label active" id="lbl-monthly">Mensuel</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="billing-toggle">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span class="toggle-label" id="lbl-annual">Annuel</span>
+      <span class="badge-eco" id="badge-eco" style="display:none">2 mois offerts</span>
+    </div>
+
     <div class="trial-banner">
-      <div class="trial-left">
-        <div class="trial-badge">✦ Offre de lancement</div>
+      <div>
+        <div class="trial-eyebrow">Offre de lancement</div>
         <div class="trial-title">15 jours d'essai gratuit</div>
-        <p class="trial-sub">Accès complet à toutes les fonctionnalités. Sans engagement.</p>
+        <p class="trial-sub">Accès complet · Sans carte bancaire · Sans engagement</p>
       </div>
-      <a href="/register" class="btn-primary">Commencer l'essai →</a>
+      <a href="/register" class="btn-trial">Commencer l'essai →</a>
     </div>
+
     <div class="plans-grid">
       <div class="plan-card">
         <div class="plan-for">Petits établissements</div>
         <div class="plan-name">Essentiel</div>
         <div class="plan-size">Jusqu'à 15 chambres</div>
-        <div class="plan-price-wrap">
-          <span class="plan-price">7 500</span>
-          <span class="plan-period"> FCFA / mois</span>
+        <div class="plan-price-row">
+          <span class="plan-price" id="price-small">7 500</span>
+          <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
-        <hr class="plan-sep">
+        <p class="plan-annual" id="annual-small" style="display:none">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
+        <hr class="plan-rule">
         <ul class="plan-features">
           <li>Livret d'accueil complet</li>
           <li>Toutes les rubriques personnalisables</li>
@@ -783,18 +1052,19 @@
         <a href="/register" class="plan-cta plan-cta-outline">Essayer gratuitement 15 jours</a>
       </div>
       <div class="plan-card featured">
-        <div class="plan-badge-featured">✦ Grands établissements</div>
-        <div class="plan-for" style="margin-top:14px">Hôtels &amp; Resorts</div>
+        <div class="plan-badge">Grands établissements</div>
+        <div class="plan-for" style="margin-top:24px">Hôtels &amp; Resorts</div>
         <div class="plan-name">Premium</div>
         <div class="plan-size">16 chambres et plus</div>
-        <div class="plan-price-wrap">
-          <span class="plan-price">15 000</span>
-          <span class="plan-period"> FCFA / mois</span>
+        <div class="plan-price-row">
+          <span class="plan-price" id="price-large">15 000</span>
+          <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual">ou <strong>150 000 FCFA / an</strong> — 2 mois offerts</p>
-        <hr class="plan-sep">
+        <p class="plan-annual" id="annual-large" style="display:none">ou <strong>150 000 FCFA / an</strong> — 2 mois offerts</p>
+        <hr class="plan-rule">
         <ul class="plan-features">
           <li>Tout le plan Essentiel</li>
+          <li>Gestion multi-séjours &amp; multi-chambres</li>
           <li>Support prioritaire</li>
           <li>Accompagnement à la configuration</li>
           <li>Mises à jour en avant-première</li>
@@ -809,31 +1079,89 @@
 <section class="cta-final">
   <div class="container">
     <div class="s-eyebrow">Prêt à démarrer ?</div>
-    <h2 class="s-title">Offrez à vos clients<br>une expérience <em>inoubliable</em> —<br>et soyez à leurs côtés à chaque instant.</h2>
-    <p class="s-sub">Rejoignez les établissements qui ont fait confiance à Welkomeo pour guider et accompagner leurs hôtes tout au long de leur séjour.</p>
-    <div class="cta-btns">
-      <a href="/register" class="btn-primary-navy">Créer mon livret gratuitement →</a>
-    </div>
-    <p class="cta-note">Essai gratuit 15 jours · Sans engagement</p>
+    <h2 class="s-title">Offrez à vos clients<br>une expérience <em>inoubliable.</em></h2>
+    <p class="s-sub">Rejoignez les établissements qui font confiance à Welkomeo.</p>
+    <a href="/register" class="btn-cta">Créer mon livret gratuitement</a>
+    <p class="cta-note">Essai 15 jours · Sans engagement · Sans carte bancaire</p>
   </div>
 </section>
 
 <!-- ── FOOTER ── -->
 <footer>
   <div class="container">
-    <div class="footer-inner">
+    <div class="footer-top">
       <div>
-        <img src="/logo-dark.svg" alt="Welkomeo" style="height:34px;display:block;margin-bottom:6px">
-        <div class="footer-by">Exploité par <a href="https://assenka.com" target="_blank" rel="noopener" style="color:rgba(255,255,255,0.5)">Assenka</a> · welkomeo.com</div>
+        <div class="footer-logo">Welkom<span>eo</span></div>
+        <p class="footer-desc">Le livret d'accueil digital pour l'hôtellerie en Afrique de l'Ouest. Personnalisable, bilingue, accessible partout.</p>
       </div>
-      <div class="footer-links">
-        <a href="/register">S'inscrire</a>
-        <a href="mailto:contact@welkomeo.com">Contact</a>
-        <a href="https://wa.me/221785917503" target="_blank" rel="noopener">WhatsApp</a>
+      <div>
+        <div class="footer-col-title">Produit</div>
+        <div class="footer-links">
+          <a href="#fonctionnalites">Fonctionnalités</a>
+          <a href="#comment">Comment ça marche</a>
+          <a href="#tarifs">Tarifs</a>
+          <a href="/register">Essai gratuit</a>
+        </div>
       </div>
+      <div>
+        <div class="footer-col-title">Contact</div>
+        <div class="footer-links">
+          <a href="mailto:contact@welkomeo.com">contact@welkomeo.com</a>
+          <a href="https://wa.me/221785917503" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="https://assenka.com" target="_blank" rel="noopener">Assenka</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Welkomeo · Tous droits réservés</div>
+      <div class="footer-by">Exploité par <a href="https://assenka.com" target="_blank" rel="noopener">Assenka</a> · welkomeo.com</div>
     </div>
   </div>
 </footer>
+
+<script>
+  /* ── NAV scroll ── */
+  (function() {
+    var nav = document.getElementById('main-nav');
+    function check() {
+      if (window.scrollY > 50) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    }
+    window.addEventListener('scroll', check, { passive: true });
+    check();
+  })();
+
+  /* ── Toggle mensuel / annuel ── */
+  (function() {
+    var toggle = document.getElementById('billing-toggle');
+    if (!toggle) return;
+    var lblM  = document.getElementById('lbl-monthly');
+    var lblA  = document.getElementById('lbl-annual');
+    var badge = document.getElementById('badge-eco');
+    var pS    = document.getElementById('price-small');
+    var pL    = document.getElementById('price-large');
+    var aS    = document.getElementById('annual-small');
+    var aL    = document.getElementById('annual-large');
+
+    toggle.addEventListener('change', function() {
+      var annual = toggle.checked;
+      lblM.classList.toggle('active', !annual);
+      lblA.classList.toggle('active', annual);
+      badge.style.display = annual ? 'inline-block' : 'none';
+      if (annual) {
+        pS.textContent = '6 250';
+        pL.textContent = '12 500';
+        aS.style.display = 'block';
+        aL.style.display = 'block';
+      } else {
+        pS.textContent = '7 500';
+        pL.textContent = '15 000';
+        aS.style.display = 'none';
+        aL.style.display = 'none';
+      }
+    });
+  })();
+</script>
 
 </body>
 </html>

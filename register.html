@@ -30,11 +30,35 @@ body {
 /* ── HEADER ── */
 .header {
   background:var(--cover); color:#fff;
-  text-align:center; padding:40px 20px 36px;
+  text-align:center; padding:44px 20px 40px;
+  border-bottom:1px solid rgba(201,168,76,0.25);
 }
-.brand { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:400; letter-spacing:2px; color:#C9A84C; margin-bottom:8px; }
-.header h1 { font-size:28px; font-weight:700; margin-bottom:6px; }
-.header p  { font-size:14px; opacity:0.65; line-height:1.6; }
+.brand-block { display:flex; flex-direction:column; align-items:center; margin-bottom:28px; }
+.brand-diamond {
+  width:36px; height:36px; background:transparent;
+  border:1.5px solid #C9A84C; transform:rotate(45deg);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:16px;
+}
+.brand-diamond-inner {
+  font-family:'Cormorant Garamond',serif; font-size:14px; font-weight:500;
+  color:#C9A84C; transform:rotate(-45deg); line-height:1;
+}
+.brand-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:38px; font-weight:300; color:#fff;
+  letter-spacing:3px; line-height:1; margin-bottom:8px;
+}
+.brand-tagline {
+  font-size:9px; font-weight:400; color:#C9A84C;
+  letter-spacing:5px; text-transform:uppercase;
+}
+.brand-rule {
+  width:40px; height:1px; background:rgba(201,168,76,0.4);
+  margin:24px auto 20px;
+}
+.header h1 { font-size:20px; font-weight:500; color:rgba(255,255,255,0.85); margin-bottom:6px; letter-spacing:0.2px; }
+.header p  { font-size:13px; color:rgba(255,255,255,0.45); line-height:1.7; font-weight:300; }
 
 /* ── PROGRESS ── */
 .progress-wrap { background:var(--white); border-bottom:1px solid var(--border); padding:16px 20px; position:sticky; top:0; z-index:10; }
@@ -158,9 +182,13 @@ body {
 <body>
 
 <div class="header">
-  <div class="brand">Welkomeo · par Assenka</div>
-  <h1>Créez votre livret d'accueil digital</h1>
-  <p>En 3 minutes, votre livret est configuré et prêt pour vos clients.</p>
+  <div class="brand-block">
+    <div class="brand-diamond"><div class="brand-diamond-inner">W</div></div>
+    <div class="brand-name">Welkomeo</div>
+    <div class="brand-tagline">Livret d'accueil digital</div>
+  </div>
+  <div class="brand-rule"></div>
+  <h1>Créez votre livret d'accueil.</h1>
 </div>
 
 <!-- PROGRESS -->

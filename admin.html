@@ -186,9 +186,15 @@ input, textarea, select {
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
-    <div class="login-logo">🏨</div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px">
+      <div style="width:32px;height:32px;border:1.5px solid #C9A84C;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:500;color:#C9A84C;transform:rotate(-45deg);line-height:1">W</span>
+      </div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--text);letter-spacing:2px;line-height:1;margin-bottom:6px">Welkomeo</div>
+      <div style="font-size:9px;color:#C9A84C;letter-spacing:4px;text-transform:uppercase">Livret d'accueil digital</div>
+    </div>
+    <div style="width:32px;height:1px;background:rgba(201,168,76,0.4);margin:0 auto 20px"></div>
     <div class="login-title">Administration</div>
-    <div class="login-sub">Welkomeo · par Assenka</div>
     <input type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()">
     <div style="position:relative;margin-bottom:12px">
       <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:0">

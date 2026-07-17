@@ -2246,19 +2246,33 @@ window.applyConfig = function() { initForm(); };
     </div>
 
     <div class="pay-plans">
-      <div class="pay-plan-card selected" id="plan-small" onclick="setPayPlan('small')">
-        <div class="plan-name">Small</div>
-        <div class="plan-desc">1 – 15 chambres</div>
-        <div class="plan-price" id="price-small">7 500</div>
+      <div class="pay-plan-card" id="plan-starter" onclick="setPayPlan('starter')">
+        <div class="plan-name">Starter</div>
+        <div class="plan-desc">1 – 3 chambres</div>
+        <div class="plan-price" id="price-starter">4 500</div>
         <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-small"></div>
+        <div class="plan-saving" id="saving-starter"></div>
       </div>
-      <div class="pay-plan-card" id="plan-large" onclick="setPayPlan('large')">
-        <div class="plan-name">Large</div>
-        <div class="plan-desc">16 chambres et +</div>
-        <div class="plan-price" id="price-large">15 000</div>
+      <div class="pay-plan-card selected" id="plan-essentiel" onclick="setPayPlan('essentiel')">
+        <div class="plan-name">Essentiel</div>
+        <div class="plan-desc">4 – 10 chambres</div>
+        <div class="plan-price" id="price-essentiel">7 500</div>
         <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-large"></div>
+        <div class="plan-saving" id="saving-essentiel"></div>
+      </div>
+      <div class="pay-plan-card" id="plan-pro" onclick="setPayPlan('pro')">
+        <div class="plan-name">Pro</div>
+        <div class="plan-desc">11 – 20 chambres</div>
+        <div class="plan-price" id="price-pro">11 000</div>
+        <div class="plan-period">FCFA / mois</div>
+        <div class="plan-saving" id="saving-pro"></div>
+      </div>
+      <div class="pay-plan-card" id="plan-premium" onclick="setPayPlan('premium')">
+        <div class="plan-name">Premium</div>
+        <div class="plan-desc">21 chambres et +</div>
+        <div class="plan-price" id="price-premium">16 500</div>
+        <div class="plan-period">FCFA / mois</div>
+        <div class="plan-saving" id="saving-premium"></div>
       </div>
     </div>
 
@@ -2269,10 +2283,12 @@ window.applyConfig = function() { initForm(); };
 
 <script>
 var _payPeriod = 'monthly';
-var _payPlan   = 'small';
+var _payPlan   = 'essentiel';
 var PAY_PRICES  = {
-  small:  { monthly: 7500,   annual: 75000  },
-  large:  { monthly: 15000,  annual: 150000 },
+  starter:   { monthly: 4500,   annual: 45000  },
+  essentiel: { monthly: 7500,   annual: 75000  },
+  pro:       { monthly: 11000,  annual: 110000 },
+  premium:   { monthly: 16500,  annual: 165000 },
 };
 
 function openPayModal() {
@@ -2291,18 +2307,18 @@ function setPayPeriod(p) {
 }
 function setPayPlan(p) {
   _payPlan = p;
-  document.getElementById('plan-small').classList.toggle('selected', p === 'small');
-  document.getElementById('plan-large').classList.toggle('selected', p === 'large');
+  ['starter','essentiel','pro','premium'].forEach(function(n) {
+    document.getElementById('plan-' + n).classList.toggle('selected', p === n);
+  });
 }
 function updatePayUI() {
-  ['small','large'].forEach(function(p) {
+  ['starter','essentiel','pro','premium'].forEach(function(p) {
     var monthly = PAY_PRICES[p].monthly;
     var annual  = PAY_PRICES[p].annual;
     if (_payPeriod === 'monthly') {
       document.getElementById('price-' + p).textContent = monthly.toLocaleString('fr-FR');
       document.getElementById('saving-' + p).textContent = '';
     } else {
-      var perMonth = Math.round(annual / 12);
       document.getElementById('price-' + p).textContent = annual.toLocaleString('fr-FR');
       document.getElementById('saving-' + p).textContent = 'Économie ' + (monthly * 12 - annual).toLocaleString('fr-FR') + ' FCFA';
     }

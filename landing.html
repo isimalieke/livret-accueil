@@ -398,7 +398,7 @@
     .trial-sub { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 300; }
     .btn-trial { display: inline-flex; align-items: center; gap: 8px; background: var(--gold); color: #1a1000; padding: 13px 26px; border-radius: 4px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: background .2s; }
     .btn-trial:hover { background: var(--gold2); }
-    .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .plan {
       background: var(--white); border: 1px solid var(--cream3);
       border-radius: 4px; padding: 36px 30px; position: relative;
@@ -421,6 +421,9 @@
     .plan-cta-outline:hover { border-color: var(--ink); color: var(--ink); }
     .plan-cta-filled { background: var(--ink); color: var(--white); }
     .plan-cta-filled:hover { background: var(--ink2); }
+    @media (max-width: 900px) {
+      .plans { grid-template-columns: 1fr 1fr; }
+    }
     @media (max-width: 600px) {
       .plans { grid-template-columns: 1fr; }
       .trial-banner { flex-direction: column; }
@@ -710,44 +713,79 @@
 
     <div class="plans">
       <div class="plan">
-        <div class="plan-for">Petits établissements</div>
-        <div class="plan-name">Essentiel</div>
-        <div class="plan-size">Jusqu'à 15 chambres</div>
+        <div class="plan-for">Chambre d'hôtes · Maison</div>
+        <div class="plan-name">Starter</div>
+        <div class="plan-size">1 à 3 chambres</div>
         <div>
-          <span class="plan-price" id="p-small">7 500</span>
+          <span class="plan-price" id="p-1">4 500</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-small" style="display:none">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-1" style="display:none">ou <strong>45 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
           <li>Livret personnalisable complet</li>
           <li>Bilingue français / anglais</li>
           <li>QR code imprimable</li>
-          <li>Gestion des séjours & des chambres</li>
+          <li>Gestion des séjours</li>
           <li>Gestion des incidents clients</li>
           <li>Mises à jour en temps réel</li>
         </ul>
         <a href="/register" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
       </div>
-      <div class="plan featured">
-        <div class="plan-badge">Grands établissements</div>
-        <div class="plan-for" style="margin-top:22px">Hôtels & Resorts</div>
-        <div class="plan-name">Premium</div>
-        <div class="plan-size">16 chambres et plus</div>
+      <div class="plan">
+        <div class="plan-for">Petit hôtel · Gîte</div>
+        <div class="plan-name">Essentiel</div>
+        <div class="plan-size">4 à 10 chambres</div>
         <div>
-          <span class="plan-price" id="p-large">15 000</span>
+          <span class="plan-price" id="p-2">7 500</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-large" style="display:none">ou <strong>150 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-2" style="display:none">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
+        <hr class="plan-sep">
+        <ul class="plan-features">
+          <li>Tout le plan Starter</li>
+          <li>Gestion multi-chambres</li>
+          <li>Vue planning des séjours</li>
+          <li>Notifications incidents en temps réel</li>
+        </ul>
+        <a href="/register" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Le plus choisi</div>
+        <div class="plan-for" style="margin-top:22px">Hôtel · Lodge</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-size">11 à 20 chambres</div>
+        <div>
+          <span class="plan-price" id="p-3">11 000</span>
+          <span class="plan-currency">FCFA / mois</span>
+        </div>
+        <p class="plan-annual" id="a-3" style="display:none">ou <strong>110 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
           <li>Tout le plan Essentiel</li>
-          <li>Vue planning multi-chambres</li>
           <li>Support prioritaire</li>
           <li>Accompagnement à la configuration</li>
-          <li>Accès aux nouvelles fonctionnalités en avant-première</li>
+          <li>Nouvelles fonctionnalités en avant-première</li>
         </ul>
         <a href="/register" class="plan-cta plan-cta-filled">Essayer gratuitement</a>
+      </div>
+      <div class="plan">
+        <div class="plan-for">Grand hôtel · Resort</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-size">21 chambres et plus</div>
+        <div>
+          <span class="plan-price" id="p-4">16 500</span>
+          <span class="plan-currency">FCFA / mois</span>
+        </div>
+        <p class="plan-annual" id="a-4" style="display:none">ou <strong>165 000 FCFA / an</strong> — 2 mois offerts</p>
+        <hr class="plan-sep">
+        <ul class="plan-features">
+          <li>Tout le plan Pro</li>
+          <li>Support dédié</li>
+          <li>Formation de votre équipe</li>
+          <li>SLA garanti</li>
+        </ul>
+        <a href="/register" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
       </div>
     </div>
   </div>
@@ -832,16 +870,21 @@
     if (!tog) return;
     var lblM = document.getElementById('lbl-m'), lblA = document.getElementById('lbl-a');
     var eco = document.getElementById('eco');
-    var pS = document.getElementById('p-small'), pL = document.getElementById('p-large');
-    var aS = document.getElementById('a-small'), aL = document.getElementById('a-large');
+    var prices = [
+      {m:'4 500', a:'3 750', id:'p-1', aid:'a-1'},
+      {m:'7 500', a:'6 250', id:'p-2', aid:'a-2'},
+      {m:'11 000', a:'9 170', id:'p-3', aid:'a-3'},
+      {m:'16 500', a:'13 750', id:'p-4', aid:'a-4'}
+    ];
     tog.addEventListener('change', function() {
       var annual = tog.checked;
       lblM.classList.toggle('active', !annual);
       lblA.classList.toggle('active', annual);
       eco.style.display = annual ? 'inline-block' : 'none';
-      pS.textContent = annual ? '6 250' : '7 500';
-      pL.textContent = annual ? '12 500' : '15 000';
-      aS.style.display = aL.style.display = annual ? 'block' : 'none';
+      prices.forEach(function(p) {
+        document.getElementById(p.id).textContent = annual ? p.a : p.m;
+        document.getElementById(p.aid).style.display = annual ? 'block' : 'none';
+      });
     });
   })();
 </script>

@@ -47,9 +47,9 @@
       border-bottom: 1px solid transparent;
     }
     nav.scrolled {
-      background: rgba(255,255,255,0.97);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border-bottom-color: var(--cream3);
+      background: rgba(4,2,1,0.76);
+      backdrop-filter: blur(24px) saturate(110%); -webkit-backdrop-filter: blur(24px) saturate(110%);
+      border-bottom: 1px solid rgba(201,168,76,0.10);
     }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
     .nav-logo {
@@ -57,16 +57,16 @@
       font-size: 21px; font-weight: 500; color: var(--white);
       letter-spacing: 1.5px; transition: color .3s;
     }
-    nav.scrolled .nav-logo { color: var(--ink); }
+    nav.scrolled .nav-logo { color: var(--white); }
     .nav-logo span { color: var(--gold); }
     .nav-links { display: flex; align-items: center; gap: 32px; }
     .nav-links a {
       font-size: 12px; font-weight: 400; letter-spacing: 0.3px;
       color: rgba(255,255,255,0.8); transition: color .2s;
     }
-    nav.scrolled .nav-links a { color: var(--mid); }
+    nav.scrolled .nav-links a { color: rgba(255,255,255,0.75); }
     .nav-links a:hover { color: var(--white) !important; }
-    nav.scrolled .nav-links a:hover { color: var(--ink) !important; }
+    nav.scrolled .nav-links a:hover { color: var(--white) !important; }
     .nav-cta {
       border: 1px solid rgba(255,255,255,0.4) !important;
       color: var(--white) !important;
@@ -75,8 +75,8 @@
       transition: all .2s !important;
     }
     .nav-cta:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.8) !important; }
-    nav.scrolled .nav-cta { border-color: var(--ink) !important; color: var(--ink) !important; }
-    nav.scrolled .nav-cta:hover { background: var(--ink) !important; color: var(--white) !important; }
+    nav.scrolled .nav-cta { border-color: var(--gold) !important; color: var(--gold) !important; }
+    nav.scrolled .nav-cta:hover { background: var(--gold) !important; color: var(--ink) !important; }
     .nav-login {
       font-size: 12px !important; font-weight: 400; letter-spacing: 0.3px;
       color: rgba(255,255,255,0.65) !important; cursor: pointer;
@@ -84,8 +84,8 @@
       transition: color .2s;
     }
     .nav-login:hover { color: rgba(255,255,255,1) !important; }
-    nav.scrolled .nav-login { color: var(--mid) !important; }
-    nav.scrolled .nav-login:hover { color: var(--ink) !important; }
+    nav.scrolled .nav-login { color: rgba(255,255,255,0.65) !important; }
+    nav.scrolled .nav-login:hover { color: var(--white) !important; }
     /* Mini-panel "Mon espace" */
     .login-panel {
       display: none; position: fixed; top: 68px; right: 0; left: 0;
@@ -435,17 +435,17 @@
     .cta-note { margin-top: 18px; font-size: 12px; color: rgba(255,255,255,0.2); font-weight: 300; }
 
     /* ── FOOTER ── */
-    footer { background: #0e0e0e; padding: 48px 0 36px; }
+    footer { background: rgba(3,2,1,0.86); backdrop-filter: blur(28px) saturate(105%); -webkit-backdrop-filter: blur(28px) saturate(105%); border-top: 1px solid rgba(201,168,76,0.08); padding: 48px 0 36px; }
     .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--white); letter-spacing: 1.5px; margin-bottom: 12px; }
     .footer-logo span { color: var(--gold); }
-    .footer-desc { font-size: 13px; color: rgba(255,255,255,0.22); line-height: 1.75; font-weight: 300; max-width: 240px; }
-    .footer-col-title { font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 18px; }
+    .footer-desc { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.75; font-weight: 300; max-width: 240px; }
+    .footer-col-title { font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 18px; }
     .footer-links { display: flex; flex-direction: column; gap: 11px; }
-    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.38); transition: color .2s; font-weight: 300; }
-    .footer-links a:hover { color: rgba(255,255,255,0.75); }
+    .footer-links a { font-size: 13px; color: rgba(255,255,255,0.70); transition: color .2s; font-weight: 300; }
+    .footer-links a:hover { color: rgba(255,255,255,1); }
     .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 26px; flex-wrap: wrap; gap: 10px; }
-    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.18); font-weight: 300; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.45); font-weight: 300; }
     .footer-by { font-size: 12px; color: rgba(255,255,255,0.18); font-weight: 300; }
     .footer-by a { color: rgba(255,255,255,0.3); transition: color .2s; }
     .footer-by a:hover { color: rgba(255,255,255,0.6); }
@@ -756,7 +756,7 @@
   <div class="container">
     <div class="s-eyebrow">Prêt ?</div>
     <h2 class="s-title">Testez par vous-même.<br><em>15 jours, gratuitement.</em></h2>
-    <p class="s-sub">Pas de présentation commerciale, pas d'engagement. Vous configurez votre livret, vous l'envoyez à vos clients — et vous voyez si ça vous convient.</p>
+
     <a href="/register" class="btn-cta">Créer mon livret gratuitement</a>
     <p class="cta-note">Sans carte bancaire · Sans engagement · Résultat visible en 10 minutes</p>
   </div>

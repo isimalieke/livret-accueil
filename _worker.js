@@ -82,14 +82,6 @@ export default {
     // ── /{slug}/config.js ──
     if (sub === 'config.js') return handleConfig(request, env, slug);
 
-    // ── /{slug}/upload-cover ──
-    if (sub === 'upload-cover' && request.method === 'POST')
-      return handleUploadCover(request, env, slug);
-
-    // ── /{slug}/cover.jpg ──
-    if (sub === 'cover.jpg')
-      return handleGetCover(env, slug);
-
     // ── /{slug}/subscription ──
     if (sub === 'subscription' && request.method === 'GET')
       return handleGetSubscription(request, env, slug);
@@ -658,54 +650,6 @@ async function handleConfig(request, env, slug) {
 // UPLOAD / GET COVER PHOTO
 // ═════════════════════════════════════════════
 
-async function handleUploadCover(request, env, slug) {
-  const auth = await requireAuth(request, env, slug, ['hotelier']);
-  if (!auth.ok) return auth.response;
-
-  let body;
-  try { body = await request.json(); } catch(e) { return json({ ok: false, error: 'JSON invalide' }, 400); }
-
-  const { base64, filename } = body || {};
-  if (!base64 || !base64.startsWith('data:image/')) {
-    return json({ ok: false, error: 'Image manquante ou format invalide' }, 400);
-  }
-
-  // Taille approximative : chaque caractère base64 = 0.75 octet
-  const estimatedBytes = (base64.length * 0.75);
-  if (estimatedBytes > 4 * 1024 * 1024) {
-    return json({ ok: false, error: 'Image trop grande (max 3 Mo)' }, 400);
-  }
-
-  // Stocker le base64 dans KV sous la clé hotel:{slug}:cover
-  await env.CONFIG_KV.put('hotel:' + slug + ':cover', base64, { expirationTtl: 60 * 60 * 24 * 365 });
-
-  // Retourner l'URL publique /{slug}/cover.jpg
-  const coverUrl = '/' + slug + '/cover.jpg';
-  return json({ ok: true, url: coverUrl });
-}
-
-async function handleGetCover(env, slug) {
-  const base64 = await env.CONFIG_KV.get('hotel:' + slug + ':cover');
-  if (!base64) {
-    return new Response('Not found', { status: 404 });
-  }
-
-  // Extraire le MIME type et les données binaires
-  const match = base64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/s);
-  if (!match) return new Response('Invalid data', { status: 500 });
-
-  const mimeType = match[1];
-  const binaryStr = atob(match[2]);
-  const bytes = new Uint8Array(binaryStr.length);
-  for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-
-  return new Response(bytes, {
-    headers: {
-      'Content-Type': mimeType,
-      'Cache-Control': 'public, max-age=86400',
-    },
-  });
-}
 
 // ═════════════════════════════════════════════
 // PAYDUNYA — PAIEMENT ABONNEMENT

@@ -549,13 +549,14 @@ async function handleRegister(request, env, url) {
     // 1 essai gratuit par adresse email
     const emailLower = email.toLowerCase().trim();
     const emailUsed  = await env.DB.prepare(
-      'SELECT u.id FROM users u WHERE u.email = ? AND u.role = \'hotelier\' LIMIT 1'
+      'SELECT u.hotel_slug FROM users u WHERE u.email = ? AND u.role = \'hotelier\' LIMIT 1'
     ).bind(emailLower).first();
     if (emailUsed)
       return json({
         ok:    false,
-        error: 'Cette adresse email a déjà bénéficié d\'un essai gratuit. Connectez-vous à votre espace existant ou choisissez un abonnement.',
+        error: 'Cette adresse email est déjà associée à un espace Welkomeo. Connectez-vous à votre espace existant.',
         code:  'TRIAL_ALREADY_USED',
+        slug:  emailUsed.hotel_slug,
       }, 409);
 
     const now               = new Date().toISOString();

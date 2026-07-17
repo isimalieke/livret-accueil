@@ -77,7 +77,41 @@
     .nav-cta:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.8) !important; }
     nav.scrolled .nav-cta { border-color: var(--ink) !important; color: var(--ink) !important; }
     nav.scrolled .nav-cta:hover { background: var(--ink) !important; color: var(--white) !important; }
-    @media (max-width: 600px) { .nav-links a:not(.nav-cta) { display: none; } }
+    .nav-login {
+      font-size: 12px !important; font-weight: 400; letter-spacing: 0.3px;
+      color: rgba(255,255,255,0.65) !important; cursor: pointer;
+      background: none; border: none; padding: 0; font-family: inherit;
+      transition: color .2s;
+    }
+    .nav-login:hover { color: rgba(255,255,255,1) !important; }
+    nav.scrolled .nav-login { color: var(--mid) !important; }
+    nav.scrolled .nav-login:hover { color: var(--ink) !important; }
+    /* Mini-panel "Mon espace" */
+    .login-panel {
+      display: none; position: fixed; top: 68px; right: 0; left: 0;
+      z-index: 99; background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--cream3);
+      padding: 20px 28px 24px;
+    }
+    .login-panel.open { display: block; }
+    .login-panel-inner { max-width: 440px; margin: 0 auto; }
+    .login-panel-inner p { font-size: 13px; color: var(--mid); margin-bottom: 12px; }
+    .login-panel-row { display: flex; gap: 8px; align-items: center; }
+    .login-panel-input {
+      flex: 1; padding: 11px 16px; border: 1px solid var(--cream3);
+      border-radius: 6px; font-size: 13px; font-family: inherit;
+      color: var(--ink); outline: none; background: var(--white);
+    }
+    .login-panel-input:focus { border-color: var(--ink); }
+    .login-panel-input::placeholder { color: var(--light); }
+    .login-panel-btn {
+      padding: 11px 22px; background: var(--ink); color: #fff;
+      border: none; border-radius: 6px; font-size: 13px; font-family: inherit;
+      cursor: pointer; white-space: nowrap; transition: opacity .2s;
+    }
+    .login-panel-btn:hover { opacity: .8; }
+    @media (max-width: 600px) { .nav-links a:not(.nav-cta):not(.nav-login) { display: none; } }
 
     /* ── HERO ── */
     .hero {
@@ -367,11 +401,26 @@
       <div class="nav-links">
         <a href="#hotelier">Fonctionnalités</a>
         <a href="#tarifs">Tarifs</a>
+        <button class="nav-login" onclick="toggleLoginPanel()" id="nav-login-btn">Mon espace</button>
         <a href="/register" class="nav-cta">Essai gratuit</a>
       </div>
     </div>
   </div>
 </nav>
+
+<!-- Panel "Mon espace" -->
+<div class="login-panel" id="login-panel">
+  <div class="login-panel-inner">
+    <p>Entrez l'identifiant de votre établissement pour accéder à votre espace admin.</p>
+    <div class="login-panel-row">
+      <input class="login-panel-input" id="login-slug-input" type="text"
+        placeholder="ex : villa-belle-vue" autocomplete="off" autocapitalize="none"
+        onkeydown="if(event.key==='Enter')goToAdmin()">
+      <button class="login-panel-btn" onclick="goToAdmin()">Accéder →</button>
+    </div>
+    <div id="login-slug-err" style="font-size:12px;color:#c00;margin-top:8px;display:none">Veuillez entrer un identifiant.</div>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -643,6 +692,29 @@
     window.addEventListener('scroll', check, { passive: true });
     check();
   })();
+
+  var _loginPanelOpen = false;
+  function toggleLoginPanel() {
+    _loginPanelOpen = !_loginPanelOpen;
+    document.getElementById('login-panel').classList.toggle('open', _loginPanelOpen);
+    document.getElementById('nav-login-btn').textContent = _loginPanelOpen ? 'Fermer ✕' : 'Mon espace';
+    if (_loginPanelOpen) setTimeout(function(){ document.getElementById('login-slug-input').focus(); }, 50);
+  }
+  function goToAdmin() {
+    var val = document.getElementById('login-slug-input').value.trim()
+      .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    var err = document.getElementById('login-slug-err');
+    if (!val) { err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    window.location.href = '/' + val + '/admin';
+  }
+  // Fermer le panel en cliquant en dehors
+  document.addEventListener('click', function(e) {
+    if (!_loginPanelOpen) return;
+    var panel = document.getElementById('login-panel');
+    var btn   = document.getElementById('nav-login-btn');
+    if (!panel.contains(e.target) && !btn.contains(e.target)) toggleLoginPanel();
+  });
 
   (function() {
     var tog = document.getElementById('billing-toggle');

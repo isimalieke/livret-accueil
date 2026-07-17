@@ -234,36 +234,90 @@
     }
     .feat-item-desc { font-size: 13px; color: var(--mid); line-height: 1.7; font-weight: 300; }
 
-    /* Mockup sobre */
-    .hotelier-visual { padding-top: 12px; }
-    .phone-frame {
-      width: 220px; margin: 0 auto;
-      background: var(--cream2); border-radius: 36px;
-      border: 2px solid var(--cream3);
-      box-shadow: 0 32px 80px rgba(0,0,0,0.1);
-      overflow: hidden;
+    /* Mockup smartphone */
+    .hotelier-visual {
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 0 40px;
     }
-    .phone-top { height: 40px; background: var(--navy2); display: flex; align-items: center; justify-content: center; }
-    .phone-notch { width: 60px; height: 16px; background: rgba(0,0,0,0.4); border-radius: 8px; }
-    .phone-body { padding: 0 0 20px; }
+    .phone-wrap {
+      position: relative; width: 260px; flex-shrink: 0;
+      filter: drop-shadow(0 40px 80px rgba(0,0,0,0.28)) drop-shadow(0 8px 24px rgba(0,0,0,0.18));
+    }
+    /* Glow doré derrière le téléphone */
+    .phone-wrap::before {
+      content: '';
+      position: absolute; inset: 20px -20px;
+      background: radial-gradient(ellipse at 50% 60%, rgba(201,168,76,0.18) 0%, transparent 70%);
+      z-index: 0;
+    }
+    .phone-shell {
+      position: relative; z-index: 1;
+      background: #111; border-radius: 44px;
+      padding: 11px; outline: 1px solid #2a2a2a;
+    }
+    /* Boutons latéraux droits */
+    .phone-shell::before {
+      content: '';
+      position: absolute; right: -3px; top: 90px;
+      width: 3px; height: 56px;
+      background: linear-gradient(to bottom, #333 0%, #1a1a1a 50%, #333 100%);
+      border-radius: 0 3px 3px 0;
+      box-shadow: 0 44px 0 #222;
+    }
+    /* Boutons gauches */
+    .phone-shell::after {
+      content: '';
+      position: absolute; left: -3px; top: 108px;
+      width: 3px; height: 36px;
+      background: linear-gradient(to bottom, #333 0%, #1a1a1a 50%, #333 100%);
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 46px 0 #222, 0 -50px 0 #222;
+    }
+    .phone-screen {
+      border-radius: 34px; overflow: hidden;
+      background: #1a1209;
+    }
+    /* Notch */
+    .phone-notch {
+      position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+      width: 72px; height: 24px; background: #111; border-radius: 20px; z-index: 5;
+    }
+    .pb-topbar {
+      background: #2a1f12; padding: 34px 16px 10px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .pb-hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 12px; font-weight: 600; letter-spacing: 2px; color: #e8dcc8; }
+    .pb-hotel-loc { font-size: 8px; letter-spacing: 1.5px; color: #8a7a62; margin-top: 2px; }
+    .pb-lang { display: flex; gap: 3px; margin-top: 2px; }
+    .pb-lang span { border-radius: 3px; padding: 2px 6px; font-size: 8px; font-weight: 600; letter-spacing: 0.3px; }
+    .pb-lang .active { border: 1px solid #c9a84c; color: #c9a84c; }
+    .pb-lang .inactive { border: 1px solid rgba(201,168,76,0.3); color: rgba(201,168,76,0.4); }
     .pb-cover {
-      height: 72px; background: linear-gradient(160deg, var(--navy2), var(--navy));
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      height: 136px;
+      background: linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.52)), url('/hero-jardin.jpg') center/cover no-repeat;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      position: relative;
     }
-    .pb-welcome { font-size: 8px; color: rgba(201,168,76,0.8); letter-spacing: 3px; text-transform: uppercase; font-family: 'Cormorant Garamond', serif; }
-    .pb-hotel { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--white); font-weight: 400; }
-    .pb-tiles { padding: 12px 12px 0; display: flex; flex-direction: column; gap: 6px; }
+    .pb-cover-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: 5px; color: #fff; font-weight: 400; }
+    .pb-cover-sub { font-size: 7px; letter-spacing: 2px; color: rgba(255,255,255,0.6); }
+    .pb-cover-btn { margin-top: 6px; border: 1px solid rgba(255,255,255,0.35); border-radius: 4px; padding: 4px 16px; font-size: 8px; color: rgba(255,255,255,0.8); }
+    .pb-tiles { background: #1a1209; padding: 8px 8px 12px; display: flex; flex-direction: column; gap: 5px; }
     .pb-tile {
-      background: var(--white); border-radius: 8px; padding: 9px 11px;
-      display: flex; align-items: center; gap: 9px;
+      background: #faf8f4; border-radius: 10px; padding: 9px 10px;
+      display: flex; align-items: center; gap: 8px;
     }
-    .pb-ico { font-size: 14px; }
-    .pb-lbl { font-family: 'Cormorant Garamond', serif; font-size: 12px; color: var(--navy); }
-    .pb-sub { font-size: 8px; color: var(--mid); margin-top: 1px; }
+    .pb-ico-wrap {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0;
+    }
+    .pb-lbl { font-size: 10px; font-weight: 600; color: #1a1a1a; }
+    .pb-sub { font-size: 8px; color: #888; margin-top: 1px; }
+    .pb-chevron { margin-left: auto; font-size: 10px; color: #ccc; }
+    .pb-homebar { background: #1a1209; padding: 0 0 8px; display: flex; justify-content: center; }
+    .pb-homebar-pill { width: 64px; height: 3px; background: rgba(255,255,255,0.18); border-radius: 3px; }
 
     @media (max-width: 800px) {
       .hotelier-inner { grid-template-columns: 1fr; gap: 48px; }
-      .phone-frame { width: 200px; }
       .hotelier-visual { display: none; }
     }
 
@@ -513,18 +567,57 @@
       </div>
 
       <div class="hotelier-visual">
-        <div class="phone-frame">
-          <div class="phone-top"><div class="phone-notch"></div></div>
-          <div class="phone-body">
-            <div class="pb-cover">
-              <div class="pb-welcome">Bienvenue</div>
-              <div class="pb-hotel">Hôtel Les Baobabs</div>
-            </div>
-            <div class="pb-tiles">
-              <div class="pb-tile"><div class="pb-ico">🛎️</div><div><div class="pb-lbl">Infos pratiques</div><div class="pb-sub">WiFi · Check-in · Clés</div></div></div>
-              <div class="pb-tile"><div class="pb-ico">🗺️</div><div><div class="pb-lbl">Bonnes adresses</div><div class="pb-sub">Restaurants · Activités</div></div></div>
-              <div class="pb-tile"><div class="pb-ico">🌐</div><div><div class="pb-lbl">EN · FR</div><div class="pb-sub">Changer la langue</div></div></div>
-              <div class="pb-tile"><div class="pb-ico">📩</div><div><div class="pb-lbl">Nous contacter</div><div class="pb-sub">Message direct</div></div></div>
+        <div class="phone-wrap">
+          <div class="phone-notch"></div>
+          <div class="phone-shell">
+            <div class="phone-screen">
+              <!-- Topbar -->
+              <div class="pb-topbar">
+                <div>
+                  <div class="pb-hotel-name">CHEZ TITOU</div>
+                  <div class="pb-hotel-loc">NGAPAROU · SÉNÉGAL</div>
+                </div>
+                <div class="pb-lang">
+                  <span class="active">FR</span>
+                  <span class="inactive">EN</span>
+                </div>
+              </div>
+              <!-- Cover -->
+              <div class="pb-cover">
+                <div class="pb-cover-title">CHEZ TITOU</div>
+                <div class="pb-cover-sub">NGAPAROU · SÉNÉGAL</div>
+                <div class="pb-cover-btn">✉ Réserver</div>
+              </div>
+              <!-- Tiles -->
+              <div class="pb-tiles">
+                <div class="pb-tile">
+                  <div class="pb-ico-wrap" style="background:#fff3e0">🏠</div>
+                  <div><div class="pb-lbl">Votre séjour</div><div class="pb-sub">WiFi, équipements, règles</div></div>
+                  <span class="pb-chevron">›</span>
+                </div>
+                <div class="pb-tile">
+                  <div class="pb-ico-wrap" style="background:#e8f5e9">🌍</div>
+                  <div><div class="pb-lbl">Découvrir</div><div class="pb-sub">Restaurants, plages, activités</div></div>
+                  <span class="pb-chevron">›</span>
+                </div>
+                <div class="pb-tile">
+                  <div class="pb-ico-wrap" style="background:#fce4ec">🚨</div>
+                  <div><div class="pb-lbl">Urgences</div><div class="pb-sub">Médecin, police, ambassades</div></div>
+                  <span class="pb-chevron">›</span>
+                </div>
+                <div class="pb-tile">
+                  <div class="pb-ico-wrap" style="background:#fffde7">🧳</div>
+                  <div><div class="pb-lbl">Départ</div><div class="pb-sub">Check-out, transports, avis</div></div>
+                  <span class="pb-chevron">›</span>
+                </div>
+                <div class="pb-tile">
+                  <div class="pb-ico-wrap" style="background:#fff8e1">⚠️</div>
+                  <div><div class="pb-lbl">Signaler un problème</div><div class="pb-sub">Notifié immédiatement</div></div>
+                  <span class="pb-chevron">›</span>
+                </div>
+              </div>
+              <!-- Home bar -->
+              <div class="pb-homebar"><div class="pb-homebar-pill"></div></div>
             </div>
           </div>
         </div>

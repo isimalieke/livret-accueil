@@ -6,17 +6,18 @@
 <title>Carte d'accueil · Welkomeo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
 * { margin:0; padding:0; box-sizing:border-box; }
 
 /* ── INTERFACE ── */
 body {
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:#e8eaed; min-height:100vh;
+  background:#e8e4dc; min-height:100vh;
   display:flex; flex-direction:column;
 }
 
 .toolbar {
-  background:#2c3e50; padding:12px 20px;
+  background:#1a1a1a; padding:12px 20px;
   display:flex; align-items:center; justify-content:space-between;
   gap:12px; flex-wrap:wrap; flex-shrink:0;
 }
@@ -54,25 +55,26 @@ body {
 .hotel-card {
   width:296px;       /* ≈ 148mm × 2 × 96dpi / 96 × 0.6 */
   display:flex; flex-direction:column;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-family:'Cormorant Garamond',Georgia,serif;
   background:#fff; overflow:hidden;
 }
 
 /* ── HEADER ── */
 .c-hdr {
-  background:#2c3e50; padding:22px 20px 18px;
+  background:#1a1a1a; padding:22px 20px 18px;
   display:flex; flex-direction:column; align-items:center; text-align:center;
   flex-shrink:0;
 }
-.c-deco-top { width:36px; height:1.5px; background:#c9a84c; margin-bottom:13px; }
+.c-deco-top { width:36px; height:1.5px; background:#C9A84C; margin-bottom:13px; }
 .c-name {
-  font-family:Georgia,'Times New Roman',serif;
-  color:#fff; font-weight:normal; font-size:18px;
-  letter-spacing:2px; text-transform:uppercase; line-height:1.2;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  color:#fff; font-weight:400; font-size:18px;
+  letter-spacing:2.5px; text-transform:uppercase; line-height:1.2;
   margin-bottom:6px;
 }
 .c-city {
-  color:rgba(255,255,255,.52); font-size:9px;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  color:rgba(255,255,255,.45); font-size:9px;
   letter-spacing:1.8px; text-transform:uppercase;
 }
 .c-deco-bot { width:20px; height:1px; background:rgba(201,168,76,.4); margin-top:13px; }
@@ -83,8 +85,8 @@ body {
   display:flex; flex-direction:column; align-items:center; gap:11px;
 }
 .c-welcome {
-  font-family:Georgia,serif; font-style:italic;
-  color:#9ca3af; font-size:11px; letter-spacing:.3px;
+  font-family:'Cormorant Garamond',Georgia,serif; font-style:italic;
+  color:#a09890; font-size:11px; letter-spacing:.3px;
 }
 
 /* QR CODE */
@@ -96,44 +98,46 @@ body {
   display:flex; align-items:center; justify-content:center;
 }
 .c-qr-lbl {
-  font-size:8.5px; color:#9ca3af; text-align:center;
+  font-family:'Cormorant Garamond',Georgia,serif; font-style:italic;
+  font-size:9px; color:#a09890; text-align:center;
   line-height:1.5; letter-spacing:.3px;
 }
 
 /* WIFI — 2 colonnes */
 .c-wifi {
-  background:#f8fafc; border:1px solid #e9ecef;
+  background:#f8f7f4; border:1px solid #e8e4dc;
   border-radius:8px; padding:9px 12px; width:100%;
 }
 .wifi-hdr {
   display:flex; align-items:center; gap:7px;
-  border-bottom:1px solid #e9ecef; padding-bottom:7px; margin-bottom:8px;
+  border-bottom:1px solid #e8e4dc; padding-bottom:7px; margin-bottom:8px;
 }
-.wifi-icon  { font-size:13px; color:#2c3e50; }
-.wifi-title { font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:.9px; color:#2c3e50; }
+.wifi-icon  { font-size:13px; color:#1a1a1a; }
+.wifi-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#1a1a1a; }
 .wifi-cols  { display:grid; grid-template-columns:1fr 1px 1fr; gap:0 10px; align-items:center; }
-.wifi-sep   { background:#e9ecef; width:1px; height:26px; }
-.wifi-col   { display:flex; flex-direction:column; gap:2px; }
-.wifi-lbl   { font-size:7.5px; text-transform:uppercase; letter-spacing:.7px; color:#9ca3af; font-weight:600; }
+.wifi-sep   { background:#e8e4dc; width:1px; height:26px; }
+.wifi-col   { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.wifi-lbl   { font-size:7px; text-transform:uppercase; letter-spacing:.7px; color:#b0a898; font-weight:600; }
 .wifi-val   {
-  font-size:11px; font-weight:700; color:#1d1d1f;
-  font-family:'SF Mono','Courier New',monospace;
+  font-size:11px; font-weight:700; color:#1a1a1a;
+  font-family:'Cormorant Garamond',Georgia,serif;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 
 /* INFO PILLS */
 .c-info-row { display:flex; gap:8px; width:100%; }
 .info-pill {
-  flex:1; background:#f0f4f8; border-radius:8px;
-  padding:7px 10px; display:flex; align-items:center; gap:7px; min-width:0;
+  flex:1; background:#f8f7f4; border-radius:8px;
+  padding:7px 9px; display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden;
 }
-.info-pill-icon { font-size:14px; flex-shrink:0; }
-.info-pill-lbl  { font-size:7px; text-transform:uppercase; letter-spacing:.5px; color:#9ca3af; font-weight:600; white-space:nowrap; }
-.info-pill-val  { font-size:11px; font-weight:700; color:#1d1d1f; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.info-pill-icon { font-size:13px; flex-shrink:0; }
+.info-pill-body { display:flex; flex-direction:column; gap:1px; min-width:0; overflow:hidden; }
+.info-pill-lbl  { font-family:'Cormorant Garamond',Georgia,serif; font-size:7px; text-transform:uppercase; letter-spacing:.5px; color:#b0a898; font-weight:600; white-space:nowrap; }
+.info-pill-val  { font-family:'Cormorant Garamond',Georgia,serif; font-size:10.5px; font-weight:700; color:#1a1a1a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.1px; }
 
 /* FOOTER */
 .c-footer {
-  background:#1a2530; padding:8px 16px 9px;
+  background:#111; padding:8px 16px 9px;
   display:flex; flex-direction:column; align-items:center; gap:5px;
   flex-shrink:0;
 }
@@ -142,9 +146,9 @@ body {
   gap:14px; flex-wrap:wrap;
 }
 .urg-item { display:flex; align-items:baseline; gap:3px; }
-.urg-num  { font-size:11px; font-weight:700; color:#fca5a5; }
-.urg-lbl  { font-size:7.5px; color:rgba(255,255,255,.4); }
-.footer-brand { font-size:7.5px; color:rgba(255,255,255,.26); text-align:center; white-space:nowrap; }
+.urg-num  { font-family:'Cormorant Garamond',Georgia,serif; font-size:12px; font-weight:700; color:#fca5a5; }
+.urg-lbl  { font-size:7px; color:rgba(255,255,255,.35); }
+.footer-brand { font-family:'Cormorant Garamond',Georgia,serif; font-size:7.5px; color:rgba(255,255,255,.22); text-align:center; white-space:nowrap; letter-spacing:.3px; }
 
 /* ── PRINT ── */
 @media print {
@@ -252,14 +256,14 @@ body {
         <div class="c-info-row">
           <div class="info-pill">
             <span class="info-pill-icon">🕙</span>
-            <div>
+            <div class="info-pill-body">
               <div class="info-pill-lbl" id="lbl-depart">Départ avant</div>
               <div class="info-pill-val" id="c-checkout">11h00</div>
             </div>
           </div>
           <div class="info-pill">
             <span class="info-pill-icon">📞</span>
-            <div>
+            <div class="info-pill-body">
               <div class="info-pill-lbl" id="lbl-contact">Contact hôte</div>
               <div class="info-pill-val" id="c-tel">—</div>
             </div>

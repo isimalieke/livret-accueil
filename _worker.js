@@ -1583,15 +1583,50 @@ async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, 
 async function sendWelcomeEmail(env, hotel, origin) {
   const adminUrl  = `${origin}/${hotel.slug}/admin`;
   const livretUrl = `${origin}/${hotel.slug}`;
-  const html = emailBase('Welkomeo', '#0f766e', '🏨', 'Bienvenue sur Welkomeo !')
-    + `<div class="greeting">Bonjour ${hotel.nom},</div>`
-    + `<div class="intro">Votre livret d'accueil numérique est prêt. Vos vacanciers peuvent dès maintenant y accéder depuis leur smartphone.</div>`
-    + `<div class="ticket-box"><div class="ticket-label">Votre identifiant de connexion</div><div class="ticket-id" style="font-size:16px;letter-spacing:0">${hotel.email}</div><div class="ticket-subject">Utilisez ce mail + votre mot de passe pour accéder à l'espace admin</div></div>`
-    + `<a class="cta" href="${adminUrl}">Configurer mon livret →</a>`
-    + `<div class="intro" style="text-align:center;font-size:13px;color:#64748b">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" style="color:#0f766e;font-weight:600">${livretUrl}</a></div>`
-    + emailFooter('Welkomeo · par Assenka');
+  const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="48" height="48" fill="none" style="display:block;margin:0 auto 10px"><path d="M28 3 L53 28 L28 53 L3 28 Z" stroke="#C9A84C" stroke-width="1.8" fill="none"/><path d="M28 11 L45 28 L28 45 L11 28 Z" fill="#C9A84C" fill-opacity="0.18"/><text x="28" y="34" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-weight="600" fill="#C9A84C">W</text></svg>`;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#f0ece6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px 12px}
+.card{max-width:520px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10)}
+.cover{background:#1a1a1a;padding:28px 24px 22px;text-align:center}
+.cover-wordmark{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:500;letter-spacing:1px;color:#fff;margin-bottom:3px}
+.cover-wordmark em{color:#C9A84C;font-style:normal}
+.cover-tagline{font-size:8px;letter-spacing:2.5px;color:rgba(201,168,76,.7);text-transform:uppercase;margin-bottom:8px}
+.cover-sub{color:rgba(255,255,255,.45);font-size:13px;font-style:italic}
+.body{padding:24px}
+.greeting{font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:12px}
+.intro{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#555;line-height:1.7;margin-bottom:18px}
+.id-box{background:#f8f7f4;border:1px solid #e8e4dc;border-radius:12px;padding:16px 20px;margin-bottom:18px;text-align:center}
+.id-label{font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:#bbb;font-weight:600;margin-bottom:5px}
+.id-email{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;font-weight:700;color:#C9A84C;word-break:break-all;margin-bottom:5px}
+.id-note{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;color:#999}
+.cta{display:block;background:#1a1a1a;color:#fff;text-decoration:none;text-align:center;padding:14px 24px;border-radius:10px;font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:16px;letter-spacing:.3px;margin-bottom:18px}
+.share-note{font-family:'Cormorant Garamond',Georgia,serif;text-align:center;font-size:14px;color:#999;margin-bottom:4px}
+.share-link{color:#C9A84C;font-weight:600;text-decoration:none}
+.footer{border-top:1px solid #f0ece4;padding:16px 24px;text-align:center}
+.footer-thanks{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;color:#bbb;font-style:italic}</style></head><body>
+<div class="card">
+  <div class="cover">
+    ${logoSvg}
+    <div class="cover-wordmark">Welkom<em>eo</em></div>
+    <div class="cover-tagline">Livret d'accueil digital</div>
+    <div class="cover-sub">Bienvenue sur Welkomeo !</div>
+  </div>
+  <div class="body">
+    <div class="greeting">Bonjour ${hotel.nom},</div>
+    <div class="intro">Votre livret d'accueil numérique est prêt. Vos vacanciers peuvent dès maintenant y accéder depuis leur smartphone.</div>
+    <div class="id-box">
+      <div class="id-label">Votre identifiant de connexion</div>
+      <div class="id-email">${hotel.email}</div>
+      <div class="id-note">Utilisez ce mail + votre mot de passe pour accéder à l'espace admin</div>
+    </div>
+    <a class="cta" href="${adminUrl}">Configurer mon livret →</a>
+    <div class="share-note">Lien à partager avec vos vacanciers :<br><a href="${livretUrl}" class="share-link">${livretUrl}</a></div>
+  </div>
+  <div class="footer"><div class="footer-thanks">Merci de votre confiance — Welkomeo · par Assenka</div></div>
+</div></body></html>`;
   const from = env.BREVO_FROM || 'Welkomeo <noreply@welkomeo.com>';
-  return resendEmail(env, hotel.email, "🏨 Votre Welkomeo est prêt !", html, from);
+  return resendEmail(env, hotel.email, "Votre Welkomeo est prêt !", html, from);
 }
 
 async function handleVerifyEmail(request, env, slug, url) {

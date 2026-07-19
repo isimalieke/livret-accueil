@@ -180,6 +180,18 @@ export default {
       if (request.method === 'DELETE' && parts[2]) return handleDeleteStay(request, env, slug, parts[2]);
     }
 
+    // ── /{slug}/reco — recommandations hôtelier ──
+    if (sub === 'reco') {
+      if (request.method === 'GET')    return handleListReco(request, env, slug);
+      if (request.method === 'POST')   return handleCreateReco(request, env, slug);
+      if (request.method === 'DELETE' && parts[2]) return handleDeleteReco(request, env, slug, parts[2]);
+    }
+
+    // ── /{slug}/nearby — Google Places + cache KV ──
+    if (sub === 'nearby' && request.method === 'GET') {
+      return handleNearby(request, env, slug, url);
+    }
+
     // ── /{slug}/paiement ──
     if (sub === 'paiement' || sub === 'paiement.html') {
       return fetchAsset(env, url.origin + '/paiement.html');
@@ -610,9 +622,20 @@ async function handleRegister(request, env, url) {
 
 async function handleConfig(request, env, slug) {
   if (request.method === 'GET') {
-    const config = await env.CONFIG_KV.get('hotel:' + slug + ':config');
+    const [config, coverData] = await Promise.all([
+      env.CONFIG_KV.get('hotel:' + slug + ':config'),
+      env.CONFIG_KV.get('hotel:' + slug + ':cover_photo', { type: 'text' }),
+    ]);
     if (config) {
-      return new Response('// WORKER-KV\n' + config, {
+      // Injecter l'URL de la photo de couverture si elle existe dans KV
+      let patched = config;
+      if (coverData) {
+        patched = patched.replace(
+          /cover_photo:\s*"[^"]*"/,
+          'cover_photo: "/' + slug + '/cover-photo"'
+        );
+      }
+      return new Response('// WORKER-KV\n' + patched, {
         headers: { 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store, no-cache' },
       });
     }
@@ -1134,6 +1157,124 @@ async function handleDeleteStay(request, env, slug, stayId) {
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);
   }
+}
+
+// ═════════════════════════════════════════════
+// RECOMMANDATIONS HÔTELIER (AUTOUR DE MOI)
+// ═════════════════════════════════════════════
+
+async function handleListReco(request, env, slug) {
+  const cat = new URL(request.url).searchParams.get('cat') || '';
+  try {
+    const q = cat
+      ? 'SELECT * FROM recommendations WHERE hotel_slug = ? AND category = ? ORDER BY sort_order ASC, id ASC'
+      : 'SELECT * FROM recommendations WHERE hotel_slug = ? ORDER BY category ASC, sort_order ASC, id ASC';
+    const rows = cat
+      ? await env.DB.prepare(q).bind(slug, cat).all()
+      : await env.DB.prepare(q).bind(slug).all();
+    return json({ ok: true, recommendations: rows.results });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+async function handleCreateReco(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+  try {
+    const { category, name, address, phone, note, sort_order } = await request.json();
+    if (!category || !name) return json({ ok: false, error: 'category et name requis' }, 400);
+    const VALID_CATS = ['restaurant', 'loisirs', 'services'];
+    if (!VALID_CATS.includes(category)) return json({ ok: false, error: 'Catégorie invalide' }, 400);
+    await env.DB.prepare(
+      'INSERT INTO recommendations (hotel_slug, category, name, address, phone, note, sort_order) VALUES (?,?,?,?,?,?,?)'
+    ).bind(slug, category, name, address||'', phone||'', note||'', sort_order||0).run();
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+async function handleDeleteReco(request, env, slug, recoId) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+  try {
+    await env.DB.prepare('DELETE FROM recommendations WHERE id = ? AND hotel_slug = ?').bind(recoId, slug).run();
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+// ─── GOOGLE PLACES NEARBY (avec cache KV 24h) ───
+
+const PLACES_TYPES = {
+  restaurant: 'restaurant|cafe|bakery|bar',
+  loisirs:    'tourist_attraction|night_club|park|amusement_park|movie_theater',
+  services:   'pharmacy|hospital|bank|atm|car_repair|laundry|post_office|supermarket',
+};
+
+async function handleNearby(request, env, slug, url) {
+  const cat = url.searchParams.get('cat');
+  const lat = url.searchParams.get('lat');
+  const lng = url.searchParams.get('lng');
+  if (!cat || !lat || !lng) return json({ ok: false, error: 'cat, lat, lng requis' }, 400);
+  if (!PLACES_TYPES[cat]) return json({ ok: false, error: 'Catégorie invalide' }, 400);
+
+  // Arrondir à 3 décimales (~100m) pour le cache
+  const latR = parseFloat(lat).toFixed(3);
+  const lngR = parseFloat(lng).toFixed(3);
+  const cacheKey = `places:${slug}:${cat}:${latR}:${lngR}`;
+
+  // Tenter le cache KV (TTL 24h)
+  if (env.CONFIG_KV) {
+    const cached = await env.CONFIG_KV.get(cacheKey);
+    if (cached) return new Response(cached, { headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT' } });
+  }
+
+  if (!env.GOOGLE_PLACES_KEY) return json({ ok: false, error: 'GOOGLE_PLACES_KEY manquante' }, 500);
+
+  // Appel Google Places Nearby Search
+  const types = PLACES_TYPES[cat].split('|');
+  const allResults = [];
+  for (const type of types.slice(0, 2)) { // max 2 types pour limiter les requêtes
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=2000&type=${type}&language=fr&key=${env.GOOGLE_PLACES_KEY}`;
+    try {
+      const r = await fetch(apiUrl);
+      const d = await r.json();
+      if (d.results) allResults.push(...d.results);
+    } catch (e) { /* silencieux */ }
+  }
+
+  // Dédupliquer par place_id, calculer distance, trier
+  const seen = new Set();
+  const places = allResults
+    .filter(p => { if (seen.has(p.place_id)) return false; seen.add(p.place_id); return true; })
+    .map(p => ({
+      id:       p.place_id,
+      name:     p.name,
+      address:  p.vicinity || '',
+      rating:   p.rating || null,
+      open_now: p.opening_hours?.open_now ?? null,
+      lat:      p.geometry?.location?.lat,
+      lng:      p.geometry?.location?.lng,
+      dist:     Math.round(calcDist(parseFloat(lat), parseFloat(lng), p.geometry?.location?.lat, p.geometry?.location?.lng)),
+    }))
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, 15);
+
+  const body = JSON.stringify({ ok: true, places });
+  if (env.CONFIG_KV) await env.CONFIG_KV.put(cacheKey, body, { expirationTtl: 86400 }); // 24h
+  return new Response(body, { headers: { 'Content-Type': 'application/json', 'X-Cache': 'MISS' } });
+}
+
+function calcDist(lat1, lon1, lat2, lon2) {
+  if (!lat2 || !lon2) return 9999;
+  const R = 6371e3;
+  const f1 = lat1 * Math.PI / 180, f2 = lat2 * Math.PI / 180;
+  const df = (lat2 - lat1) * Math.PI / 180, dl = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(df/2)**2 + Math.cos(f1)*Math.cos(f2)*Math.sin(dl/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 // ═════════════════════════════════════════════

@@ -1803,14 +1803,20 @@ function openResa(e, type) {
   e.preventDefault(); e.stopPropagation();
   if (typeof CONFIG === 'undefined') return;
   var h = CONFIG.hotel;
+  if (!h) return;
   var url = '';
   if (type === 'wa') {
+    if (!h.whatsapp) return;
+    var clean = h.whatsapp.replace(/[\s\+\-\(\)]/g,'');
     var msg = encodeURIComponent('Bonjour, je souhaite faire une réservation à ' + h.nom + '.');
-    url = 'https://wa.me/' + h.whatsapp.replace(/[\s\+\-]/g,'') + '?text=' + msg;
+    url = 'https://wa.me/' + clean + '?text=' + msg;
   } else {
+    if (!h.email) return;
     url = 'mailto:' + h.email + '?subject=' + encodeURIComponent('Réservation — ' + h.nom);
   }
-  window.open(url, '_blank', 'noopener');
+  // window.open est bloqué en mode PWA standalone — fallback sur location.href
+  var win = window.open(url, '_blank', 'noopener');
+  if (!win) location.href = url;
 }
 
 // ── PAIEMENT ──

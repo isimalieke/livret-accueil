@@ -608,8 +608,8 @@ body.has-cover-photo #inc-dialcode {
 /* ── AUTOUR DE MOI ── */
 .nearby-cat-btn { cursor:pointer; transition:background .15s; }
 .nearby-cat-btn.active { background:var(--gold) !important; }
-.nearby-cat-btn.active .sli-label, .nearby-cat-btn.active .sli-arrow { color:#fff !important; }
-.nearby-cat-btn.active .sli-ico { filter: brightness(10); }
+.nearby-cat-btn.active .sli-label { color:#fff !important; }
+.nearby-cat-btn.active .sli-arrow { color:rgba(255,255,255,0.7) !important; }
 .nearby-item {
   display:flex; align-items:flex-start; gap:10px;
   padding:11px 0; border-bottom:1px solid var(--border);
@@ -2427,9 +2427,11 @@ async function renderNearby() {
 
   // 1. Charger les favoris hôtelier
   var recoErr = null;
+  var recoDebug = '';
   try {
     var r = await fetch('/' + slug + '/reco?cat=' + _nearbyCat, { cache: 'no-cache' });
     var d = await r.json();
+    recoDebug = 'ok=' + d.ok + ' n=' + (d.recommendations||[]).length + ' slug=' + slug + ' cat=' + _nearbyCat;
     if (d.ok) favs = d.recommendations || [];
     else recoErr = d.error || 'Erreur API reco';
   } catch(e) { recoErr = e.message || 'Fetch reco échoué'; }
@@ -2477,9 +2479,9 @@ async function renderNearby() {
 
   if (!favs.length && !places.length) {
     if (recoErr) {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">⚠️ Erreur chargement : ' + recoErr + ' (slug: ' + slug + ')</div>';
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">⚠️ ' + recoErr + '</div>';
     } else {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat pour cette catégorie.</div>';
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat [' + recoDebug + ']</div>';
     }
   }
 

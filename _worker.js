@@ -1212,6 +1212,7 @@ const PLACES_TYPES = {
   restaurant: 'restaurant|cafe|bakery|bar',
   culture:    'tourist_attraction|museum|art_gallery|night_club|movie_theater|amusement_park',
   plages:     'park|campground|rv_park',
+  shopping:   'shopping_mall|clothing_store|jewelry_store|book_store|shoe_store|department_store',
   services:   'pharmacy|hospital|bank|atm|laundry|post_office|supermarket|car_repair',
 };
 

@@ -777,22 +777,12 @@ body.has-cover-photo #inc-dialcode {
     </div>
     <div class="sub-list-item" onclick="showPage('services')">
       <div class="sli-ico">✅</div>
-      <div><div class="sli-label fr-o">Services inclus</div><div class="sli-label en-o">Included services</div><div class="sli-sub fr-o">Ce qui est compris dans votre séjour</div><div class="sli-sub en-o">What's included in your stay</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
-    <div class="sub-list-item" onclick="showPage('sur-demande')">
-      <div class="sli-ico">🛎️</div>
-      <div><div class="sli-label fr-o">Sur demande</div><div class="sli-label en-o">On request</div><div class="sli-sub fr-o">Services disponibles en supplément</div><div class="sli-sub en-o">Additional services available</div></div>
+      <div><div class="sli-label fr-o">Services</div><div class="sli-label en-o">Services</div><div class="sli-sub fr-o">Inclus &amp; disponibles sur demande</div><div class="sli-sub en-o">Included &amp; available on request</div></div>
       <div class="sli-arrow">›</div>
     </div>
     <div class="sub-list-item" onclick="showPage('paiement')">
       <div class="sli-ico">💳</div>
-      <div><div class="sli-label fr-o">Paiement</div><div class="sli-label en-o">Payment</div><div class="sli-sub fr-o">Wave, Orange Money, virement</div><div class="sli-sub en-o">Wave, Orange Money, transfer</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
-    <div class="sub-list-item" onclick="showPage('converter')">
-      <div class="sli-ico">💱</div>
-      <div><div class="sli-label fr-o">Convertisseur</div><div class="sli-label en-o">Currency converter</div><div class="sli-sub fr-o">Taux de change en temps réel</div><div class="sli-sub en-o">Live exchange rates</div></div>
+      <div><div class="sli-label fr-o">Paiement &amp; Devises</div><div class="sli-label en-o">Payment &amp; Currency</div><div class="sli-sub fr-o">Wave, Orange Money, convertisseur</div><div class="sli-sub en-o">Wave, Orange Money, converter</div></div>
       <div class="sli-arrow">›</div>
     </div>
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
@@ -813,11 +803,6 @@ body.has-cover-photo #inc-dialcode {
     <div class="sub-list-item" onclick="showPage('quartier')">
       <div class="sli-ico">🗺️</div>
       <div><div class="sli-label fr-o">Autour de vous</div><div class="sli-label en-o">Around you</div><div class="sli-sub fr-o">Restaurants, culture, plages, services</div><div class="sli-sub en-o">Food, culture, beaches, services</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
-    <div class="sub-list-item" onclick="showPage('shopping')">
-      <div class="sli-ico">🛍️</div>
-      <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div><div class="sli-sub fr-o">Marchés, boutiques, artisanat</div><div class="sli-sub en-o">Markets, shops, crafts</div></div>
       <div class="sli-arrow">›</div>
     </div>
     <div class="sub-list-item" onclick="showPage('transport')">
@@ -982,46 +967,30 @@ body.has-cover-photo #inc-dialcode {
   </div>
 </div>
 
-<!-- ══ SERVICES INCLUS ══ -->
+<!-- ══ SERVICES ══ -->
 <div class="screen" id="screen-services">
   <div class="page-hdr">
     <div class="page-hdr-icon">✅</div>
     <div>
-      <div class="page-hdr-title fr-o">Services Inclus</div>
-      <div class="page-hdr-title en-o">Included Services</div>
-      <div class="page-hdr-sub">Compris dans votre séjour</div>
+      <div class="page-hdr-title fr-o">Services</div>
+      <div class="page-hdr-title en-o">Services</div>
+      <div class="page-hdr-sub fr-o">Inclus &amp; sur demande</div>
+      <div class="page-hdr-sub en-o">Included &amp; on request</div>
     </div>
   </div>
   <div class="page-body">
     <div class="card">
-      <div class="card-lbl fr-o">Inclus dans votre séjour</div>
-      <div class="card-lbl en-o">Included in your stay</div>
+      <div class="card-lbl fr-o">✅ Inclus dans votre séjour</div>
+      <div class="card-lbl en-o">✅ Included in your stay</div>
       <div id="services-inclus"></div>
     </div>
-  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
-
-  </div>
-</div>
-
-<!-- ══ SUR DEMANDE ══ -->
-<div class="screen" id="screen-sur-demande">
-  <div class="page-hdr">
-    <div class="page-hdr-icon">🛎️</div>
-    <div>
-      <div class="page-hdr-title fr-o">Services Sur Demande</div>
-      <div class="page-hdr-title en-o">On-Request Services</div>
-      <div class="page-hdr-sub">À commander à la réception</div>
-    </div>
-  </div>
-  <div class="page-body">
-    <div class="card">
-      <div class="card-lbl fr-o">Disponible sur demande</div>
-      <div class="card-lbl en-o">Available on request</div>
+    <div class="card" id="services-demande-card">
+      <div class="card-lbl fr-o">🛎️ Disponibles sur demande</div>
+      <div class="card-lbl en-o">🛎️ Available on request</div>
       <div id="services-demande"></div>
+      <div class="tip" style="margin-top:10px">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
     </div>
-    <div class="tip">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
-
   </div>
 </div>
 
@@ -1074,8 +1043,9 @@ body.has-cover-photo #inc-dialcode {
     <!-- Sélecteur de catégorie -->
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
       <button class="nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">🍽️ <span class="fr-o">Restaurants</span><span class="en-o">Eat</span></button>
-      <button class="nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">🎭 <span class="fr-o">Culture & sorties</span><span class="en-o">Culture</span></button>
-      <button class="nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">🏖️ <span class="fr-o">Plages & nature</span><span class="en-o">Beaches</span></button>
+      <button class="nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">🎭 <span class="fr-o">Culture</span><span class="en-o">Culture</span></button>
+      <button class="nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">🏖️ <span class="fr-o">Plages</span><span class="en-o">Beaches</span></button>
+      <button class="nearby-cat-btn" data-cat="shopping" onclick="selectNearbyCat('shopping',this)">🛍️ <span class="fr-o">Shopping</span><span class="en-o">Shopping</span></button>
       <button class="nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">🛠️ <span class="fr-o">Services</span><span class="en-o">Services</span></button>
     </div>
 
@@ -1301,9 +1271,9 @@ body.has-cover-photo #inc-dialcode {
   <div class="page-hdr">
     <div class="page-hdr-icon">💳</div>
     <div>
-      <div class="page-hdr-title fr-o">Paiement</div>
-      <div class="page-hdr-title en-o">Payment</div>
-      <div class="page-hdr-sub">Wave · Orange Money · Virement</div>
+      <div class="page-hdr-title fr-o">Paiement &amp; Devises</div>
+      <div class="page-hdr-title en-o">Payment &amp; Currency</div>
+      <div class="page-hdr-sub">Wave · Orange Money · Convertisseur</div>
     </div>
   </div>
   <div class="page-body">
@@ -1331,8 +1301,42 @@ body.has-cover-photo #inc-dialcode {
     </div>
     <div class="tip fr-o">💡 Indiquez votre nom et numéro de chambre lors du paiement.</div>
     <div class="tip en-o">💡 Include your name and room number when making payment.</div>
-  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
+    <!-- ── Convertisseur intégré ── -->
+    <div style="margin-top:20px">
+      <div class="card-lbl fr-o" style="padding:0 2px 10px;font-size:13px;font-weight:700;color:var(--text2)">💱 Convertisseur de devises</div>
+      <div class="card-lbl en-o" style="padding:0 2px 10px;font-size:13px;font-weight:700;color:var(--text2)">💱 Currency converter</div>
+      <div class="conv-card">
+        <div class="conv-lbl fr-o">Montant</div>
+        <div class="conv-lbl en-o">Amount</div>
+        <div class="conv-block">
+          <input type="number" id="conv-amount" class="conv-input" value="1000" min="0" step="any" oninput="convertCurrency()">
+          <div class="conv-select-wrap">
+            <select id="conv-from" class="conv-select" onchange="convertCurrency()"></select>
+          </div>
+        </div>
+        <div class="conv-swap-wrap">
+          <button class="conv-swap" onclick="swapCurrencies()" title="Inverser">⇄</button>
+        </div>
+        <div class="conv-lbl fr-o">Montant</div>
+        <div class="conv-lbl en-o">Amount</div>
+        <div class="conv-block conv-block-result">
+          <div class="conv-result-val" id="conv-result">—</div>
+          <div class="conv-select-wrap">
+            <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
+          </div>
+        </div>
+      </div>
+      <div class="conv-rate-info" id="conv-rate-info"></div>
+      <div class="tip">ℹ️ <span class="fr-o">Taux indicatifs — vérifiez auprès de votre banque avant toute transaction.</span><span class="en-o">Indicative rates — always check with your bank before any transaction.</span></div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-lbl fr-o">Référence rapide</div>
+        <div class="card-lbl en-o">Quick reference</div>
+        <div id="conv-table"></div>
+      </div>
+    </div>
+
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
   </div>
 </div>
 
@@ -1519,54 +1523,6 @@ body.has-cover-photo #inc-dialcode {
 </div>
 
 <!-- ══ CONVERTISSEUR DE MONNAIE ══ -->
-<div class="screen" id="screen-converter">
-  <div class="page-hdr">
-    <div class="page-hdr-icon">💱</div>
-    <div>
-      <div class="page-hdr-title fr-o">Convertisseur</div>
-      <div class="page-hdr-title en-o">Currency Converter</div>
-      <div class="page-hdr-sub fr-o">Taux en temps réel</div>
-      <div class="page-hdr-sub en-o">Live exchange rates</div>
-    </div>
-  </div>
-  <div class="page-body">
-    <div class="conv-card">
-      <!-- Bloc "De" -->
-      <div class="conv-lbl fr-o">Montant</div>
-      <div class="conv-lbl en-o">Amount</div>
-      <div class="conv-block">
-        <input type="number" id="conv-amount" class="conv-input" value="1000" min="0" step="any" oninput="convertCurrency()">
-        <div class="conv-select-wrap">
-          <select id="conv-from" class="conv-select" onchange="convertCurrency()"></select>
-        </div>
-      </div>
-
-      <div class="conv-swap-wrap">
-        <button class="conv-swap" onclick="swapCurrencies()" title="Inverser">⇄</button>
-      </div>
-
-      <!-- Bloc "Vers" -->
-      <div class="conv-lbl fr-o">Montant</div>
-      <div class="conv-lbl en-o">Amount</div>
-      <div class="conv-block conv-block-result">
-        <div class="conv-result-val" id="conv-result">—</div>
-        <div class="conv-select-wrap">
-          <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
-        </div>
-      </div>
-    </div>
-    <div class="conv-rate-info" id="conv-rate-info"></div>
-    <div class="tip">ℹ️ <span class="fr-o">Taux indicatifs fournis par <strong>open.er-api.com</strong>. Vérifiez auprès de votre banque avant toute transaction.</span><span class="en-o">Indicative rates provided by <strong>open.er-api.com</strong>. Always check with your bank before any transaction.</span></div>
-
-    <!-- Tableau de référence rapide -->
-    <div class="card" style="margin-top:16px">
-      <div class="card-lbl fr-o">Référence rapide</div>
-      <div class="card-lbl en-o">Quick reference</div>
-      <div id="conv-table"></div>
-    </div>
-    <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
-  </div>
-</div>
 
 </main>
 

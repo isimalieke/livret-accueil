@@ -143,14 +143,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
   background:var(--cover) center/cover no-repeat;
   min-height:220px;
   display:flex; flex-direction:column; justify-content:flex-end;
-  border-bottom:1px solid var(--gold-line);
   overflow:hidden;
 }
-/* Gradient overlay sombre en bas pour lisibilité du texte */
+/* Gradient overlay : fond sombre bas pour lisibilité + fondu vers le noir pour transition */
 .home-cover::after {
   content:'';
   position:absolute; inset:0;
-  background:linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.62) 100%);
+  background:linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.72) 80%, rgba(0,0,0,0.88) 100%);
   pointer-events:none;
 }
 .home-cover-content {
@@ -444,9 +443,16 @@ body.lang-en .en-o { display:block; }
 #home-menu-bg {
   position:absolute; inset:-30px;
   background-size:cover; background-position:center;
-  filter:blur(28px) brightness(0.38) saturate(0.8);
+  filter:blur(28px) brightness(0.50) saturate(0.8);
   opacity:0; transition:opacity 0.9s ease;
   pointer-events:none;
+}
+/* Fondu noir en haut du grid pour raccorder avec la photo du cover */
+.grid-wrap::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:60px;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, transparent 100%);
+  z-index:0; pointer-events:none;
 }
 #ticket-follow-wrap, .grid-wrap > .back-row-bottom { position:relative; z-index:1; }
 

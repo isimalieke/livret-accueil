@@ -571,7 +571,6 @@ body.has-cover-photo .main { min-height:100vh; }
 body.has-cover-photo .screen { min-height:100vh; }
 
 /* Cartes flottantes sur la photo */
-body.has-cover-photo .sub-list-item,
 body.has-cover-photo .card,
 body.has-cover-photo .appl-card,
 body.has-cover-photo .conv-card,
@@ -579,6 +578,19 @@ body.has-cover-photo .conv-block,
 body.has-cover-photo .conv-block-result {
   background:rgba(255,255,255,0.91) !important;
 }
+
+/* Vignettes de navigation — translucides */
+body.has-cover-photo .sub-list-item {
+  background: rgba(0,0,0,0.38) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+body.has-cover-photo .sub-list-item .sli-label { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
+body.has-cover-photo .sub-list-item .sli-sub   { color:rgba(255,255,255,0.72) !important; }
+body.has-cover-photo .sub-list-item .sli-arrow { color:rgba(255,255,255,0.55) !important; }
+body.has-cover-photo .sub-list-item .sli-ico   { background:rgba(255,255,255,0.18) !important; }
 body.has-cover-photo .tip-box,
 body.has-cover-photo .wifi-box,
 body.has-cover-photo .paiement-box,
@@ -607,11 +619,11 @@ body.has-cover-photo #inc-dialcode {
 }
 /* ── AUTOUR DE MOI ── */
 .nearby-cat-btn { cursor:pointer; transition:background .15s; }
-.nearby-cat-btn.active { background:var(--gold) !important; border-radius:14px 14px 0 0 !important; }
+.nearby-cat-btn.active { background:#1a1a1a !important; border-radius:14px 14px 0 0 !important; }
 .nearby-cat-btn.active .sli-label,
 .nearby-cat-btn.active .sli-sub { color:#fff !important; }
-.nearby-cat-btn.active .sli-ico { background:rgba(255,255,255,0.25) !important; }
-.nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.85) !important; }
+.nearby-cat-btn.active .sli-ico { background:rgba(255,255,255,0.12) !important; }
+.nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.6) !important; }
 .nearby-cat-panel {
   background:#fff;
   border-radius:0 0 14px 14px;

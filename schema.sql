@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS recommendations (
   name         TEXT NOT NULL,
   address      TEXT DEFAULT '',
   phone        TEXT DEFAULT '',
+  url          TEXT DEFAULT '',     -- site web ou lien Google Maps
   note         TEXT DEFAULT '',     -- commentaire de l'hôtelier
   sort_order   INTEGER DEFAULT 0,
   created_at   TEXT DEFAULT (datetime('now')),
@@ -107,6 +108,8 @@ CREATE TABLE IF NOT EXISTS recommendations (
 
 -- Migration à exécuter une seule fois :
 -- npx wrangler d1 execute livret-db --remote --command "CREATE TABLE IF NOT EXISTS recommendations (id INTEGER PRIMARY KEY AUTOINCREMENT, hotel_slug TEXT NOT NULL, category TEXT NOT NULL, name TEXT NOT NULL, address TEXT DEFAULT '', phone TEXT DEFAULT '', note TEXT DEFAULT '', sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')), FOREIGN KEY (hotel_slug) REFERENCES hotels(slug));"
+-- Migration ajout colonne url :
+-- npx wrangler d1 execute livret-db --remote --command "ALTER TABLE recommendations ADD COLUMN url TEXT DEFAULT '';"
 
 -- Index de performance
 CREATE INDEX IF NOT EXISTS idx_tickets_hotel    ON tickets(hotel_slug, created_at DESC);

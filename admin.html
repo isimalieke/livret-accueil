@@ -701,8 +701,12 @@ input, textarea, select {
             <input id="reco-phone" type="tel" placeholder="+221 77 000 00 00" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
           </div>
           <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Site web / Lien Maps</label>
+            <input id="reco-url" type="url" placeholder="https://maps.google.com/..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div style="grid-column:1/-1">
             <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Votre commentaire</label>
-            <input id="reco-note" type="text" placeholder="Ex: Meilleur thiéboudienne de la ville !" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+            <input id="reco-note" type="text" placeholder="Ex: Meilleur thiéboudienne de la ville ! Réserver le soir, compter 15 000 FCFA." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
           </div>
         </div>
         <button onclick="addReco()" style="background:#C9A84C;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">+ Ajouter ce favori</button>
@@ -1788,6 +1792,7 @@ async function loadReco() {
         <div class="reco-card-body">
           <div class="reco-card-name">${r.name}</div>
           <div class="reco-card-meta">${[r.address, r.phone].filter(Boolean).join(' · ')}</div>
+          ${r.url ? `<div class="reco-card-meta"><a href="${r.url}" target="_blank" style="color:#C9A84C;font-size:11px">🔗 ${r.url.replace(/^https?:\/\//, '').substring(0,40)}${r.url.length > 47 ? '…' : ''}</a></div>` : ''}
           ${r.note ? `<div class="reco-card-note">"${r.note}"</div>` : ''}
         </div>
         <button class="reco-del" onclick="deleteReco(${r.id})" title="Supprimer">✕</button>
@@ -1812,13 +1817,14 @@ async function addReco() {
         name,
         address: document.getElementById('reco-address').value.trim(),
         phone:   document.getElementById('reco-phone').value.trim(),
+        url:     document.getElementById('reco-url').value.trim(),
         note:    document.getElementById('reco-note').value.trim(),
       })
     });
     var data = await resp.json();
     if (data.ok) {
       msg.textContent = '✓ Ajouté !';
-      ['reco-name','reco-address','reco-phone','reco-note'].forEach(id => document.getElementById(id).value = '');
+      ['reco-name','reco-address','reco-phone','reco-url','reco-note'].forEach(id => document.getElementById(id).value = '');
       setTimeout(() => msg.textContent = '', 2000);
       loadReco();
     } else { msg.textContent = data.error || 'Erreur.'; }

@@ -2436,6 +2436,7 @@ async function renderNearby() {
         <div class="nearby-item-body">
           <div class="nearby-item-name">${esc(f.name)}</div>
           <div class="nearby-item-meta">${[f.address, f.phone].filter(Boolean).map(esc).join(' · ')}</div>
+          ${f.url ? `<div class="nearby-item-meta"><a href="${esc(f.url)}" onclick="var w=window.open(this.href,'_blank','noopener');if(!w)location.href=this.href;return false;" style="color:var(--gold);font-size:11px;text-decoration:none">🔗 Voir →</a></div>` : ''}
           ${f.note ? `<div class="nearby-item-note">"${esc(f.note)}"</div>` : ''}
         </div>
       </div>`).join('');

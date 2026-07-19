@@ -1182,13 +1182,13 @@ async function handleCreateReco(request, env, slug) {
   const auth = await requireAuth(request, env, slug, ['hotelier']);
   if (!auth.ok) return auth.response;
   try {
-    const { category, name, address, phone, note, sort_order } = await request.json();
+    const { category, name, address, phone, url, note, sort_order } = await request.json();
     if (!category || !name) return json({ ok: false, error: 'category et name requis' }, 400);
     const VALID_CATS = ['restaurant', 'culture', 'plages', 'shopping', 'services'];
     if (!VALID_CATS.includes(category)) return json({ ok: false, error: 'Catégorie invalide' }, 400);
     await env.DB.prepare(
-      'INSERT INTO recommendations (hotel_slug, category, name, address, phone, note, sort_order) VALUES (?,?,?,?,?,?,?)'
-    ).bind(slug, category, name, address||'', phone||'', note||'', sort_order||0).run();
+      'INSERT INTO recommendations (hotel_slug, category, name, address, phone, url, note, sort_order) VALUES (?,?,?,?,?,?,?,?)'
+    ).bind(slug, category, name, address||'', phone||'', url||'', note||'', sort_order||0).run();
     return json({ ok: true });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);

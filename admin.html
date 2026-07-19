@@ -491,6 +491,57 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- RECOMMANDATIONS AUTOUR DE MOI -->
+  <div class="section" id="reco-section">
+    <div class="section-head" onclick="toggle(this); loadReco()">
+      <h2 style="margin:0">📍 Autour de moi — Vos recommandations</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;color:#666;margin-bottom:16px">Ajoutez vos adresses favorites par catégorie. Elles apparaîtront en tête de liste dans le livret de vos vacanciers, avec une étoile ★.</p>
+
+      <!-- Sélecteur de catégorie -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="reco-cat-btn active" data-cat="restaurant" onclick="selectRecoCat('restaurant',this)">🍽️ Restaurants</button>
+        <button class="reco-cat-btn" data-cat="culture" onclick="selectRecoCat('culture',this)">🎭 Culture</button>
+        <button class="reco-cat-btn" data-cat="plages" onclick="selectRecoCat('plages',this)">🏖️ Plages</button>
+        <button class="reco-cat-btn" data-cat="shopping" onclick="selectRecoCat('shopping',this)">🛍️ Shopping</button>
+        <button class="reco-cat-btn" data-cat="services" onclick="selectRecoCat('services',this)">🛠️ Services</button>
+      </div>
+
+      <!-- Formulaire ajout -->
+      <div style="background:#f8f7f4;border:1px solid #e8e4dc;border-radius:10px;padding:14px 16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Nom de l'établissement *</label>
+            <input id="reco-name" type="text" placeholder="Ex: Restaurant Le Baobab" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Adresse</label>
+            <input id="reco-address" type="text" placeholder="Ex: 12 rue de la Plage" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Téléphone</label>
+            <input id="reco-phone" type="tel" placeholder="+221 77 000 00 00" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Site web / Lien Maps</label>
+            <input id="reco-url" type="url" placeholder="https://maps.google.com/..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div style="grid-column:1/-1">
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Votre commentaire</label>
+            <input id="reco-note" type="text" placeholder="Ex: Meilleur thiéboudienne de la ville ! Réserver le soir, compter 15 000 FCFA." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addReco()" style="background:#C9A84C;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">+ Ajouter ce favori</button>
+        <span id="reco-msg" style="font-size:12px;color:#666;margin-left:10px"></span>
+      </div>
+
+      <!-- Liste des recommandations -->
+      <div id="reco-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+
   <!-- ══ URGENCES ══ -->
   <div class="section-group">Urgences</div>
 
@@ -570,8 +621,8 @@ input, textarea, select {
   </div>
 
 
-  <!-- ══ OUTILS ADMIN ══ -->
-  <div class="section-group">Outils admin</div>
+  <!-- ══ GESTION ══ -->
+  <div class="section-group">Gestion</div>
 
   <!-- ACCÈS VOYAGEUR -->
   <div class="section">
@@ -594,57 +645,6 @@ input, textarea, select {
         <input id="acc-pwd" value="Teranga2024">
         <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
       </div>
-    </div>
-  </div>
-
-  <!-- RECOMMANDATIONS AUTOUR DE MOI -->
-  <div class="section" id="reco-section">
-    <div class="section-head" onclick="toggle(this); loadReco()">
-      <h2 style="margin:0">📍 Autour de moi — Vos recommandations</h2>
-      <span class="chevron">▼</span>
-    </div>
-    <div class="section-body">
-      <p style="font-size:13px;color:#666;margin-bottom:16px">Ajoutez vos adresses favorites par catégorie. Elles apparaîtront en tête de liste dans le livret de vos vacanciers, avec une étoile ★.</p>
-
-      <!-- Sélecteur de catégorie -->
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-        <button class="reco-cat-btn active" data-cat="restaurant" onclick="selectRecoCat('restaurant',this)">🍽️ Restaurants</button>
-        <button class="reco-cat-btn" data-cat="culture" onclick="selectRecoCat('culture',this)">🎭 Culture</button>
-        <button class="reco-cat-btn" data-cat="plages" onclick="selectRecoCat('plages',this)">🏖️ Plages</button>
-        <button class="reco-cat-btn" data-cat="shopping" onclick="selectRecoCat('shopping',this)">🛍️ Shopping</button>
-        <button class="reco-cat-btn" data-cat="services" onclick="selectRecoCat('services',this)">🛠️ Services</button>
-      </div>
-
-      <!-- Formulaire ajout -->
-      <div style="background:#f8f7f4;border:1px solid #e8e4dc;border-radius:10px;padding:14px 16px;margin-bottom:16px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Nom de l'établissement *</label>
-            <input id="reco-name" type="text" placeholder="Ex: Restaurant Le Baobab" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Adresse</label>
-            <input id="reco-address" type="text" placeholder="Ex: 12 rue de la Plage" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Téléphone</label>
-            <input id="reco-phone" type="tel" placeholder="+221 77 000 00 00" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Site web / Lien Maps</label>
-            <input id="reco-url" type="url" placeholder="https://maps.google.com/..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
-          </div>
-          <div style="grid-column:1/-1">
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Votre commentaire</label>
-            <input id="reco-note" type="text" placeholder="Ex: Meilleur thiéboudienne de la ville ! Réserver le soir, compter 15 000 FCFA." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
-          </div>
-        </div>
-        <button onclick="addReco()" style="background:#C9A84C;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">+ Ajouter ce favori</button>
-        <span id="reco-msg" style="font-size:12px;color:#666;margin-left:10px"></span>
-      </div>
-
-      <!-- Liste des recommandations -->
-      <div id="reco-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
 

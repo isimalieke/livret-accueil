@@ -184,6 +184,7 @@ export default {
     if (sub === 'reco') {
       if (request.method === 'GET')    return handleListReco(request, env, slug);
       if (request.method === 'POST')   return handleCreateReco(request, env, slug);
+      if (request.method === 'PUT'    && parts[2]) return handleUpdateReco(request, env, slug, parts[2]);
       if (request.method === 'DELETE' && parts[2]) return handleDeleteReco(request, env, slug, parts[2]);
     }
 
@@ -1200,6 +1201,24 @@ async function handleDeleteReco(request, env, slug, recoId) {
   if (!auth.ok) return auth.response;
   try {
     await env.DB.prepare('DELETE FROM recommendations WHERE id = ? AND hotel_slug = ?').bind(recoId, slug).run();
+    return json({ ok: true });
+  } catch (e) {
+    return json({ ok: false, error: e.message }, 500);
+  }
+}
+
+async function handleUpdateReco(request, env, slug, recoId) {
+  const auth = await requireAuth(request, env, slug, ['hotelier']);
+  if (!auth.ok) return auth.response;
+  try {
+    const body = await request.json();
+    const { category, name, address, phone, url, note } = body;
+    if (!name || !name.trim()) return json({ ok: false, error: 'Le nom est requis' }, 400);
+    const VALID_CATS = ['restaurant', 'culture', 'plages', 'shopping', 'services'];
+    if (category && !VALID_CATS.includes(category)) return json({ ok: false, error: 'Catégorie invalide' }, 400);
+    await env.DB.prepare(
+      'UPDATE recommendations SET category=?, name=?, address=?, phone=?, url=?, note=? WHERE id=? AND hotel_slug=?'
+    ).bind(category || 'restaurant', name.trim(), address || '', phone || '', url || '', note || '', recoId, slug).run();
     return json({ ok: true });
   } catch (e) {
     return json({ ok: false, error: e.message }, 500);

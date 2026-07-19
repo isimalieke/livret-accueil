@@ -194,8 +194,12 @@ input, textarea, select {
 .reco-card-name { font-size:13px; font-weight:700; color:#1a1a1a; margin-bottom:2px; }
 .reco-card-meta { font-size:11px; color:#888; }
 .reco-card-note { font-size:11px; color:#C9A84C; font-style:italic; margin-top:3px; }
+.reco-view-mode { display:flex; align-items:flex-start; gap:8px; width:100%; }
+.reco-edit-mode { padding:4px 0; }
 .reco-del { background:none; border:none; color:#ccc; font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0; }
 .reco-del:hover { color:#e74c3c; }
+.reco-edit-btn { background:none; border:none; color:#C9A84C; font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+.reco-edit-btn:hover { color:#a07830; }
 </style>
 </head>
 <body>
@@ -1717,15 +1721,49 @@ async function loadReco() {
       return;
     }
     wrap.innerHTML = data.recommendations.map(r => `
-      <div class="reco-card">
-        <span class="reco-card-star">★</span>
-        <div class="reco-card-body">
-          <div class="reco-card-name">${r.name}</div>
-          <div class="reco-card-meta">${[r.address, r.phone].filter(Boolean).join(' · ')}</div>
-          ${r.url ? `<div class="reco-card-meta"><a href="${r.url}" target="_blank" style="color:#C9A84C;font-size:11px">🔗 ${r.url.replace(/^https?:\/\//, '').substring(0,40)}${r.url.length > 47 ? '…' : ''}</a></div>` : ''}
-          ${r.note ? `<div class="reco-card-note">"${r.note}"</div>` : ''}
+      <div class="reco-card" id="reco-card-${r.id}">
+        <div class="reco-view-mode">
+          <span class="reco-card-star">★</span>
+          <div class="reco-card-body">
+            <div class="reco-card-name">${escA(r.name)}</div>
+            <div class="reco-card-meta">${[r.address, r.phone].filter(Boolean).map(escA).join(' · ')}</div>
+            ${r.url ? `<div class="reco-card-meta"><a href="${escA(r.url)}" target="_blank" style="color:#C9A84C;font-size:11px">🔗 ${escA(r.url.replace(/^https?:\/\//,'').substring(0,40))}${r.url.length>47?'…':''}</a></div>` : ''}
+            ${r.note ? `<div class="reco-card-note">&ldquo;${escA(r.note)}&rdquo;</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+            <button class="reco-edit-btn" onclick="startEditReco(${r.id},${JSON.stringify(r).replace(/</g,'\\u003c')})" title="Modifier">✎</button>
+            <button class="reco-del" onclick="deleteReco(${r.id})" title="Supprimer">✕</button>
+          </div>
         </div>
-        <button class="reco-del" onclick="deleteReco(${r.id})" title="Supprimer">✕</button>
+        <div class="reco-edit-mode" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div style="grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:3px">Nom *</label>
+              <input id="re-name-${r.id}" type="text" value="${escA(r.name)}" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:3px">Adresse</label>
+              <input id="re-address-${r.id}" type="text" value="${escA(r.address||'')}" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:3px">Téléphone</label>
+              <input id="re-phone-${r.id}" type="tel" value="${escA(r.phone||'')}" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:3px">Site web / Lien Maps</label>
+              <input id="re-url-${r.id}" type="url" value="${escA(r.url||'')}" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:3px">Commentaire</label>
+              <input id="re-note-${r.id}" type="text" value="${escA(r.note||'')}" style="width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button onclick="saveEditReco(${r.id},'${escA(_recoCat)}')" style="background:#C9A84C;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-weight:700;font-size:12px;cursor:pointer">💾 Sauvegarder</button>
+            <button onclick="cancelEditReco(${r.id})" style="background:transparent;border:1px solid #ccc;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer">Annuler</button>
+            <span id="re-msg-${r.id}" style="font-size:12px;color:#666"></span>
+          </div>
+        </div>
       </div>`).join('');
   } catch(e) {
     wrap.innerHTML = '<div style="color:#ef4444;font-size:13px">Erreur chargement.</div>';
@@ -1758,6 +1796,50 @@ async function addReco() {
       setTimeout(() => msg.textContent = '', 2000);
       loadReco();
     } else { msg.textContent = data.error || 'Erreur.'; }
+  } catch(e) { msg.textContent = 'Erreur réseau.'; }
+}
+
+function escA(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function startEditReco(id, data) {
+  var card = document.getElementById('reco-card-' + id);
+  if (!card) return;
+  card.querySelector('.reco-view-mode').style.display = 'none';
+  card.querySelector('.reco-edit-mode').style.display = 'block';
+  card.querySelector('#re-name-' + id).focus();
+}
+
+function cancelEditReco(id) {
+  var card = document.getElementById('reco-card-' + id);
+  if (!card) return;
+  card.querySelector('.reco-view-mode').style.display = 'flex';
+  card.querySelector('.reco-edit-mode').style.display = 'none';
+}
+
+async function saveEditReco(id, cat) {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var msg = document.getElementById('re-msg-' + id);
+  var name = document.getElementById('re-name-' + id).value.trim();
+  if (!name) { msg.textContent = 'Le nom est requis.'; return; }
+  msg.textContent = 'Enregistrement…';
+  try {
+    var resp = await fetch('/' + slug + '/reco/' + id, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: cat,
+        name: name,
+        address: document.getElementById('re-address-' + id).value.trim(),
+        phone:   document.getElementById('re-phone-'   + id).value.trim(),
+        url:     document.getElementById('re-url-'     + id).value.trim(),
+        note:    document.getElementById('re-note-'    + id).value.trim(),
+      })
+    });
+    var data = await resp.json();
+    if (data.ok) { loadReco(); }
+    else { msg.textContent = data.error || 'Erreur.'; }
   } catch(e) { msg.textContent = 'Erreur réseau.'; }
 }
 

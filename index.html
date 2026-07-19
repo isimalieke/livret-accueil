@@ -573,13 +573,12 @@ body.has-cover-photo .incident-home-ico   { background:rgba(255,255,255,0.18) !i
 }
 body.has-cover-photo { background:transparent; }
 body.has-cover-photo .main,
-body.has-cover-photo .grid-wrap,
 body.has-cover-photo .page-body,
 body.has-cover-photo .sub-list { background:transparent !important; }
 body.has-cover-photo .main { min-height:100vh; }
 body.has-cover-photo .screen { min-height:100vh; }
-/* Photo plein écran sur l'accueil — on masque le fond flou local */
-body.has-cover-photo #home-menu-bg { opacity:0 !important; }
+/* Accueil : fond gris sombre solide (pas de photo en arrière-plan) */
+body.has-cover-photo .grid-wrap { background:#1c1c1e !important; }
 
 /* Cartes flottantes sur la photo */
 body.has-cover-photo .card,

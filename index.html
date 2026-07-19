@@ -2370,20 +2370,17 @@ function selectNearbyCat(cat, btn) {
   _nearbyCat = cat;
   document.querySelectorAll('.nearby-cat-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (_nearbyPos) renderNearby();
-  else loadNearby();
+  renderNearby();
 }
 
 function loadNearby() {
+  // Affiche d'abord les favoris immédiatement
+  renderNearby();
+  // Puis tente la géolocalisation en arrière-plan
   var statusEl = document.getElementById('nearby-geo-status');
-  var resultsEl = document.getElementById('nearby-results');
+  if (!navigator.geolocation) return;
   statusEl.style.display = 'block';
   statusEl.textContent = '📍 Localisation en cours…';
-  if (!navigator.geolocation) {
-    statusEl.textContent = '⚠️ Géolocalisation non disponible.';
-    renderNearby(null);
-    return;
-  }
   navigator.geolocation.getCurrentPosition(
     pos => {
       _nearbyPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -2391,8 +2388,7 @@ function loadNearby() {
       renderNearby();
     },
     () => {
-      statusEl.textContent = '⚠️ Localisation refusée — affichage sans tri par distance';
-      renderNearby(null);
+      statusEl.style.display = 'none';
     },
     { timeout: 8000 }
   );

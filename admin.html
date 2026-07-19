@@ -481,24 +481,48 @@ input, textarea, select {
       <h2>🚗 Transports</h2><span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="sub-label">VTC & Taxis</div>
+
+      <div class="sub-label">📱 Applications de transport</div>
+      <div class="hint" style="margin-bottom:8px">Ex : Yango, InDrive, Heetch… Renseignez le nom et le lien de téléchargement.</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
-        <tbody id="transport-vtc-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-vtc-rows', ficheTpl)">+ Ajouter</button>
+        <table class="dyn-table"><thead><tr><th>Nom de l'app</th><th>Lien téléchargement (App Store / Play Store)</th><th>Note pour le visiteur</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-apps-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-apps-rows', transportAppTpl)">+ Ajouter une application</button>
       </div>
-      <div class="sub-label">Transport commun</div>
+
+      <div class="sub-label">🚕 Taxis & chauffeurs de confiance</div>
+      <div class="hint" style="margin-bottom:8px">Numéros recommandés personnellement par votre établissement.</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
-        <tbody id="transport-commun-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-commun-rows', ficheTpl)">+ Ajouter</button>
+        <table class="dyn-table"><thead><tr><th>Nom / Société</th><th style="width:130px">Téléphone</th><th>Note (langue parlée, disponibilité…)</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-taxis-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-taxis-rows', transportTaxiTpl)">+ Ajouter un taxi</button>
       </div>
-      <div class="sub-label">Location (voiture, scooter…)</div>
+
+      <div class="sub-label">🚌 Bus & transport commun</div>
+      <div class="hint" style="margin-bottom:8px">Lignes utiles, arrêts proches, destinations desservies.</div>
       <div class="field">
-        <table class="dyn-table"><thead><tr><th style="width:42px">Icône</th><th>Nom</th><th style="width:100px">Info</th><th style="width:110px">Téléphone</th><th>Site web</th><th style="width:30px"></th></tr></thead>
+        <table class="dyn-table"><thead><tr><th>Ligne / Nom</th><th>Arrêt le plus proche</th><th>Destinations principales</th><th style="width:30px"></th></tr></thead>
+        <tbody id="transport-bus-rows"></tbody></table>
+        <button class="btn-add" onclick="addRow('transport-bus-rows', transportBusTpl)">+ Ajouter une ligne</button>
+      </div>
+
+      <div class="sub-label">🚗 Location de véhicules</div>
+      <div class="hint" style="margin-bottom:8px">Voiture, scooter, vélo… Sociétés recommandées.</div>
+      <div class="field">
+        <table class="dyn-table"><thead><tr><th>Nom / Société</th><th style="width:130px">Téléphone</th><th>Site web</th><th>Note</th><th style="width:30px"></th></tr></thead>
         <tbody id="transport-location-rows"></tbody></table>
-        <button class="btn-add" onclick="addRow('transport-location-rows', ficheTpl)">+ Ajouter</button>
+        <button class="btn-add" onclick="addRow('transport-location-rows', transportLocationTpl)">+ Ajouter</button>
       </div>
+
+      <div class="sub-label">🛺 Clandos & transports informels</div>
+      <div class="hint" style="margin-bottom:8px">Expliquez comment fonctionnent les transports informels locaux (taxi-brousse, clando, moto-taxi…), les zones desservies, prix indicatifs et précautions.</div>
+      <div class="field">
+        <textarea id="transport-clando" rows="5" placeholder="Ex : Les clandos sont des taxis collectifs informels qui circulent sur des axes fixes. Montez à bord et indiquez votre destination. Tarif : 200–500 FCFA selon la distance. Évitez-les la nuit. Demandez à la réception les axes principaux depuis l'hôtel."></textarea>
+      </div>
+      <div class="field">
+        <textarea id="transport-clando-en" rows="4" placeholder="English version (optional): Clandos are informal shared taxis running on fixed routes…"></textarea>
+      </div>
+
     </div>
   </div>
 
@@ -1190,6 +1214,35 @@ function ficheTpl(d) {
        + '<td><input value="' + esc(d.url||'') + '" placeholder="https://…"></td>'
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
+function transportAppTpl(d) {
+  d = d || {};
+  return '<td><input value="' + esc(d.nom||'') + '" placeholder="Yango, InDrive…"></td>'
+       + '<td><input value="' + esc(d.lien||'') + '" placeholder="https://apps.apple.com/…"></td>'
+       + '<td><input value="' + esc(d.note||'') + '" placeholder="Disponible sur iOS et Android"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function transportTaxiTpl(d) {
+  d = d || {};
+  return '<td><input value="' + esc(d.nom||'') + '" placeholder="Nom ou société…"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" placeholder="+221 77…" style="width:130px"></td>'
+       + '<td><input value="' + esc(d.note||'') + '" placeholder="Parle français, disponible 24h…"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function transportBusTpl(d) {
+  d = d || {};
+  return '<td><input value="' + esc(d.ligne||'') + '" placeholder="Bus 2, DDD…"></td>'
+       + '<td><input value="' + esc(d.arret||'') + '" placeholder="Arrêt le plus proche"></td>'
+       + '<td><input value="' + esc(d.destinations||'') + '" placeholder="Centre-ville, Aéroport…"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
+function transportLocationTpl(d) {
+  d = d || {};
+  return '<td><input value="' + esc(d.nom||'') + '" placeholder="Nom / Société…"></td>'
+       + '<td><input value="' + esc(d.tel||'') + '" placeholder="+221…" style="width:130px"></td>'
+       + '<td><input value="' + esc(d.url||'') + '" placeholder="https://…"></td>'
+       + '<td><input value="' + esc(d.note||'') + '" placeholder="Voiture, scooter…"></td>'
+       + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
+}
 function urgenceTpl(d) {
   return '<td><input value="' + esc(d.numero||'') + '" style="width:90px"></td>'
        + '<td><input value="' + esc(d.label_fr||'') + '"></td>'
@@ -1329,9 +1382,12 @@ function initForm() {
 
   // Transport
   if (C.transport) {
-    (C.transport.vtc||[]).forEach(function(t){ addRow('transport-vtc-rows', ficheTpl, toFiche(t, {icon:'🚗'})); });
-    (C.transport.commun||[]).forEach(function(t){ addRow('transport-commun-rows', ficheTpl, toFiche(t, {icon:'🚌'})); });
-    (C.transport.location||[]).forEach(function(t){ addRow('transport-location-rows', ficheTpl, toFiche(t, {icon:'🔑'})); });
+    (C.transport.apps||[]).forEach(function(t){ addRow('transport-apps-rows', transportAppTpl, t); });
+    (C.transport.taxis||[]).forEach(function(t){ addRow('transport-taxis-rows', transportTaxiTpl, t); });
+    (C.transport.bus||[]).forEach(function(t){ addRow('transport-bus-rows', transportBusTpl, t); });
+    (C.transport.location||[]).forEach(function(t){ addRow('transport-location-rows', transportLocationTpl, t); });
+    if (C.transport.clando_fr) document.getElementById('transport-clando').value = C.transport.clando_fr;
+    if (C.transport.clando_en) document.getElementById('transport-clando-en').value = C.transport.clando_en;
   }
 
   // Plages & Activités
@@ -1451,9 +1507,10 @@ function buildConfigContent() {
   var restos        = readRows('resto-rows',              FICHE);
   var quartierPts   = readRows('quartier-rows',           FICHE);
   var commerces     = readRows('commerces-rows',          FICHE);
-  var vtc           = readRows('transport-vtc-rows',      FICHE);
-  var commun        = readRows('transport-commun-rows',   FICHE);
-  var location      = readRows('transport-location-rows', FICHE);
+  var tApps     = readRows('transport-apps-rows',     ['nom','lien','note']);
+  var tTaxis    = readRows('transport-taxis-rows',    ['nom','tel','note']);
+  var tBus      = readRows('transport-bus-rows',      ['ligne','arret','destinations']);
+  var location  = readRows('transport-location-rows', ['nom','tel','url','note']);
   var plages        = readRows('plages-rows',             FICHE);
   var activites     = readRows('activites-rows',          FICHE);
   var marches       = readRows('marches-rows',            FICHE);
@@ -1543,9 +1600,12 @@ function buildConfigContent() {
 
   // Transport
   js += '  transport: {\n';
-  js += '    vtc:      ' + j(vtc) + ',\n';
-  js += '    commun:   ' + j(commun) + ',\n';
-  js += '    location: ' + j(location) + ',\n';
+  js += '    apps:        ' + j(tApps) + ',\n';
+  js += '    taxis:       ' + j(tTaxis) + ',\n';
+  js += '    bus:         ' + j(tBus) + ',\n';
+  js += '    location:    ' + j(location) + ',\n';
+  js += '    clando_fr:   ' + JSON.stringify(gv('transport-clando')) + ',\n';
+  js += '    clando_en:   ' + JSON.stringify(gv('transport-clando-en')) + ',\n';
   js += '  },\n\n';
 
   // Plages

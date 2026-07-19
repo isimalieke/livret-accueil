@@ -1073,28 +1073,49 @@ body.has-cover-photo #inc-dialcode {
   <div class="page-hdr">
     <div class="page-hdr-icon">🚗</div>
     <div>
-      <div class="page-hdr-title">Transports</div>
-      <div class="page-hdr-sub">VTC · Bus · Location</div>
+      <div class="page-hdr-title fr-o">Transports</div>
+      <div class="page-hdr-title en-o">Getting around</div>
+      <div class="page-hdr-sub fr-o">Sélection de votre hôte</div>
+      <div class="page-hdr-sub en-o">Host recommendations</div>
     </div>
   </div>
   <div class="page-body">
-    <div class="card">
-      <div class="card-lbl">VTC &amp; Taxis</div>
-      <div id="transport-vtc"></div>
-    </div>
-    <div class="card">
-      <div class="card-lbl fr-o">Transport commun</div>
-      <div class="card-lbl en-o">Public transport</div>
-      <div id="transport-commun"></div>
-    </div>
-    <div class="card">
-      <div class="card-lbl fr-o">Location</div>
-      <div class="card-lbl en-o">Rental</div>
-      <div id="transport-location"></div>
-    </div>
-    <div class="tip">📍 <span id="transport-adresse"></span></div>
-  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
+    <!-- Applications -->
+    <div class="card" id="tr-apps-card" style="display:none">
+      <div class="card-lbl">📱 <span class="fr-o">Applications</span><span class="en-o">Apps</span></div>
+      <div id="tr-apps"></div>
+    </div>
+
+    <!-- Taxis de confiance -->
+    <div class="card" id="tr-taxis-card" style="display:none">
+      <div class="card-lbl">🚕 <span class="fr-o">Taxis de confiance</span><span class="en-o">Trusted taxis</span></div>
+      <div id="tr-taxis"></div>
+    </div>
+
+    <!-- Bus & commun -->
+    <div class="card" id="tr-bus-card" style="display:none">
+      <div class="card-lbl">🚌 <span class="fr-o">Bus & transport commun</span><span class="en-o">Public transport</span></div>
+      <div id="tr-bus"></div>
+    </div>
+
+    <!-- Location -->
+    <div class="card" id="tr-location-card" style="display:none">
+      <div class="card-lbl">🚗 <span class="fr-o">Location de véhicules</span><span class="en-o">Vehicle rental</span></div>
+      <div id="tr-location"></div>
+    </div>
+
+    <!-- Clandos -->
+    <div class="card" id="tr-clando-card" style="display:none">
+      <div class="card-lbl">🛺 <span class="fr-o">Taxis informels (clandos)</span><span class="en-o">Informal taxis</span></div>
+      <div id="tr-clando-fr" class="fr-o" style="font-size:14px;line-height:1.6;color:var(--text)"></div>
+      <div id="tr-clando-en" class="en-o" style="font-size:14px;line-height:1.6;color:var(--text)"></div>
+    </div>
+
+    <!-- Adresse + lien Maps -->
+    <div class="tip">📍 <span id="transport-adresse"></span></div>
+
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
   </div>
 </div>
 
@@ -2012,9 +2033,33 @@ function applyConfig() {
   r('quartier-commerces',(C.quartier.commerces || []).map(ficheRow).join(''));
 
   // Transport
-  r('transport-vtc',      ((C.transport||{}).vtc      || []).map(ficheRow).join(''));
-  r('transport-commun',   ((C.transport||{}).commun   || []).map(ficheRow).join(''));
-  r('transport-location', ((C.transport||{}).location || []).map(ficheRow).join(''));
+  // Transport
+  var TR = C.transport || {};
+  function showTrCard(cardId, contentId, items, renderFn) {
+    if (items && items.length) {
+      document.getElementById(cardId).style.display = 'block';
+      r(contentId, items.map(renderFn).join(''));
+    }
+  }
+  showTrCard('tr-apps-card', 'tr-apps', TR.apps, function(a) {
+    var link = a.lien ? ' <a href="' + a.lien + '" target="_blank" rel="noopener" style="color:var(--gold);font-size:12px" onclick="event.stopPropagation();var w=window.open(this.href,\'_blank\',\'noopener\');if(!w)location.href=this.href;return false;">↗ Télécharger</a>' : '';
+    return '<div class="fiche-row"><span class="fiche-ico">📱</span><div><strong>' + esc(a.nom) + '</strong>' + link + (a.note ? '<br><span style="font-size:12px;color:var(--text2)">' + esc(a.note) + '</span>' : '') + '</div></div>';
+  });
+  showTrCard('tr-taxis-card', 'tr-taxis', TR.taxis, function(t) {
+    return '<div class="fiche-row"><span class="fiche-ico">🚕</span><div><strong>' + esc(t.nom) + '</strong>' + (t.tel ? ' · ' + tel(t.tel) : '') + (t.note ? '<br><span style="font-size:12px;color:var(--text2)">' + esc(t.note) + '</span>' : '') + '</div></div>';
+  });
+  showTrCard('tr-bus-card', 'tr-bus', TR.bus, function(b) {
+    return '<div class="fiche-row"><span class="fiche-ico">🚌</span><div><strong>' + esc(b.ligne) + '</strong>' + (b.arret ? ' · Arrêt : ' + esc(b.arret) : '') + (b.destinations ? '<br><span style="font-size:12px;color:var(--text2)">→ ' + esc(b.destinations) + '</span>' : '') + '</div></div>';
+  });
+  showTrCard('tr-location-card', 'tr-location', TR.location, function(l) {
+    var lnk = l.url ? ' <a href="' + l.url + '" target="_blank" rel="noopener" style="color:var(--gold);font-size:12px" onclick="event.stopPropagation();var w=window.open(this.href,\'_blank\',\'noopener\');if(!w)location.href=this.href;return false;">↗ Site</a>' : '';
+    return '<div class="fiche-row"><span class="fiche-ico">🚗</span><div><strong>' + esc(l.nom) + '</strong>' + (l.tel ? ' · ' + tel(l.tel) : '') + lnk + (l.note ? '<br><span style="font-size:12px;color:var(--text2)">' + esc(l.note) + '</span>' : '') + '</div></div>';
+  });
+  if (TR.clando_fr || TR.clando_en) {
+    document.getElementById('tr-clando-card').style.display = 'block';
+    if (TR.clando_fr) document.getElementById('tr-clando-fr').textContent = TR.clando_fr;
+    if (TR.clando_en) document.getElementById('tr-clando-en').textContent = TR.clando_en;
+  }
   r('transport-adresse', 'Notre adresse / Our address : <strong>' + h.adresse + '</strong>' + ml(h.adresse));
 
   // Restaurants (nouveau format plat OU ancien {senegalais, international})

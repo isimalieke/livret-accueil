@@ -580,17 +580,23 @@ body.has-cover-photo .conv-block-result {
 }
 
 /* Vignettes de navigation — translucides */
-body.has-cover-photo .sub-list-item {
+body.has-cover-photo .sub-list-item,
+body.has-cover-photo .cat-tile {
   background: rgba(0,0,0,0.38) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
   border: 1px solid rgba(255,255,255,0.18) !important;
+  border-left: none !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
 }
-body.has-cover-photo .sub-list-item .sli-label { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
-body.has-cover-photo .sub-list-item .sli-sub   { color:rgba(255,255,255,0.72) !important; }
-body.has-cover-photo .sub-list-item .sli-arrow { color:rgba(255,255,255,0.55) !important; }
-body.has-cover-photo .sub-list-item .sli-ico   { background:rgba(255,255,255,0.18) !important; }
+body.has-cover-photo .sub-list-item .sli-label,
+body.has-cover-photo .cat-tile .cat-tile-label { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
+body.has-cover-photo .sub-list-item .sli-sub,
+body.has-cover-photo .cat-tile .cat-tile-sub   { color:rgba(255,255,255,0.72) !important; }
+body.has-cover-photo .sub-list-item .sli-arrow,
+body.has-cover-photo .cat-tile .cat-tile-arr   { color:rgba(255,255,255,0.55) !important; }
+body.has-cover-photo .sub-list-item .sli-ico,
+body.has-cover-photo .cat-tile .cat-tile-ico   { background:rgba(255,255,255,0.18) !important; }
 body.has-cover-photo .tip-box,
 body.has-cover-photo .wifi-box,
 body.has-cover-photo .paiement-box,

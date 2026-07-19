@@ -2404,11 +2404,13 @@ async function renderNearby() {
   var googleErr = null;
 
   // 1. Charger les favoris hôtelier
+  var recoErr = null;
   try {
-    var r = await fetch('/' + slug + '/reco?cat=' + _nearbyCat);
+    var r = await fetch('/' + slug + '/reco?cat=' + _nearbyCat, { cache: 'no-cache' });
     var d = await r.json();
     if (d.ok) favs = d.recommendations || [];
-  } catch(e) {}
+    else recoErr = d.error || 'Erreur API reco';
+  } catch(e) { recoErr = e.message || 'Fetch reco échoué'; }
 
   // 2. Charger Google Places si clé dispo
   if (_nearbyPos) {
@@ -2452,10 +2454,8 @@ async function renderNearby() {
   }
 
   if (!favs.length && !places.length) {
-    if (googleErr && googleErr.includes('manquante')) {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">📍 Votre hôte n\'a pas encore configuré les recommandations pour cette catégorie.</div>';
-    } else if (googleErr) {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat · ' + googleErr + '</div>';
+    if (recoErr) {
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">⚠️ Erreur chargement : ' + recoErr + ' (slug: ' + slug + ')</div>';
     } else {
       html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat pour cette catégorie.</div>';
     }

@@ -1,4 +1,4 @@
-const CACHE = 'welkomeo-v54';
+const CACHE = 'welkomeo-v55';
 // config.js exclu du pré-cache — contenu dynamique (KV)
 const FILES = ['./index.html', './manifest.json', './admin.html', './gestion.html', './reset.html', './paiement.html'];
 

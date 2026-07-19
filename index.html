@@ -607,12 +607,18 @@ body.has-cover-photo #inc-dialcode {
 }
 /* ── AUTOUR DE MOI ── */
 .nearby-cat-btn { cursor:pointer; transition:background .15s; }
-.nearby-cat-btn.active { background:var(--gold) !important; }
+.nearby-cat-btn.active { background:var(--gold) !important; border-radius:14px 14px 0 0 !important; }
 .nearby-cat-btn.active .sli-label,
 .nearby-cat-btn.active .sli-sub { color:#fff !important; }
 .nearby-cat-btn.active .sli-ico { background:rgba(255,255,255,0.25) !important; }
-.nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.8) !important; }
-.nearby-cat-panel { background:rgba(0,0,0,0.025); border-bottom:1px solid var(--border); }
+.nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.85) !important; }
+.nearby-cat-panel {
+  background:#fff;
+  border-radius:0 0 14px 14px;
+  margin-bottom:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+  overflow:hidden;
+}
 .nearby-item-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
 .nearby-item-meta { font-size:11px; color:var(--text2); }
 .nearby-item-note { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }

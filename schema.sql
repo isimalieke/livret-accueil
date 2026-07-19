@@ -90,9 +90,28 @@ CREATE TABLE IF NOT EXISTS stays (
 -- Si la table stays existe déjà, ajouter la colonne civility :
 -- npx wrangler d1 execute livret-db --remote --command "ALTER TABLE stays ADD COLUMN civility TEXT DEFAULT '';"
 
+-- Recommandations hôtelier (favoris "Autour de moi")
+-- category : 'restaurant' | 'loisirs' | 'services'
+CREATE TABLE IF NOT EXISTS recommendations (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  hotel_slug   TEXT NOT NULL,
+  category     TEXT NOT NULL,
+  name         TEXT NOT NULL,
+  address      TEXT DEFAULT '',
+  phone        TEXT DEFAULT '',
+  note         TEXT DEFAULT '',     -- commentaire de l'hôtelier
+  sort_order   INTEGER DEFAULT 0,
+  created_at   TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (hotel_slug) REFERENCES hotels(slug)
+);
+
+-- Migration à exécuter une seule fois :
+-- npx wrangler d1 execute livret-db --remote --command "CREATE TABLE IF NOT EXISTS recommendations (id INTEGER PRIMARY KEY AUTOINCREMENT, hotel_slug TEXT NOT NULL, category TEXT NOT NULL, name TEXT NOT NULL, address TEXT DEFAULT '', phone TEXT DEFAULT '', note TEXT DEFAULT '', sort_order INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now')), FOREIGN KEY (hotel_slug) REFERENCES hotels(slug));"
+
 -- Index de performance
 CREATE INDEX IF NOT EXISTS idx_tickets_hotel    ON tickets(hotel_slug, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_ticket  ON messages(ticket_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_users_hotel      ON users(hotel_slug);
 CREATE INDEX IF NOT EXISTS idx_users_email      ON users(hotel_slug, email);
 CREATE INDEX IF NOT EXISTS idx_stays_hotel      ON stays(hotel_slug, checkout);
+CREATE INDEX IF NOT EXISTS idx_reco_hotel       ON recommendations(hotel_slug, category);

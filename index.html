@@ -605,6 +605,29 @@ body.has-cover-photo .field textarea {
 body.has-cover-photo #inc-dialcode {
   background: #ffffff !important;
 }
+/* ── AUTOUR DE MOI ── */
+.nearby-cat-btn {
+  flex:1; padding:9px 10px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1.5px solid var(--border); background:var(--card); color:var(--text2);
+  cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.nearby-cat-btn.active { border-color:var(--gold); background:var(--gold); color:#fff; }
+.nearby-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:11px 0; border-bottom:1px solid var(--border);
+}
+.nearby-item:last-child { border-bottom:none; }
+.nearby-item-star { color:var(--gold); font-size:13px; flex-shrink:0; margin-top:2px; }
+.nearby-item-body { flex:1; min-width:0; }
+.nearby-item-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.nearby-item-meta { font-size:11px; color:var(--text2); }
+.nearby-item-note { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }
+.nearby-item-dist { font-size:11px; color:var(--text2); flex-shrink:0; text-align:right; }
+.nearby-item-rating { color:#f59e0b; font-size:11px; }
+.nearby-section-lbl {
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.7px;
+  color:var(--text2); padding:10px 0 6px; margin-top:4px;
+}
 </style>
 </head>
 <body class="lang-fr">
@@ -1056,28 +1079,30 @@ body.has-cover-photo #inc-dialcode {
     </div>
   </div>
   <div class="page-body">
-    <!-- Bouton Maps "Autour de l'hôtel" -->
-    <div id="maps-poi-wrap" style="display:none;margin-bottom:14px">
-      <a id="maps-poi-btn" href="#" target="_blank" rel="noopener"
-         onclick="event.preventDefault();event.stopPropagation();window.open(this.href,'_blank','noopener')"
-         style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--blue);color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:600;text-decoration:none">
-        📍 <span class="fr-o">Explorer le quartier sur Google Maps</span><span class="en-o">Explore the neighbourhood on Google Maps</span>
-      </a>
-      <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:6px" class="fr-o">Restaurants, pharmacies, banques, commerces autour de l'hôtel</div>
-      <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:6px" class="en-o">Restaurants, pharmacies, banks, shops around the hotel</div>
-    </div>
-    <div class="card">
-      <div class="card-lbl fr-o">Recommandations de l'hôte</div>
-      <div class="card-lbl en-o">Host's picks nearby</div>
-      <div id="quartier-points"></div>
-    </div>
-    <div class="card">
-      <div class="card-lbl fr-o">Commerces</div>
-      <div class="card-lbl en-o">Shops</div>
-      <div id="quartier-commerces"></div>
-    </div>
-  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
+    <!-- Sélecteur de catégorie -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">🍽️ <span class="fr-o">Restaurants</span><span class="en-o">Restaurants</span></button>
+      <button class="nearby-cat-btn" data-cat="loisirs" onclick="selectNearbyCat('loisirs',this)">🎭 <span class="fr-o">Loisirs</span><span class="en-o">Leisure</span></button>
+      <button class="nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">🏥 <span class="fr-o">Services</span><span class="en-o">Services</span></button>
+    </div>
+
+    <!-- Statut géolocalisation -->
+    <div id="nearby-geo-status" style="font-size:12px;color:var(--text2);margin-bottom:12px;display:none"></div>
+
+    <!-- Résultats -->
+    <div id="nearby-results">
+      <div style="text-align:center;padding:32px 16px;color:var(--text2)">
+        <div style="font-size:32px;margin-bottom:8px">📍</div>
+        <div class="fr-o" style="font-size:13px">Autorisez la géolocalisation pour voir les adresses triées par distance</div>
+        <div class="en-o" style="font-size:13px">Allow location access to see places sorted by distance</div>
+        <button onclick="loadNearby()" style="margin-top:14px;background:var(--gold);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
+          <span class="fr-o">📍 Localiser</span><span class="en-o">📍 Locate me</span>
+        </button>
+      </div>
+    </div>
+
+  <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
   </div>
 </div>
 
@@ -2335,6 +2360,117 @@ document.addEventListener('DOMContentLoaded', function() {
   s.src = slug ? '/' + slug + '/config.js' : '/config.js';
   document.head.appendChild(s);
 })();
+</script>
+
+<script>
+// ══ AUTOUR DE MOI — Google Places + Recommandations hôtelier ══
+var _nearbyCat = 'restaurant';
+var _nearbyPos = null;
+
+function selectNearbyCat(cat, btn) {
+  _nearbyCat = cat;
+  document.querySelectorAll('.nearby-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (_nearbyPos) renderNearby();
+  else loadNearby();
+}
+
+function loadNearby() {
+  var statusEl = document.getElementById('nearby-geo-status');
+  var resultsEl = document.getElementById('nearby-results');
+  statusEl.style.display = 'block';
+  statusEl.textContent = '📍 Localisation en cours…';
+  if (!navigator.geolocation) {
+    statusEl.textContent = '⚠️ Géolocalisation non disponible.';
+    renderNearby(null);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      _nearbyPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      statusEl.style.display = 'none';
+      renderNearby();
+    },
+    () => {
+      statusEl.textContent = '⚠️ Localisation refusée — affichage sans tri par distance';
+      renderNearby(null);
+    },
+    { timeout: 8000 }
+  );
+}
+
+async function renderNearby() {
+  var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+  var wrap = document.getElementById('nearby-results');
+  wrap.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Chargement…</div>';
+
+  var favs = [], places = [];
+
+  // 1. Charger les favoris hôtelier
+  try {
+    var r = await fetch('/' + slug + '/reco?cat=' + _nearbyCat);
+    var d = await r.json();
+    if (d.ok) favs = d.recommendations || [];
+  } catch(e) {}
+
+  // 2. Charger Google Places si clé dispo
+  if (_nearbyPos) {
+    try {
+      var url = '/' + slug + '/nearby?cat=' + _nearbyCat
+              + '&lat=' + _nearbyPos.lat + '&lng=' + _nearbyPos.lng;
+      var r2 = await fetch(url);
+      var d2 = await r2.json();
+      if (d2.ok) places = d2.places || [];
+    } catch(e) {}
+  }
+
+  // 3. Rendre
+  var html = '';
+
+  if (favs.length) {
+    html += '<div class="nearby-section-lbl">★ Sélection de votre hôte</div>';
+    html += favs.map(f => `
+      <div class="nearby-item">
+        <span class="nearby-item-star">★</span>
+        <div class="nearby-item-body">
+          <div class="nearby-item-name">${esc(f.name)}</div>
+          <div class="nearby-item-meta">${[f.address, f.phone].filter(Boolean).map(esc).join(' · ')}</div>
+          ${f.note ? `<div class="nearby-item-note">"${esc(f.note)}"</div>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  if (places.length) {
+    html += '<div class="nearby-section-lbl">📍 À proximité</div>';
+    html += places.map(p => `
+      <div class="nearby-item">
+        <div class="nearby-item-body">
+          <div class="nearby-item-name">${esc(p.name)}</div>
+          <div class="nearby-item-meta">${esc(p.address)}${p.rating ? ` · <span class="nearby-item-rating">★ ${p.rating}</span>` : ''}${p.open_now === true ? ' · <span style="color:#16a34a">Ouvert</span>' : p.open_now === false ? ' · <span style="color:#dc2626">Fermé</span>' : ''}</div>
+        </div>
+        <div class="nearby-item-dist">${p.dist < 1000 ? p.dist + ' m' : (p.dist/1000).toFixed(1) + ' km'}</div>
+      </div>`).join('');
+  }
+
+  if (!favs.length && !places.length) {
+    html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat pour cette catégorie.</div>';
+  }
+
+  wrap.innerHTML = '<div class="card" style="padding:0 16px">' + html + '</div>';
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Charger automatiquement quand on arrive sur l'écran quartier
+document.addEventListener('DOMContentLoaded', function() {
+  var orig = window.showScreen;
+  window.showScreen = function(id) {
+    if (typeof orig === 'function') orig(id);
+    if (id === 'screen-quartier' && !_nearbyPos) loadNearby();
+  };
+});
 </script>
 </body>
 </html>

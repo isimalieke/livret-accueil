@@ -179,6 +179,23 @@ input, textarea, select {
 .tel-row input, .tel-row select {
   touch-action: manipulation;
 }
+/* ── RECOMMANDATIONS ── */
+.reco-cat-btn {
+  padding:7px 14px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1.5px solid #ddd; background:#fff; color:#666; cursor:pointer; transition:all .15s;
+}
+.reco-cat-btn.active { border-color:#C9A84C; background:#C9A84C; color:#fff; }
+.reco-card {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  background:#fff; border:1px solid #e8e4dc; border-radius:10px; padding:12px 14px;
+}
+.reco-card-star { color:#C9A84C; font-size:14px; flex-shrink:0; }
+.reco-card-body { flex:1; min-width:0; }
+.reco-card-name { font-size:13px; font-weight:700; color:#1a1a1a; margin-bottom:2px; }
+.reco-card-meta { font-size:11px; color:#888; }
+.reco-card-note { font-size:11px; color:#C9A84C; font-style:italic; margin-top:3px; }
+.reco-del { background:none; border:none; color:#ccc; font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0; }
+.reco-del:hover { color:#e74c3c; }
 </style>
 </head>
 <body>
@@ -623,6 +640,51 @@ input, textarea, select {
         <input id="acc-pwd" value="Teranga2024">
         <div class="hint">Communiquez ce mot de passe à l'arrivée. <strong>Pour terminer le séjour : changez le mot de passe</strong> puis cliquez "Enregistrer en ligne".</div>
       </div>
+    </div>
+  </div>
+
+  <!-- RECOMMANDATIONS AUTOUR DE MOI -->
+  <div class="section" id="reco-section">
+    <div class="section-head" onclick="toggle(this); loadReco()">
+      <h2 style="margin:0">📍 Autour de moi — Vos recommandations</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body" style="display:none">
+      <p style="font-size:13px;color:#666;margin-bottom:16px">Ajoutez vos adresses favorites par catégorie. Elles apparaîtront en tête de liste dans le livret de vos vacanciers, avec une étoile ★.</p>
+
+      <!-- Sélecteur de catégorie -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="reco-cat-btn active" data-cat="restaurant" onclick="selectRecoCat('restaurant',this)">🍽️ Restaurants & cafés</button>
+        <button class="reco-cat-btn" data-cat="loisirs" onclick="selectRecoCat('loisirs',this)">🎭 Loisirs & nature</button>
+        <button class="reco-cat-btn" data-cat="services" onclick="selectRecoCat('services',this)">🏥 Santé & services</button>
+      </div>
+
+      <!-- Formulaire ajout -->
+      <div style="background:#f8f7f4;border:1px solid #e8e4dc;border-radius:10px;padding:14px 16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Nom de l'établissement *</label>
+            <input id="reco-name" type="text" placeholder="Ex: Restaurant Le Baobab" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Adresse</label>
+            <input id="reco-address" type="text" placeholder="Ex: 12 rue de la Plage" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Téléphone</label>
+            <input id="reco-phone" type="tel" placeholder="+221 77 000 00 00" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Votre commentaire</label>
+            <input id="reco-note" type="text" placeholder="Ex: Meilleur thiéboudienne de la ville !" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+          </div>
+        </div>
+        <button onclick="addReco()" style="background:#C9A84C;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer">+ Ajouter ce favori</button>
+        <span id="reco-msg" style="font-size:12px;color:#666;margin-left:10px"></span>
+      </div>
+
+      <!-- Liste des recommandations -->
+      <div id="reco-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </div>
 
@@ -1632,6 +1694,86 @@ async function saveOnline(silent) {
 // ══ SÉJOURS MULTI-VOYAGEURS ══
 
 var _staysLoaded = false;
+
+// ═══════════════════════════════
+// RECOMMANDATIONS (AUTOUR DE MOI)
+// ═══════════════════════════════
+var _recoCat = 'restaurant';
+
+function selectRecoCat(cat, btn) {
+  _recoCat = cat;
+  document.querySelectorAll('.reco-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadReco();
+}
+
+async function loadReco() {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  if (!slug || !_jwt) return;
+  var wrap = document.getElementById('reco-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="color:#888;font-size:13px;padding:8px">Chargement…</div>';
+  try {
+    var resp = await fetch('/' + slug + '/reco?cat=' + _recoCat, { headers: { 'Authorization': 'Bearer ' + _jwt } });
+    var data = await resp.json();
+    if (!data.ok || !data.recommendations.length) {
+      wrap.innerHTML = '<div style="color:#aaa;font-size:13px;padding:8px;font-style:italic">Aucun favori dans cette catégorie.</div>';
+      return;
+    }
+    wrap.innerHTML = data.recommendations.map(r => `
+      <div class="reco-card">
+        <span class="reco-card-star">★</span>
+        <div class="reco-card-body">
+          <div class="reco-card-name">${r.name}</div>
+          <div class="reco-card-meta">${[r.address, r.phone].filter(Boolean).join(' · ')}</div>
+          ${r.note ? `<div class="reco-card-note">"${r.note}"</div>` : ''}
+        </div>
+        <button class="reco-del" onclick="deleteReco(${r.id})" title="Supprimer">✕</button>
+      </div>`).join('');
+  } catch(e) {
+    wrap.innerHTML = '<div style="color:#ef4444;font-size:13px">Erreur chargement.</div>';
+  }
+}
+
+async function addReco() {
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  var name = document.getElementById('reco-name').value.trim();
+  var msg  = document.getElementById('reco-msg');
+  if (!name) { msg.textContent = 'Le nom est requis.'; return; }
+  msg.textContent = 'Enregistrement…';
+  try {
+    var resp = await fetch('/' + slug + '/reco', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: _recoCat,
+        name,
+        address: document.getElementById('reco-address').value.trim(),
+        phone:   document.getElementById('reco-phone').value.trim(),
+        note:    document.getElementById('reco-note').value.trim(),
+      })
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      msg.textContent = '✓ Ajouté !';
+      ['reco-name','reco-address','reco-phone','reco-note'].forEach(id => document.getElementById(id).value = '');
+      setTimeout(() => msg.textContent = '', 2000);
+      loadReco();
+    } else { msg.textContent = data.error || 'Erreur.'; }
+  } catch(e) { msg.textContent = 'Erreur réseau.'; }
+}
+
+async function deleteReco(id) {
+  if (!confirm('Supprimer ce favori ?')) return;
+  var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';
+  try {
+    await fetch('/' + slug + '/reco/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    loadReco();
+  } catch(e) {}
+}
 
 async function loadStays() {
   var slug = window.location.pathname.split('/').filter(Boolean).slice(-2,-1)[0] || '';

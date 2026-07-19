@@ -1277,30 +1277,29 @@ body.has-cover-photo #inc-dialcode {
     </div>
   </div>
   <div class="page-body">
-    <div class="card">
-      <div class="card-lbl fr-o">Réglez votre séjour ou vos services</div>
-      <div class="card-lbl en-o">Pay for your stay or services</div>
-      <div id="pay-wave" style="display:none" class="pay-block">
-        <div class="pay-logo">📱 Wave</div>
-        <div class="pay-info" id="pay-wave-info"></div>
-        <a id="pay-wave-btn" href="#" class="pay-btn" onclick="return openWave(event)">Payer via Wave / Pay via Wave</a>
-      </div>
-      <div id="pay-om" style="display:none" class="pay-block">
-        <div class="pay-logo">🟠 Orange Money</div>
-        <div class="pay-info" id="pay-om-info"></div>
-        <a id="pay-om-btn" href="#" class="pay-btn" onclick="return openOM(event)">Payer via Orange Money</a>
-      </div>
-      <div id="pay-paypal" style="display:none" class="pay-block">
-        <div class="pay-logo">🔵 PayPal</div>
-        <a id="pay-paypal-btn" href="#" class="pay-btn" onclick="event.stopPropagation();window.open(this.dataset.url,'_blank','noopener');return false;">Payer via PayPal / Pay via PayPal</a>
-      </div>
-      <div id="pay-virement" style="display:none" class="pay-block">
-        <div class="pay-logo">🏦 Virement bancaire / Bank transfer</div>
-        <div class="pay-info" id="pay-virement-info"></div>
-      </div>
+    <div class="tip fr-o" style="margin-bottom:14px">💡 Rendez-vous à l'accueil pour régler votre séjour. Vous trouverez ci-dessous les moyens de paiement acceptés.</div>
+    <div class="tip en-o" style="margin-bottom:14px">💡 Please settle your bill at reception. Below are the accepted payment methods.</div>
+    <div id="pay-wave" style="display:none" class="card">
+      <div class="card-lbl">📱 Wave</div>
+      <div class="pay-info" id="pay-wave-info"></div>
     </div>
-    <div class="tip fr-o">💡 Indiquez votre nom et numéro de chambre lors du paiement.</div>
-    <div class="tip en-o">💡 Include your name and room number when making payment.</div>
+    <div id="pay-om" style="display:none" class="card">
+      <div class="card-lbl">🟠 Orange Money</div>
+      <div class="pay-info" id="pay-om-info"></div>
+    </div>
+    <div id="pay-paypal" style="display:none" class="card">
+      <div class="card-lbl">🔵 PayPal</div>
+      <div class="pay-info" id="pay-paypal-info"></div>
+    </div>
+    <div id="pay-virement" style="display:none" class="card">
+      <div class="card-lbl">🏦 <span class="fr-o">Virement bancaire</span><span class="en-o">Bank transfer</span></div>
+      <div class="pay-info fr-o">Demandez les coordonnées bancaires à l'accueil.</div>
+      <div class="pay-info en-o">Ask for bank details at reception.</div>
+    </div>
+    <div id="pay-none" style="display:none" class="tip">
+      <span class="fr-o">Aucun moyen de paiement renseigné. Contactez l'accueil.</span>
+      <span class="en-o">No payment method listed. Please contact reception.</span>
+    </div>
 
     <!-- ── Convertisseur intégré ── -->
     <div style="margin-top:20px">
@@ -1776,16 +1775,6 @@ function openResa(e, type) {
 }
 
 // ── PAIEMENT ──
-function openWave(e) {
-  e.preventDefault(); e.stopPropagation();
-  window.open(document.getElementById('pay-wave-btn').dataset.url, '_blank', 'noopener');
-  return false;
-}
-function openOM(e) {
-  e.preventDefault(); e.stopPropagation();
-  window.open(document.getElementById('pay-om-btn').dataset.url, '_blank', 'noopener');
-  return false;
-}
 
 // ── LANGUE ──
 function setLang(lang) {
@@ -2062,33 +2051,34 @@ function applyConfig() {
          + '</div>';
   }).join(''));
 
-  // Paiement
+  // Paiement — affichage informatif uniquement (le client règle à l'accueil)
   if (C.paiement) {
     var P = C.paiement;
+    var hasAny = false;
     if (P.wave_numero) {
-      var wUrl = 'https://web.wave.com/pay/' + encodeURIComponent(P.wave_numero.replace(/\s/g,''));
       document.getElementById('pay-wave').style.display = 'block';
-      t('pay-wave-info', P.wave_nom + ' · ' + P.wave_numero);
-      document.getElementById('pay-wave-btn').dataset.url = wUrl;
+      t('pay-wave-info', (P.wave_nom ? P.wave_nom + ' · ' : '') + P.wave_numero);
+      hasAny = true;
     }
     if (P.orange_numero) {
-      var oUrl = 'https://www.orange-money.com/send?to=' + P.orange_numero.replace(/\s/g,'');
       document.getElementById('pay-om').style.display = 'block';
-      t('pay-om-info', P.orange_nom + ' · ' + P.orange_numero);
-      document.getElementById('pay-om-btn').dataset.url = oUrl;
+      t('pay-om-info', (P.orange_nom ? P.orange_nom + ' · ' : '') + P.orange_numero);
+      hasAny = true;
     }
     if (P.paypal_lien) {
       document.getElementById('pay-paypal').style.display = 'block';
-      document.getElementById('pay-paypal-btn').dataset.url = P.paypal_lien;
+      r('pay-paypal-info', '<a href="' + P.paypal_lien + '" target="_blank" rel="noopener" style="color:var(--gold)">' + P.paypal_lien + '</a>');
+      hasAny = true;
     }
     if (P.iban) {
       document.getElementById('pay-virement').style.display = 'block';
-      r('pay-virement-info',
-        '<strong>' + P.titulaire + '</strong><br>'
-        + 'IBAN : ' + P.iban + '<br>'
-        + 'SWIFT : ' + P.swift + '<br>'
-        + 'Banque : ' + P.banque);
+      hasAny = true;
+    } else if (!P.wave_numero && !P.orange_numero && !P.paypal_lien) {
+      // Afficher virement par défaut si rien d'autre n'est renseigné
+      document.getElementById('pay-virement').style.display = 'block';
+      hasAny = true;
     }
+    if (!hasAny) document.getElementById('pay-none').style.display = 'block';
   }
 
   // Checkout

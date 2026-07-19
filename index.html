@@ -802,7 +802,7 @@ body.has-cover-photo #inc-dialcode {
   <div class="sub-list">
     <div class="sub-list-item" onclick="showPage('quartier')">
       <div class="sli-ico">🗺️</div>
-      <div><div class="sli-label fr-o">Autour de vous</div><div class="sli-label en-o">Around you</div><div class="sli-sub fr-o">Restaurants, culture, plages, services</div><div class="sli-sub en-o">Food, culture, beaches, services</div></div>
+      <div><div class="sli-label fr-o">Autour de moi</div><div class="sli-label en-o">Near me</div><div class="sli-sub fr-o">Restaurants, culture, plages, services</div><div class="sli-sub en-o">Food, culture, beaches, services</div></div>
       <div class="sli-arrow">›</div>
     </div>
     <div class="sub-list-item" onclick="showPage('transport')">
@@ -1032,8 +1032,8 @@ body.has-cover-photo #inc-dialcode {
   <div class="page-hdr">
     <div class="page-hdr-icon">🗺️</div>
     <div>
-      <div class="page-hdr-title fr-o">Autour de vous</div>
-      <div class="page-hdr-title en-o">Around you</div>
+      <div class="page-hdr-title fr-o">Autour de moi</div>
+      <div class="page-hdr-title en-o">Near me</div>
       <div class="page-hdr-sub fr-o">Sélection de votre hôte · Google Places</div>
       <div class="page-hdr-sub en-o">Host picks · Google Places</div>
     </div>
@@ -2404,6 +2404,7 @@ async function renderNearby() {
   wrap.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Chargement…</div>';
 
   var favs = [], places = [];
+  var googleErr = null;
 
   // 1. Charger les favoris hôtelier
   try {
@@ -2420,7 +2421,8 @@ async function renderNearby() {
       var r2 = await fetch(url);
       var d2 = await r2.json();
       if (d2.ok) places = d2.places || [];
-    } catch(e) {}
+      else googleErr = d2.error || 'Erreur Places';
+    } catch(e) { googleErr = 'Réseau indisponible'; }
   }
 
   // 3. Rendre
@@ -2452,7 +2454,13 @@ async function renderNearby() {
   }
 
   if (!favs.length && !places.length) {
-    html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat pour cette catégorie.</div>';
+    if (googleErr && googleErr.includes('manquante')) {
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">📍 Votre hôte n\'a pas encore configuré les recommandations pour cette catégorie.</div>';
+    } else if (googleErr) {
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat · ' + googleErr + '</div>';
+    } else {
+      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat pour cette catégorie.</div>';
+    }
   }
 
   wrap.innerHTML = '<div class="card" style="padding:0 16px">' + html + '</div>';

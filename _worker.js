@@ -1184,7 +1184,7 @@ async function handleCreateReco(request, env, slug) {
   try {
     const { category, name, address, phone, note, sort_order } = await request.json();
     if (!category || !name) return json({ ok: false, error: 'category et name requis' }, 400);
-    const VALID_CATS = ['restaurant', 'loisirs', 'services'];
+    const VALID_CATS = ['restaurant', 'culture', 'plages', 'shopping', 'services'];
     if (!VALID_CATS.includes(category)) return json({ ok: false, error: 'Catégorie invalide' }, 400);
     await env.DB.prepare(
       'INSERT INTO recommendations (hotel_slug, category, name, address, phone, note, sort_order) VALUES (?,?,?,?,?,?,?)'

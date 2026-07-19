@@ -606,12 +606,10 @@ body.has-cover-photo #inc-dialcode {
   background: #ffffff !important;
 }
 /* ── AUTOUR DE MOI ── */
-.nearby-cat-btn {
-  flex:1; padding:9px 10px; border-radius:20px; font-size:12px; font-weight:600;
-  border:1.5px solid var(--border); background:var(--card); color:var(--text2);
-  cursor:pointer; transition:all .15s; white-space:nowrap;
-}
-.nearby-cat-btn.active { border-color:var(--gold); background:var(--gold); color:#fff; }
+.nearby-cat-btn { cursor:pointer; transition:background .15s; }
+.nearby-cat-btn.active { background:var(--gold) !important; }
+.nearby-cat-btn.active .sli-label, .nearby-cat-btn.active .sli-arrow { color:#fff !important; }
+.nearby-cat-btn.active .sli-ico { filter: brightness(10); }
 .nearby-item {
   display:flex; align-items:flex-start; gap:10px;
   padding:11px 0; border-bottom:1px solid var(--border);
@@ -1041,12 +1039,32 @@ body.has-cover-photo #inc-dialcode {
   <div class="page-body">
 
     <!-- Sélecteur de catégorie -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">🍽️ <span class="fr-o">Restaurants</span><span class="en-o">Eat</span></button>
-      <button class="nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">🎭 <span class="fr-o">Culture</span><span class="en-o">Culture</span></button>
-      <button class="nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">🏖️ <span class="fr-o">Plages</span><span class="en-o">Beaches</span></button>
-      <button class="nearby-cat-btn" data-cat="shopping" onclick="selectNearbyCat('shopping',this)">🛍️ <span class="fr-o">Shopping</span><span class="en-o">Shopping</span></button>
-      <button class="nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">🛠️ <span class="fr-o">Services</span><span class="en-o">Services</span></button>
+    <div class="sub-list" style="margin-bottom:16px">
+      <div class="sub-list-item nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">
+        <div class="sli-ico">🍽️</div>
+        <div><div class="sli-label fr-o">Restaurants</div><div class="sli-label en-o">Eat</div></div>
+        <div class="sli-arrow">›</div>
+      </div>
+      <div class="sub-list-item nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">
+        <div class="sli-ico">🎭</div>
+        <div><div class="sli-label fr-o">Culture & Loisirs</div><div class="sli-label en-o">Culture</div></div>
+        <div class="sli-arrow">›</div>
+      </div>
+      <div class="sub-list-item nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">
+        <div class="sli-ico">🏖️</div>
+        <div><div class="sli-label fr-o">Plages & Parcs</div><div class="sli-label en-o">Beaches</div></div>
+        <div class="sli-arrow">›</div>
+      </div>
+      <div class="sub-list-item nearby-cat-btn" data-cat="shopping" onclick="selectNearbyCat('shopping',this)">
+        <div class="sli-ico">🛍️</div>
+        <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div></div>
+        <div class="sli-arrow">›</div>
+      </div>
+      <div class="sub-list-item nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">
+        <div class="sli-ico">🛠️</div>
+        <div><div class="sli-label fr-o">Services</div><div class="sli-label en-o">Services</div></div>
+        <div class="sli-arrow">›</div>
+      </div>
     </div>
 
     <!-- Statut géolocalisation -->
@@ -2372,6 +2390,10 @@ function selectNearbyCat(cat, btn) {
   document.querySelectorAll('.nearby-cat-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderNearby();
+  setTimeout(function() {
+    var el = document.getElementById('nearby-results');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 }
 
 function loadNearby() {

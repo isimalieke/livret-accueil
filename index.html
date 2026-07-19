@@ -444,7 +444,7 @@ body.lang-en .en-o { display:block; }
 #home-menu-bg {
   position:absolute; inset:-30px;
   background-size:cover; background-position:center;
-  filter:blur(22px) brightness(0.22);
+  filter:blur(28px) brightness(0.38) saturate(0.8);
   opacity:0; transition:opacity 0.9s ease;
   pointer-events:none;
 }
@@ -577,8 +577,8 @@ body.has-cover-photo .page-body,
 body.has-cover-photo .sub-list { background:transparent !important; }
 body.has-cover-photo .main { min-height:100vh; }
 body.has-cover-photo .screen { min-height:100vh; }
-/* Accueil : fond gris sombre solide (pas de photo en arrière-plan) */
-body.has-cover-photo .grid-wrap { background:#1c1c1e !important; }
+/* Accueil : fond = photo floutée (couleurs adaptées à chaque hôtel) */
+body.has-cover-photo .grid-wrap { background: transparent !important; }
 
 /* Cartes flottantes sur la photo */
 body.has-cover-photo .card,

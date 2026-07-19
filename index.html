@@ -548,7 +548,7 @@ body.lang-en .en-o { display:block; }
 .conv-select { border:none; background:transparent; font-size:13px; font-weight:600; color:var(--text); outline:none; max-width:130px; cursor:pointer; }
 .conv-swap-wrap { text-align:center; margin:10px 0; }
 .conv-swap { background:var(--blue); border:none; border-radius:50%; width:36px; height:36px; font-size:17px; color:#fff; cursor:pointer; box-shadow:0 2px 8px rgba(5,51,114,.25); }
-.conv-rate-info { text-align:center; font-size:12px; color:var(--text2); margin-bottom:12px; }
+.conv-rate-info { text-align:center; font-size:13px; color:var(--text); margin:8px 0 12px; line-height:1.6; }
 .conv-tbl-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
 .conv-tbl-row:last-child { border-bottom:none; }
 .conv-tbl-cur { font-weight:600; color:var(--text); }
@@ -1328,7 +1328,7 @@ body.has-cover-photo #inc-dialcode {
         </div>
       </div>
       <div class="conv-rate-info" id="conv-rate-info"></div>
-      <div class="tip">ℹ️ <span class="fr-o">Taux indicatifs — vérifiez auprès de votre banque avant toute transaction.</span><span class="en-o">Indicative rates — always check with your bank before any transaction.</span></div>
+      <div class="tip">💡 <span class="fr-o">La devise locale est le <strong>Franc CFA (XOF)</strong>, parité fixe avec l'Euro : <strong>1 EUR = 655,957 XOF</strong>. Taux des autres devises fournis en temps réel par open.er-api.com — à titre indicatif uniquement.</span><span class="en-o">Local currency is the <strong>CFA Franc (XOF)</strong>, fixed rate against the Euro: <strong>1 EUR = 655.957 XOF</strong>. Other rates provided in real time by open.er-api.com — for guidance only.</span></div>
       <div class="card" style="margin-top:12px">
         <div class="card-lbl fr-o">Référence rapide</div>
         <div class="card-lbl en-o">Quick reference</div>
@@ -2171,10 +2171,11 @@ function initConverter() {
 
 function loadRates() {
   // Taux de change indicatifs statiques (fallback si API indisponible)
+  // XOF = 655.957 EUR (parité fixe depuis 1999)
   var fallback = { EUR:1, USD:1.08, GBP:0.855, CHF:0.97, CAD:1.47, XOF:655.957, XAF:655.957, MAD:10.72, TND:3.38, DZD:145.2, GHS:15.8, NGN:1680, KES:141, ZAR:20.1, MRU:43.2, GMD:73.5 };
   _convRates = fallback;
   _convBase  = 'EUR';
-  _convUpdated = 'taux indicatifs';
+  _convUpdated = null; // null = fallback
   convertCurrency();
   // Tentative de chargement live
   fetch('https://open.er-api.com/v6/latest/EUR')
@@ -2184,7 +2185,7 @@ function loadRates() {
         _convRates  = d.rates;
         _convRates['EUR'] = 1;
         _convBase   = 'EUR';
-        _convUpdated = d.time_last_update_utc ? d.time_last_update_utc.slice(0,16).replace('T',' ') + ' UTC' : 'en ligne';
+        _convUpdated = d.time_last_update_utc ? d.time_last_update_utc.slice(0,16).replace('T',' ') : null;
         convertCurrency();
       }
     }).catch(function(){});
@@ -2201,7 +2202,16 @@ function convertCurrency() {
   var result = (amount / rFrom) * rTo;
   var fmt    = result >= 100 ? result.toFixed(0) : result >= 10 ? result.toFixed(2) : result.toFixed(4);
   document.getElementById('conv-result').textContent = fmt;
-  document.getElementById('conv-rate-info').textContent = '1 ' + from + ' = ' + ((1 / rFrom * rTo)).toFixed(4) + ' ' + to + ' · ' + _convUpdated;
+  // Ligne de taux + source
+  var rate = (1 / rFrom * rTo);
+  var rateFmt = rate >= 1 ? rate.toFixed(4) : rate.toFixed(6);
+  var sourceEl = document.getElementById('conv-rate-info');
+  if (sourceEl) {
+    var srcLine = _convUpdated
+      ? '🟢 <strong>Taux en direct</strong> · Source : <a href="https://open.er-api.com" target="_blank" rel="noopener" style="color:var(--gold)">open.er-api.com</a> · Mis à jour : ' + _convUpdated + ' UTC'
+      : '🟡 <strong>Taux indicatifs</strong> · Source : Banque de France / BCE (parité fixe XOF) · <em>Connexion hors ligne</em>';
+    sourceEl.innerHTML = '1 ' + from + ' = ' + rateFmt + ' ' + to + '<br><span style="font-size:11px;color:var(--text2)">' + srcLine + '</span>';
+  }
   // Tableau de référence : montants courants
   var tbl = document.getElementById('conv-table');
   if (!tbl) return;

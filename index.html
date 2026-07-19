@@ -608,24 +608,14 @@ body.has-cover-photo #inc-dialcode {
 /* ── AUTOUR DE MOI ── */
 .nearby-cat-btn { cursor:pointer; transition:background .15s; }
 .nearby-cat-btn.active { background:var(--gold) !important; }
-.nearby-cat-btn.active .sli-label { color:#fff !important; }
-.nearby-cat-btn.active .sli-arrow { color:rgba(255,255,255,0.7) !important; }
-.nearby-item {
-  display:flex; align-items:flex-start; gap:10px;
-  padding:11px 0; border-bottom:1px solid var(--border);
-}
-.nearby-item:last-child { border-bottom:none; }
-.nearby-item-star { color:var(--gold); font-size:13px; flex-shrink:0; margin-top:2px; }
-.nearby-item-body { flex:1; min-width:0; }
+.nearby-cat-btn.active .sli-label,
+.nearby-cat-btn.active .sli-sub { color:#fff !important; }
+.nearby-cat-btn.active .sli-ico { background:rgba(255,255,255,0.25) !important; }
+.nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.8) !important; }
+.nearby-cat-panel { background:rgba(0,0,0,0.025); border-bottom:1px solid var(--border); }
 .nearby-item-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
 .nearby-item-meta { font-size:11px; color:var(--text2); }
 .nearby-item-note { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }
-.nearby-item-dist { font-size:11px; color:var(--text2); flex-shrink:0; text-align:right; }
-.nearby-item-rating { color:#f59e0b; font-size:11px; }
-.nearby-section-lbl {
-  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.7px;
-  color:var(--text2); padding:10px 0 6px; margin-top:4px;
-}
 </style>
 </head>
 <body class="lang-fr">
@@ -1038,47 +1028,47 @@ body.has-cover-photo #inc-dialcode {
   </div>
   <div class="page-body">
 
-    <!-- Sélecteur de catégorie -->
-    <div class="sub-list" style="margin-bottom:16px">
-      <div class="sub-list-item nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">
-        <div class="sli-ico">🍽️</div>
-        <div><div class="sli-label fr-o">Restaurants</div><div class="sli-label en-o">Eat</div></div>
-        <div class="sli-arrow">›</div>
+    <!-- Accordéon catégories -->
+    <div class="sub-list">
+      <div>
+        <div class="sub-list-item nearby-cat-btn" data-cat="restaurant" onclick="toggleNearbyCat('restaurant',this)">
+          <div class="sli-ico">🍽️</div>
+          <div><div class="sli-label fr-o">Restaurants</div><div class="sli-label en-o">Restaurants</div></div>
+          <div class="nearby-chevron sli-arrow">›</div>
+        </div>
+        <div class="nearby-cat-panel" id="nearby-panel-restaurant"></div>
       </div>
-      <div class="sub-list-item nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">
-        <div class="sli-ico">🎭</div>
-        <div><div class="sli-label fr-o">Culture & Loisirs</div><div class="sli-label en-o">Culture</div></div>
-        <div class="sli-arrow">›</div>
+      <div>
+        <div class="sub-list-item nearby-cat-btn" data-cat="culture" onclick="toggleNearbyCat('culture',this)">
+          <div class="sli-ico">🎭</div>
+          <div><div class="sli-label fr-o">Culture & Loisirs</div><div class="sli-label en-o">Culture</div></div>
+          <div class="nearby-chevron sli-arrow">›</div>
+        </div>
+        <div class="nearby-cat-panel" id="nearby-panel-culture"></div>
       </div>
-      <div class="sub-list-item nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">
-        <div class="sli-ico">🏖️</div>
-        <div><div class="sli-label fr-o">Plages & Parcs</div><div class="sli-label en-o">Beaches</div></div>
-        <div class="sli-arrow">›</div>
+      <div>
+        <div class="sub-list-item nearby-cat-btn" data-cat="plages" onclick="toggleNearbyCat('plages',this)">
+          <div class="sli-ico">🏖️</div>
+          <div><div class="sli-label fr-o">Plages & Parcs</div><div class="sli-label en-o">Beaches</div></div>
+          <div class="nearby-chevron sli-arrow">›</div>
+        </div>
+        <div class="nearby-cat-panel" id="nearby-panel-plages"></div>
       </div>
-      <div class="sub-list-item nearby-cat-btn" data-cat="shopping" onclick="selectNearbyCat('shopping',this)">
-        <div class="sli-ico">🛍️</div>
-        <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div></div>
-        <div class="sli-arrow">›</div>
+      <div>
+        <div class="sub-list-item nearby-cat-btn" data-cat="shopping" onclick="toggleNearbyCat('shopping',this)">
+          <div class="sli-ico">🛍️</div>
+          <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div></div>
+          <div class="nearby-chevron sli-arrow">›</div>
+        </div>
+        <div class="nearby-cat-panel" id="nearby-panel-shopping"></div>
       </div>
-      <div class="sub-list-item nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">
-        <div class="sli-ico">🛠️</div>
-        <div><div class="sli-label fr-o">Services</div><div class="sli-label en-o">Services</div></div>
-        <div class="sli-arrow">›</div>
-      </div>
-    </div>
-
-    <!-- Statut géolocalisation -->
-    <div id="nearby-geo-status" style="font-size:12px;color:var(--text2);margin-bottom:12px;display:none"></div>
-
-    <!-- Résultats -->
-    <div id="nearby-results">
-      <div style="text-align:center;padding:32px 16px;color:var(--text2)">
-        <div style="font-size:32px;margin-bottom:8px">📍</div>
-        <div class="fr-o" style="font-size:13px">Autorisez la géolocalisation pour voir les adresses triées par distance</div>
-        <div class="en-o" style="font-size:13px">Allow location access to see places sorted by distance</div>
-        <button onclick="loadNearby()" style="margin-top:14px;background:var(--gold);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
-          <span class="fr-o">📍 Localiser</span><span class="en-o">📍 Locate me</span>
-        </button>
+      <div>
+        <div class="sub-list-item nearby-cat-btn" data-cat="services" onclick="toggleNearbyCat('services',this)">
+          <div class="sli-ico">🛠️</div>
+          <div><div class="sli-label fr-o">Services</div><div class="sli-label en-o">Services</div></div>
+          <div class="nearby-chevron sli-arrow">›</div>
+        </div>
+        <div class="nearby-cat-panel" id="nearby-panel-services"></div>
       </div>
     </div>
 
@@ -2381,111 +2371,97 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-// ══ AUTOUR DE MOI — Google Places + Recommandations hôtelier ══
-var _nearbyCat = 'restaurant';
-var _nearbyPos = null;
+// ══ AUTOUR DE MOI — Accordéon par catégorie ══
+var _nearbyCat = null; // catégorie actuellement ouverte
 
-function selectNearbyCat(cat, btn) {
-  _nearbyCat = cat;
-  document.querySelectorAll('.nearby-cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderNearby();
-  setTimeout(function() {
-    var el = document.getElementById('nearby-results');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
+async function toggleNearbyCat(cat, btn) {
+  var panel = document.getElementById('nearby-panel-' + cat);
+
+  // Fermer la catégorie précédente
+  if (_nearbyCat && _nearbyCat !== cat) {
+    var oldBtn = document.querySelector('.nearby-cat-btn[data-cat="' + _nearbyCat + '"]');
+    var oldPanel = document.getElementById('nearby-panel-' + _nearbyCat);
+    if (oldBtn) {
+      oldBtn.classList.remove('active');
+      var oldArrow = oldBtn.querySelector('.nearby-chevron');
+      if (oldArrow) oldArrow.textContent = '›';
+    }
+    if (oldPanel) oldPanel.innerHTML = '';
+  }
+
+  // Basculer la catégorie courante
+  if (_nearbyCat === cat) {
+    // Refermer
+    btn.classList.remove('active');
+    var arrow = btn.querySelector('.nearby-chevron');
+    if (arrow) arrow.textContent = '›';
+    panel.innerHTML = '';
+    _nearbyCat = null;
+  } else {
+    // Ouvrir
+    btn.classList.add('active');
+    var arrow = btn.querySelector('.nearby-chevron');
+    if (arrow) arrow.textContent = '∨';
+    _nearbyCat = cat;
+    await loadNearbyCat(cat, panel);
+  }
+}
+
+async function loadNearbyCat(cat, panel) {
+  var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
+  panel.innerHTML = '<div style="padding:14px 16px;color:var(--text2);font-size:13px">Chargement…</div>';
+  try {
+    var r = await fetch('/' + slug + '/reco?cat=' + cat, { cache: 'no-cache' });
+    var d = await r.json();
+    var favs = d.ok ? (d.recommendations || []) : [];
+
+    if (!favs.length) {
+      panel.innerHTML = '<div style="padding:14px 16px 18px;color:var(--text2);font-size:13px;font-style:italic" class="fr-o">Aucun favori dans cette catégorie pour l\'instant.</div>'
+        + '<div style="padding:14px 16px 18px;color:var(--text2);font-size:13px;font-style:italic" class="en-o">No picks in this category yet.</div>';
+      return;
+    }
+
+    panel.innerHTML = '<div style="padding:0 16px 12px">'
+      + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);padding:12px 0 6px" class="fr-o">★ Sélection de votre hôte</div>'
+      + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text2);padding:12px 0 6px" class="en-o">★ Host picks</div>'
+      + favs.map(function(f) { return (
+        '<div class="nearby-fav-row" onclick="toggleFavDetail(this)" style="padding:11px 0;border-top:1px solid var(--border);cursor:pointer">'
+          + '<div style="display:flex;align-items:center;gap:10px">'
+            + '<span style="color:var(--gold);font-size:13px;flex-shrink:0">★</span>'
+            + '<div style="flex:1;min-width:0">'
+              + '<div class="nearby-item-name">' + esc(f.name) + '</div>'
+              + (f.address ? '<div class="nearby-item-meta">' + esc(f.address) + '</div>' : '')
+            + '</div>'
+            + '<span class="fav-chevron" style="color:var(--text2);font-size:18px;flex-shrink:0;line-height:1">›</span>'
+          + '</div>'
+          + '<div class="fav-detail" style="display:none;padding:10px 0 4px 23px">'
+            + (f.phone ? '<div style="margin-bottom:6px"><a href="tel:' + esc(f.phone) + '" style="color:var(--gold);text-decoration:none;font-size:13px;font-weight:600">📞 ' + esc(f.phone) + '</a></div>' : '')
+            + (f.url   ? '<div style="margin-bottom:6px"><a href="' + esc(f.url) + '" onclick="var w=window.open(this.href,\'_blank\',\'noopener\');if(!w)location.href=this.href;return false;" style="color:var(--gold);text-decoration:none;font-size:13px">🔗 Voir →</a></div>' : '')
+            + (f.note  ? '<div class="nearby-item-note">&ldquo;' + esc(f.note) + '&rdquo;</div>' : '')
+          + '</div>'
+        + '</div>'
+      ); }).join('')
+      + '</div>';
+  } catch(e) {
+    panel.innerHTML = '<div style="padding:12px 16px;color:#ef4444;font-size:13px">Erreur de chargement.</div>';
+  }
+}
+
+function toggleFavDetail(row) {
+  var detail = row.querySelector('.fav-detail');
+  var chevron = row.querySelector('.fav-chevron');
+  if (!detail) return;
+  var isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  if (chevron) chevron.textContent = isOpen ? '›' : '∨';
 }
 
 function loadNearby() {
-  // Affiche d'abord les favoris immédiatement
-  renderNearby();
-  // Puis tente la géolocalisation en arrière-plan
-  var statusEl = document.getElementById('nearby-geo-status');
-  if (!navigator.geolocation) return;
-  statusEl.style.display = 'block';
-  statusEl.textContent = '📍 Localisation en cours…';
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      _nearbyPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      statusEl.style.display = 'none';
-      renderNearby();
-    },
-    () => {
-      statusEl.style.display = 'none';
-    },
-    { timeout: 8000 }
-  );
-}
-
-async function renderNearby() {
-  var slug = window.location.pathname.split('/').filter(Boolean)[0] || '';
-  var wrap = document.getElementById('nearby-results');
-  wrap.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Chargement…</div>';
-
-  var favs = [], places = [];
-  var googleErr = null;
-
-  // 1. Charger les favoris hôtelier
-  var recoErr = null;
-  var recoDebug = '';
-  try {
-    var r = await fetch('/' + slug + '/reco?cat=' + _nearbyCat, { cache: 'no-cache' });
-    var d = await r.json();
-    recoDebug = 'ok=' + d.ok + ' n=' + (d.recommendations||[]).length + ' slug=' + slug + ' cat=' + _nearbyCat;
-    if (d.ok) favs = d.recommendations || [];
-    else recoErr = d.error || 'Erreur API reco';
-  } catch(e) { recoErr = e.message || 'Fetch reco échoué'; }
-
-  // 2. Charger Google Places si clé dispo
-  if (_nearbyPos) {
-    try {
-      var url = '/' + slug + '/nearby?cat=' + _nearbyCat
-              + '&lat=' + _nearbyPos.lat + '&lng=' + _nearbyPos.lng;
-      var r2 = await fetch(url);
-      var d2 = await r2.json();
-      if (d2.ok) places = d2.places || [];
-      else googleErr = d2.error || 'Erreur Places';
-    } catch(e) { googleErr = 'Réseau indisponible'; }
+  // Ouvre automatiquement "Restaurants" au premier affichage
+  if (_nearbyCat === null) {
+    var btn = document.querySelector('.nearby-cat-btn[data-cat="restaurant"]');
+    if (btn) toggleNearbyCat('restaurant', btn);
   }
-
-  // 3. Rendre
-  var html = '';
-
-  if (favs.length) {
-    html += '<div class="nearby-section-lbl">★ Sélection de votre hôte</div>';
-    html += favs.map(f => `
-      <div class="nearby-item">
-        <span class="nearby-item-star">★</span>
-        <div class="nearby-item-body">
-          <div class="nearby-item-name">${esc(f.name)}</div>
-          <div class="nearby-item-meta">${[f.address, f.phone].filter(Boolean).map(esc).join(' · ')}</div>
-          ${f.url ? `<div class="nearby-item-meta"><a href="${esc(f.url)}" onclick="var w=window.open(this.href,'_blank','noopener');if(!w)location.href=this.href;return false;" style="color:var(--gold);font-size:11px;text-decoration:none">🔗 Voir →</a></div>` : ''}
-          ${f.note ? `<div class="nearby-item-note">"${esc(f.note)}"</div>` : ''}
-        </div>
-      </div>`).join('');
-  }
-
-  if (places.length) {
-    html += '<div class="nearby-section-lbl">📍 À proximité</div>';
-    html += places.map(p => `
-      <div class="nearby-item">
-        <div class="nearby-item-body">
-          <div class="nearby-item-name">${esc(p.name)}</div>
-          <div class="nearby-item-meta">${esc(p.address)}${p.rating ? ` · <span class="nearby-item-rating">★ ${p.rating}</span>` : ''}${p.open_now === true ? ' · <span style="color:#16a34a">Ouvert</span>' : p.open_now === false ? ' · <span style="color:#dc2626">Fermé</span>' : ''}</div>
-        </div>
-        <div class="nearby-item-dist">${p.dist < 1000 ? p.dist + ' m' : (p.dist/1000).toFixed(1) + ' km'}</div>
-      </div>`).join('');
-  }
-
-  if (!favs.length && !places.length) {
-    if (recoErr) {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">⚠️ ' + recoErr + '</div>';
-    } else {
-      html = '<div style="text-align:center;padding:32px 16px;color:var(--text2);font-size:13px">Aucun résultat [' + recoDebug + ']</div>';
-    }
-  }
-
-  wrap.innerHTML = '<div class="card" style="padding:0 16px">' + html + '</div>';
 }
 
 function esc(s) {

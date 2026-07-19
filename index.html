@@ -2328,11 +2328,12 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch(e) {}
 });
 
-// Hook : init convertisseur + pré-remplissage chambre incident
+// Hook : init convertisseur + pré-remplissage chambre incident + autour de moi
 (function() {
   var orig = showPage;
   showPage = function(id) {
     orig(id);
+    if (id === 'quartier') { setTimeout(loadNearby, 50); }
     if (id === 'converter' && !_convInit) { _convInit = true; setTimeout(initConverter, 50); }
     if (id === 'incident') {
       try {
@@ -2467,14 +2468,7 @@ function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// Charger automatiquement quand on arrive sur l'écran quartier
-document.addEventListener('DOMContentLoaded', function() {
-  var orig = window.showScreen;
-  window.showScreen = function(id) {
-    if (typeof orig === 'function') orig(id);
-    if (id === 'screen-quartier' && !_nearbyPos) loadNearby();
-  };
-});
+// (loadNearby déclenché via le hook showPage ci-dessus)
 </script>
 </body>
 </html>

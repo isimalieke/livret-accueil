@@ -1210,8 +1210,9 @@ async function handleDeleteReco(request, env, slug, recoId) {
 
 const PLACES_TYPES = {
   restaurant: 'restaurant|cafe|bakery|bar',
-  loisirs:    'tourist_attraction|night_club|park|amusement_park|movie_theater',
-  services:   'pharmacy|hospital|bank|atm|car_repair|laundry|post_office|supermarket',
+  culture:    'tourist_attraction|museum|art_gallery|night_club|movie_theater|amusement_park',
+  plages:     'park|campground|rv_park',
+  services:   'pharmacy|hospital|bank|atm|laundry|post_office|supermarket|car_repair',
 };
 
 async function handleNearby(request, env, slug, url) {

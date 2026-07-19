@@ -810,29 +810,19 @@ body.has-cover-photo #inc-dialcode {
     </div>
   </div>
   <div class="sub-list">
-    <div class="sub-list-item" onclick="showPage('restaurants')">
-      <div class="sli-ico">🍽️</div>
-      <div><div class="sli-label fr-o">Restaurants</div><div class="sli-label en-o">Restaurants</div><div class="sli-sub fr-o">Nos adresses préférées</div><div class="sli-sub en-o">Our favourite spots</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
     <div class="sub-list-item" onclick="showPage('quartier')">
-      <div class="sli-ico">📍</div>
-      <div><div class="sli-label fr-o">Quartier</div><div class="sli-label en-o">Neighbourhood</div><div class="sli-sub fr-o">À découvrir à proximité</div><div class="sli-sub en-o">Nearby places</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
-    <div class="sub-list-item" onclick="showPage('transport')">
-      <div class="sli-ico">🚗</div>
-      <div><div class="sli-label fr-o">Transports</div><div class="sli-label en-o">Transport</div><div class="sli-sub fr-o">Bus, taxi, Yango, aéroport</div><div class="sli-sub en-o">Bus, taxi, Yango, airport</div></div>
-      <div class="sli-arrow">›</div>
-    </div>
-    <div class="sub-list-item" onclick="showPage('plages')">
-      <div class="sli-ico">🏖️</div>
-      <div><div class="sli-label fr-o">Plages &amp; activités</div><div class="sli-label en-o">Beaches &amp; activities</div><div class="sli-sub fr-o">Les plus belles de Dakar</div><div class="sli-sub en-o">Dakar's best beaches</div></div>
+      <div class="sli-ico">🗺️</div>
+      <div><div class="sli-label fr-o">Autour de vous</div><div class="sli-label en-o">Around you</div><div class="sli-sub fr-o">Restaurants, culture, plages, services</div><div class="sli-sub en-o">Food, culture, beaches, services</div></div>
       <div class="sli-arrow">›</div>
     </div>
     <div class="sub-list-item" onclick="showPage('shopping')">
       <div class="sli-ico">🛍️</div>
       <div><div class="sli-label fr-o">Shopping</div><div class="sli-label en-o">Shopping</div><div class="sli-sub fr-o">Marchés, boutiques, artisanat</div><div class="sli-sub en-o">Markets, shops, crafts</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
+    <div class="sub-list-item" onclick="showPage('transport')">
+      <div class="sli-ico">🚗</div>
+      <div><div class="sli-label fr-o">Transports</div><div class="sli-label en-o">Transport</div><div class="sli-sub fr-o">Bus, taxi, Yango, aéroport</div><div class="sli-sub en-o">Bus, taxi, Yango, airport</div></div>
       <div class="sli-arrow">›</div>
     </div>
     <div class="sub-list-item" onclick="showPage('conseils')">
@@ -1071,20 +1061,22 @@ body.has-cover-photo #inc-dialcode {
 <!-- ══ QUARTIER ══ -->
 <div class="screen" id="screen-quartier">
   <div class="page-hdr">
-    <div class="page-hdr-icon">📍</div>
+    <div class="page-hdr-icon">🗺️</div>
     <div>
-      <div class="page-hdr-title fr-o">Quartier &amp; Ville</div>
-      <div class="page-hdr-title en-o">Neighbourhood &amp; City</div>
-      <div class="page-hdr-sub">Points d'intérêt · Commerces</div>
+      <div class="page-hdr-title fr-o">Autour de vous</div>
+      <div class="page-hdr-title en-o">Around you</div>
+      <div class="page-hdr-sub fr-o">Sélection de votre hôte · Google Places</div>
+      <div class="page-hdr-sub en-o">Host picks · Google Places</div>
     </div>
   </div>
   <div class="page-body">
 
     <!-- Sélecteur de catégorie -->
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">🍽️ <span class="fr-o">Restaurants</span><span class="en-o">Restaurants</span></button>
-      <button class="nearby-cat-btn" data-cat="loisirs" onclick="selectNearbyCat('loisirs',this)">🎭 <span class="fr-o">Loisirs</span><span class="en-o">Leisure</span></button>
-      <button class="nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">🏥 <span class="fr-o">Services</span><span class="en-o">Services</span></button>
+      <button class="nearby-cat-btn active" data-cat="restaurant" onclick="selectNearbyCat('restaurant',this)">🍽️ <span class="fr-o">Restaurants</span><span class="en-o">Eat</span></button>
+      <button class="nearby-cat-btn" data-cat="culture" onclick="selectNearbyCat('culture',this)">🎭 <span class="fr-o">Culture & sorties</span><span class="en-o">Culture</span></button>
+      <button class="nearby-cat-btn" data-cat="plages" onclick="selectNearbyCat('plages',this)">🏖️ <span class="fr-o">Plages & nature</span><span class="en-o">Beaches</span></button>
+      <button class="nearby-cat-btn" data-cat="services" onclick="selectNearbyCat('services',this)">🛠️ <span class="fr-o">Services</span><span class="en-o">Services</span></button>
     </div>
 
     <!-- Statut géolocalisation -->

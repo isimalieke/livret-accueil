@@ -684,14 +684,14 @@ async function handleConfig(request, env, slug) {
 // ═════════════════════════════════════════════
 
 const PAYDUNYA_PLANS = {
-  starter_monthly:   { amount: 4500,   label: 'Welkomeo Starter — Mensuel',   plan: 'starter',   period: 'monthly',  months: 1  },
-  starter_annual:    { amount: 45000,  label: 'Welkomeo Starter — Annuel',    plan: 'starter',   period: 'annual',   months: 12 },
-  essentiel_monthly: { amount: 7500,   label: 'Welkomeo Essentiel — Mensuel', plan: 'essentiel', period: 'monthly',  months: 1  },
-  essentiel_annual:  { amount: 75000,  label: 'Welkomeo Essentiel — Annuel',  plan: 'essentiel', period: 'annual',   months: 12 },
-  pro_monthly:       { amount: 11000,  label: 'Welkomeo Pro — Mensuel',       plan: 'pro',       period: 'monthly',  months: 1  },
-  pro_annual:        { amount: 110000, label: 'Welkomeo Pro — Annuel',        plan: 'pro',       period: 'annual',   months: 12 },
-  premium_monthly:   { amount: 16500,  label: 'Welkomeo Premium — Mensuel',   plan: 'premium',   period: 'monthly',  months: 1  },
-  premium_annual:    { amount: 165000, label: 'Welkomeo Premium — Annuel',    plan: 'premium',   period: 'annual',   months: 12 },
+  starter_monthly:   { amount: 9900,   label: 'Welkomeo Starter — Mensuel',   plan: 'starter',   period: 'monthly',  months: 1  },
+  starter_annual:    { amount: 99000,  label: 'Welkomeo Starter — Annuel',    plan: 'starter',   period: 'annual',   months: 12 },
+  essentiel_monthly: { amount: 24900,  label: 'Welkomeo Essentiel — Mensuel', plan: 'essentiel', period: 'monthly',  months: 1  },
+  essentiel_annual:  { amount: 249000, label: 'Welkomeo Essentiel — Annuel',  plan: 'essentiel', period: 'annual',   months: 12 },
+  pro_monthly:       { amount: 49900,  label: 'Welkomeo Pro — Mensuel',       plan: 'pro',       period: 'monthly',  months: 1  },
+  pro_annual:        { amount: 499000, label: 'Welkomeo Pro — Annuel',        plan: 'pro',       period: 'annual',   months: 12 },
+  premium_monthly:   { amount: 99900,  label: 'Welkomeo Premium — Mensuel',   plan: 'premium',   period: 'monthly',  months: 1  },
+  premium_annual:    { amount: 999000, label: 'Welkomeo Premium — Annuel',    plan: 'premium',   period: 'annual',   months: 12 },
 };
 
 async function handlePayCreate(request, env, slug, url) {
@@ -1654,10 +1654,10 @@ async function runTrialReminders(env) {
       + `<div class="intro">${intro}</div>`
       + `<div class="intro">Pour continuer à utiliser Welkomeo sans interruption, choisissez votre formule :</div>`
       + `<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">`
-      + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Starter</td><td style="padding:8px 12px">1–3 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">4 500 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">45 000 FCFA/an</td></tr>`
-      + `<tr><td style="padding:8px 12px;font-weight:700">Essentiel</td><td style="padding:8px 12px">4–10 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">7 500 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">75 000 FCFA/an</td></tr>`
-      + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Pro</td><td style="padding:8px 12px">11–20 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">11 000 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">110 000 FCFA/an</td></tr>`
-      + `<tr><td style="padding:8px 12px;font-weight:700">Premium</td><td style="padding:8px 12px">21 chambres et +</td><td style="padding:8px 12px;font-weight:700;color:#053372">16 500 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">165 000 FCFA/an</td></tr>`
+      + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Starter</td><td style="padding:8px 12px">1–3 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">9 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">99 000 FCFA/an</td></tr>`
+      + `<tr><td style="padding:8px 12px;font-weight:700">Essentiel</td><td style="padding:8px 12px">4–10 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">24 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">249 000 FCFA/an</td></tr>`
+      + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Pro</td><td style="padding:8px 12px">11–20 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">49 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">499 000 FCFA/an</td></tr>`
+      + `<tr><td style="padding:8px 12px;font-weight:700">Premium</td><td style="padding:8px 12px">21 chambres et +</td><td style="padding:8px 12px;font-weight:700;color:#053372">99 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">999 000 FCFA/an</td></tr>`
       + `</table>`
       + `<a class="cta" href="${adminUrl}">S'abonner depuis mon espace admin →</a>`
       + `<div class="intro" style="text-align:center;font-size:12px;color:#94a3b8">Votre livret : <a href="https://welkomeo.com/${h.slug}" style="color:#053372">welkomeo.com/${h.slug}</a></div>`
@@ -1966,8 +1966,8 @@ function unhex(s) { return Uint8Array.from(s.match(/.{2}/g), b => parseInt(b, 16
 
 // Tarification (FCFA)
 const PLANS = {
-  small: { monthly: 7500,  annual: 75000  },
-  large: { monthly: 15000, annual: 150000 },
+  small: { monthly: 24900,  annual: 249000 },
+  large: { monthly: 99900,  annual: 999000 },
 };
 
 function computeSubscriptionStatus(hotel) {

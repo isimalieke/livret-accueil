@@ -22,8 +22,8 @@ export default {
     const path = url.pathname;
 
     // ── Fichiers statiques racine ──
-    const ROOT_STATIC = ['/sw.js', '/manifest.json', '/favicon.ico'];
-    if (ROOT_STATIC.includes(path) || path.startsWith('/icons/')) {
+    const ROOT_STATIC = ['/sw.js', '/manifest.json', '/favicon.ico', '/hero-jardin.jpg', '/clients-photo.jpg'];
+    if (ROOT_STATIC.includes(path) || path.startsWith('/icons/') || /^\/.+\.(jpg|jpeg|png|webp|gif|svg|ico|woff2?|ttf|otf)$/.test(path)) {
       return fetchAsset(env, request.url);
     }
 

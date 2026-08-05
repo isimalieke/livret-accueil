@@ -220,8 +220,8 @@ body {
   <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
   <div class="steps-label">
     <div class="step-dot active" id="dot-1">1 · Établissement</div>
-    <div class="step-dot" id="dot-0">2 · Votre formule</div>
-    <div class="step-dot" id="dot-2">3 · Votre compte</div>
+    <div class="step-dot" id="dot-2">2 · Votre compte</div>
+    <div class="step-dot" id="dot-0">3 · Votre formule</div>
   </div>
 </div>
 
@@ -255,9 +255,14 @@ body {
       </div>
     </div>
     <p style="font-size:12px;color:#888;text-align:center">Vous pourrez changer de formule à tout moment depuis votre espace admin.</p>
-    <div class="nav-btns" style="margin-top:16px">
-      <button class="btn-prev" onclick="goStep(1)" style="width:100%">← Retour</button>
+
+    <div class="nav-btns" style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn-prev" onclick="goStep(2)" style="width:48%">← Précédent</button>
+      <button class="btn-submit" onclick="submitFromPlan()" style="width:48%;margin:0">✅ Créer mon livret</button>
     </div>
+    <p style="font-size:11px;color:var(--text2);text-align:center;margin-top:10px;line-height:1.6">
+      Votre livret est créé instantanément. Un email de confirmation vous sera envoyé.
+    </p>
   </div>
 
   <!-- ── STEP 1 : ÉTABLISSEMENT ── -->
@@ -501,15 +506,9 @@ body {
     </div>
 
     <div class="nav-btns" style="display:block">
-      <button class="btn-prev" onclick="goStep(0)" style="width:100%;margin-bottom:10px">← Retour</button>
+      <button class="btn-prev" onclick="goStep(1)" style="width:48%;margin-bottom:10px">← Précédent</button>
+      <button class="btn-next" onclick="goStep(0)" style="width:48%">Suivant →</button>
     </div>
-
-    <button class="btn-submit" onclick="submitForm()">
-      ✅ Créer mon livret maintenant
-    </button>
-    <p style="font-size:11px;color:var(--text2);text-align:center;margin-top:10px;line-height:1.6">
-      Votre livret est créé instantanément. Un email de confirmation vous sera envoyé.
-    </p>
   </div>
 
   <!-- step-3 vide pour compatibilité JS -->
@@ -580,28 +579,34 @@ function applyPlan(plan) {
   document.getElementById('plan-badge').style.display = 'flex';
 }
 
-var planPreSelected = false;
+var selectedPlan = null;
 
 function selectPlan(plan) {
-  // Called from step-0 (plan selection) — go to compte
   applyPlan(plan);
-  goStep(2);
+  selectedPlan = plan;
+  // Visual highlight
+  ['starter','essentiel','pro','premium'].forEach(function(p) {
+    var el = document.getElementById('ps-' + p);
+    if (el) el.classList.toggle('selected', p === plan);
+  });
 }
 
 function changePlan(e) {
   e.preventDefault();
   document.getElementById('plan-badge').style.display = 'none';
-  planPreSelected = false;
   goStep(0);
 }
 
 function goNextFromEtab() {
-  // From établissement: skip plan step if pre-selected from landing
-  if (planPreSelected) {
-    goStep(2);
-  } else {
-    goStep(0);
+  goStep(2);
+}
+
+function submitFromPlan() {
+  if (!selectedPlan) {
+    alert('Veuillez choisir une formule pour continuer.');
+    return;
   }
+  submitForm();
 }
 
 // Init: always start at step-1 (établissement)
@@ -611,8 +616,7 @@ function goNextFromEtab() {
   currentStep = 1;
   document.getElementById('step-1').classList.add('active');
   if (plan && PLAN_INFO[plan]) {
-    applyPlan(plan);
-    planPreSelected = true;
+    selectPlan(plan);
   }
   updateProgress();
 })();
@@ -689,15 +693,12 @@ function validateStep(step) {
 }
 
 function updateProgress() {
-  // Logical order: 1=Étab, 0=Plan, 2=Compte
-  var logicalStep = { 1: 1, 0: 2, 2: 3 };
+  // Logical order: 1=Étab, 2=Compte, 0=Formule
+  var logicalStep = { 1: 1, 2: 2, 0: 3 };
   var ls = logicalStep[currentStep] || 1;
   var pct = { 1: 33, 2: 66, 3: 100 };
   document.getElementById('progress-fill').style.width = (pct[ls] || 100) + '%';
-  // dot-1 = Établissement (logical 1)
-  // dot-0 = Formule (logical 2)
-  // dot-2 = Compte (logical 3)
-  var dots = [{id:'dot-1', l:1}, {id:'dot-0', l:2}, {id:'dot-2', l:3}];
+  var dots = [{id:'dot-1', l:1}, {id:'dot-2', l:2}, {id:'dot-0', l:3}];
   dots.forEach(function(d) {
     var el = document.getElementById(d.id);
     if (!el) return;

@@ -669,6 +669,15 @@ body.has-cover-photo #inc-dialcode {
 <!-- Fond photo global (affiché dans tous les écrans si photo définie) -->
 <div id="global-photo-bg"></div>
 
+<!-- ── BOUTON FLOTTANT CONTACT HÔTELIER ── -->
+<div id="host-fab" style="display:none;position:fixed;bottom:24px;right:18px;z-index:500">
+  <button id="host-fab-btn" onclick="toggleHostFab()" style="width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,0.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;transition:transform .2s">📞</button>
+  <div id="host-fab-panel" style="display:none;position:absolute;bottom:62px;right:0;background:rgba(20,20,20,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px 16px;min-width:230px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+    <div id="host-fab-nom" style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1)"></div>
+    <div id="host-fab-links"></div>
+  </div>
+</div>
+
 <!-- ── AUTH ── -->
 <div id="auth-screen" style="display:none">
   <div id="auth-bg"></div>
@@ -1986,6 +1995,27 @@ function applyConfig() {
     document.getElementById('cov-resa-email').style.display = 'inline-flex';
   }
 
+  // Bouton flottant contact hôtelier
+  if (C.telephones && C.telephones.length > 0) {
+    var fab = document.getElementById('host-fab');
+    var fabNom = document.getElementById('host-fab-nom');
+    var fabLinks = document.getElementById('host-fab-links');
+    if (fab && fabLinks) {
+      if (fabNom && h.hote_nom) fabNom.textContent = h.hote_nom;
+      else if (fabNom) fabNom.textContent = h.nom || 'Votre hôte';
+      var linksHtml = C.telephones.map(function(t) {
+        var num = (t.dialcode || '') + ' ' + (t.numero || '');
+        var wa = num.replace(/\s+/g, '').replace('+', '');
+        return '<div style="margin-bottom:8px;display:flex;gap:8px">'
+          + '<a href="tel:' + num.trim() + '" style="flex:1;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:#fff;text-decoration:none;font-size:12px">📞 ' + (t.label || 'Appeler') + '</a>'
+          + (h.whatsapp ? '<a href="https://wa.me/' + wa + '" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:rgba(37,211,102,0.25);border-radius:8px;padding:8px 10px;color:#25d366;text-decoration:none;font-size:16px">💬</a>' : '')
+          + '</div>';
+      }).join('');
+      fabLinks.innerHTML = linksHtml;
+      fab.style.display = 'block';
+    }
+  }
+
   // Bienvenue
   r('bvn-fr', C.bienvenue.texte_fr);
   r('bvn-en', C.bienvenue.texte_en);
@@ -2482,7 +2512,7 @@ async function loadNearbyCat(cat, panel) {
           + '</div>'
           + '<div class="fav-detail" style="display:none;padding:10px 0 4px 23px">'
             + (f.phone ? '<div style="margin-bottom:6px"><a href="tel:' + esc(f.phone) + '" style="color:var(--gold);text-decoration:none;font-size:13px;font-weight:600">📞 ' + esc(f.phone) + '</a></div>' : '')
-            + (f.url   ? '<div style="margin-bottom:6px"><a href="' + esc(f.url) + '" onclick="var w=window.open(this.href,\'_blank\',\'noopener\');if(!w)location.href=this.href;return false;" style="color:var(--gold);text-decoration:none;font-size:13px">🔗 Voir →</a></div>' : '')
+            + (f.url   ? '<div style="margin-bottom:6px"><a href="' + esc(f.url) + '" onclick="var w=window.open(this.href,\'_blank\',\'noopener\');if(!w)location.href=this.href;return false;" style="color:var(--gold);text-decoration:none;font-size:13px;font-weight:600">' + (f.url.includes('maps') || f.url.includes('goo.gl') ? '📍 Ouvrir dans Maps' : '🔗 Voir le site') + '</a></div>' : '')
             + (f.note  ? '<div class="nearby-item-note">&ldquo;' + esc(f.note) + '&rdquo;</div>' : '')
           + '</div>'
         + '</div>'
@@ -2513,6 +2543,25 @@ function loadNearby() {
 function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// ── Bouton flottant contact hôtelier ──
+function toggleHostFab() {
+  var panel = document.getElementById('host-fab-panel');
+  if (!panel) return;
+  var open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  document.getElementById('host-fab-btn').textContent = open ? '📞' : '✕';
+}
+document.addEventListener('click', function(e) {
+  var fab = document.getElementById('host-fab');
+  if (fab && !fab.contains(e.target)) {
+    var panel = document.getElementById('host-fab-panel');
+    if (panel && panel.style.display !== 'none') {
+      panel.style.display = 'none';
+      document.getElementById('host-fab-btn').textContent = '📞';
+    }
+  }
+});
 
 // (loadNearby déclenché via le hook showPage ci-dessus)
 </script>

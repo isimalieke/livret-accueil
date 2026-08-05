@@ -249,6 +249,12 @@ input, textarea, select {
     <a id="sub-pay-btn" href="#" style="display:none;flex-shrink:0;background:var(--blue);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">💳 S'abonner</a>
   </div>
 
+  <!-- ══ BANDEAU PREMIERS PAS ══ -->
+  <div id="onboarding-banner" style="display:none;margin:12px 0 4px;background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;line-height:1.5">
+    <strong>📋 Première configuration</strong> — Les champs affichés en grisé sont des <em>exemples</em>. Remplacez-les par vos vraies informations avant d'enregistrer. Les données exemples ne seront jamais visibles par vos voyageurs tant que vous ne les enregistrez pas.
+    <button onclick="document.getElementById('onboarding-banner').style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#92400e;margin-top:-2px">✕</button>
+  </div>
+
   <!-- ══ IDENTITÉ ══ -->
   <div class="section-group">Identité de l'établissement</div>
 
@@ -281,8 +287,8 @@ input, textarea, select {
         </datalist>
         <div class="hint">Au moins 1 numéro obligatoire. Chaque numéro sera affiché avec un lien d'appel dans le livret.</div>
       </div>
-      <div class="field"><label>Email</label><input id="h-email" value="contact@hotelteranga.sn"></div>
-      <div class="field"><label>Nom de l'hôte / propriétaire</label><input id="h-hote" value="Fatou &amp; Mamadou Diallo"></div>
+      <div class="field"><label>Email</label><input id="h-email" placeholder="ex : contact@monhotel.com"></div>
+      <div class="field"><label>Nom de l'hôte / propriétaire</label><input id="h-hote" placeholder="ex : Marie et Jean Dupont"></div>
       <div class="field">
         <label>Photo de couverture</label>
         <div class="cover-upload-zone" onclick="document.getElementById('cover-file-input').click()">
@@ -392,21 +398,21 @@ input, textarea, select {
     </div>
     <div class="section-body">
       <div class="row2">
-        <div class="field"><label>Numéro Wave</label><input id="pay-wave-num" value="+221 77 123 45 67"><div class="hint">Laisser vide pour masquer</div></div>
-        <div class="field"><label>Nom compte Wave</label><input id="pay-wave-nom" value="Fatou Diallo"></div>
+        <div class="field"><label>Numéro Wave</label><input id="pay-wave-num" placeholder="ex : +221 77 123 45 67"><div class="hint">Laisser vide pour masquer</div></div>
+        <div class="field"><label>Nom compte Wave</label><input id="pay-wave-nom" placeholder="ex : Marie Dupont"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Numéro Orange Money</label><input id="pay-om-num" value="+221 76 123 45 67"></div>
-        <div class="field"><label>Nom compte Orange Money</label><input id="pay-om-nom" value="Fatou Diallo"></div>
+        <div class="field"><label>Numéro Orange Money</label><input id="pay-om-num" placeholder="ex : +221 76 123 45 67"></div>
+        <div class="field"><label>Nom compte Orange Money</label><input id="pay-om-nom" placeholder="ex : Marie Dupont"></div>
       </div>
-      <div class="field"><label>Lien PayPal.me</label><input id="pay-paypal" value="https://paypal.me/hotelteranga"><div class="hint">Ex : https://paypal.me/votrenom</div></div>
+      <div class="field"><label>Lien PayPal.me</label><input id="pay-paypal" placeholder="ex : https://paypal.me/votrenom"><div class="hint">Ex : https://paypal.me/votrenom</div></div>
       <div class="row2">
-        <div class="field"><label>IBAN</label><input id="pay-iban" value="SN28 A002 0030 8230 0300 0705"></div>
-        <div class="field"><label>Code SWIFT / BIC</label><input id="pay-swift" value="ATTISNDAXXX"></div>
+        <div class="field"><label>IBAN</label><input id="pay-iban" placeholder="ex : SN28 A002 0030 8230 0300 0705"></div>
+        <div class="field"><label>Code SWIFT / BIC</label><input id="pay-swift" placeholder="ex : ATTISNDAXXX"></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Banque</label><input id="pay-banque" value="CBAO Groupe Attijariwafa Bank"></div>
-        <div class="field"><label>Titulaire du compte</label><input id="pay-titulaire" value="Fatou Diallo"></div>
+        <div class="field"><label>Banque</label><input id="pay-banque" placeholder="ex : CBAO, Ecobank, BHS…"></div>
+        <div class="field"><label>Titulaire du compte</label><input id="pay-titulaire" placeholder="ex : Marie Dupont"></div>
       </div>
     </div>
   </div>
@@ -529,8 +535,9 @@ input, textarea, select {
             <input id="reco-phone" type="tel" placeholder="+221 77 000 00 00" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Site web / Lien Maps</label>
-            <input id="reco-url" type="url" placeholder="https://maps.google.com/..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+            <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">📍 Lien Google Maps <span style="color:#C9A84C">★</span></label>
+            <input id="reco-url" type="url" placeholder="ex : https://maps.app.goo.gl/..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:13px">
+            <div style="font-size:10px;color:#999;margin-top:3px">Copiez le lien depuis Google Maps → Partager → Copier le lien</div>
           </div>
           <div style="grid-column:1/-1">
             <label style="font-size:11px;font-weight:600;color:#666;display:block;margin-bottom:4px">Votre commentaire</label>
@@ -1225,6 +1232,12 @@ function sv(id, val) { var el = document.getElementById(id); if(el && val !== un
 function initForm() {
   if (typeof CONFIG === 'undefined') return;
   var C = CONFIG; var h = C.hotel;
+
+  // Bandeau premiers pas : affiché si le nom de l'hôtel n'est pas encore renseigné
+  if (!h.nom || !h.nom.trim()) {
+    var banner = document.getElementById('onboarding-banner');
+    if (banner) banner.style.display = 'block';
+  }
 
   // Établissement
   sv('h-nom', h.nom); sv('h-nom-court', h.nom_court);

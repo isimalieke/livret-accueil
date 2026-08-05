@@ -61,6 +61,11 @@ export default {
       return handleMigrateToD1(request, env);
     }
 
+    // ── /legal ──
+    if (path === '/legal' || path === '/legal/') {
+      return fetchAsset(env, url.origin + '/legal.html');
+    }
+
     // ── /register ──
     if (path === '/register' || path === '/register/') {
       if (request.method === 'POST') return handleRegister(request, env, url);

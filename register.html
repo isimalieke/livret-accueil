@@ -299,14 +299,102 @@ body {
         <div class="field">
           <label>Pays</label>
           <select id="f-pays">
-            <option value="Sénégal" selected>🇸🇳 Sénégal</option>
-            <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
-            <option value="Mali">🇲🇱 Mali</option>
-            <option value="Guinée">🇬🇳 Guinée</option>
-            <option value="Cameroun">🇨🇲 Cameroun</option>
-            <option value="Maroc">🇲🇦 Maroc</option>
-            <option value="France">🇫🇷 France</option>
-            <option value="Autre">🌍 Autre</option>
+            <optgroup label="Afrique de l'Ouest">
+              <option value="Sénégal" selected>🇸🇳 Sénégal</option>
+              <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
+              <option value="Mali">🇲🇱 Mali</option>
+              <option value="Guinée">🇬🇳 Guinée</option>
+              <option value="Burkina Faso">🇧🇫 Burkina Faso</option>
+              <option value="Niger">🇳🇪 Niger</option>
+              <option value="Bénin">🇧🇯 Bénin</option>
+              <option value="Togo">🇹🇬 Togo</option>
+              <option value="Ghana">🇬🇭 Ghana</option>
+              <option value="Nigeria">🇳🇬 Nigeria</option>
+              <option value="Mauritanie">🇲🇷 Mauritanie</option>
+              <option value="Gambie">🇬🇲 Gambie</option>
+              <option value="Guinée-Bissau">🇬🇼 Guinée-Bissau</option>
+              <option value="Sierra Leone">🇸🇱 Sierra Leone</option>
+              <option value="Liberia">🇱🇷 Liberia</option>
+              <option value="Cap-Vert">🇨🇻 Cap-Vert</option>
+            </optgroup>
+            <optgroup label="Afrique Centrale">
+              <option value="Cameroun">🇨🇲 Cameroun</option>
+              <option value="Gabon">🇬🇦 Gabon</option>
+              <option value="Congo">🇨🇬 Congo</option>
+              <option value="RD Congo">🇨🇩 RD Congo</option>
+              <option value="Tchad">🇹🇩 Tchad</option>
+              <option value="République Centrafricaine">🇨🇫 République Centrafricaine</option>
+              <option value="Guinée Équatoriale">🇬🇶 Guinée Équatoriale</option>
+              <option value="São Tomé-et-Príncipe">🇸🇹 São Tomé-et-Príncipe</option>
+              <option value="Burundi">🇧🇮 Burundi</option>
+              <option value="Rwanda">🇷🇼 Rwanda</option>
+            </optgroup>
+            <optgroup label="Afrique de l'Est">
+              <option value="Éthiopie">🇪🇹 Éthiopie</option>
+              <option value="Kenya">🇰🇪 Kenya</option>
+              <option value="Tanzanie">🇹🇿 Tanzanie</option>
+              <option value="Ouganda">🇺🇬 Ouganda</option>
+              <option value="Djibouti">🇩🇯 Djibouti</option>
+              <option value="Somalie">🇸🇴 Somalie</option>
+              <option value="Érythrée">🇪🇷 Érythrée</option>
+              <option value="Madagascar">🇲🇬 Madagascar</option>
+              <option value="Comores">🇰🇲 Comores</option>
+              <option value="Maurice">🇲🇺 Maurice</option>
+              <option value="Seychelles">🇸🇨 Seychelles</option>
+              <option value="Mozambique">🇲🇿 Mozambique</option>
+              <option value="Zambie">🇿🇲 Zambie</option>
+              <option value="Zimbabwe">🇿🇼 Zimbabwe</option>
+              <option value="Malawi">🇲🇼 Malawi</option>
+            </optgroup>
+            <optgroup label="Afrique du Nord">
+              <option value="Maroc">🇲🇦 Maroc</option>
+              <option value="Algérie">🇩🇿 Algérie</option>
+              <option value="Tunisie">🇹🇳 Tunisie</option>
+              <option value="Libye">🇱🇾 Libye</option>
+              <option value="Égypte">🇪🇬 Égypte</option>
+              <option value="Soudan">🇸🇩 Soudan</option>
+            </optgroup>
+            <optgroup label="Afrique Australe">
+              <option value="Afrique du Sud">🇿🇦 Afrique du Sud</option>
+              <option value="Namibie">🇳🇦 Namibie</option>
+              <option value="Botswana">🇧🇼 Botswana</option>
+              <option value="Angola">🇦🇴 Angola</option>
+              <option value="Lesotho">🇱🇸 Lesotho</option>
+              <option value="Eswatini">🇸🇿 Eswatini</option>
+            </optgroup>
+            <optgroup label="Europe">
+              <option value="France">🇫🇷 France</option>
+              <option value="Belgique">🇧🇪 Belgique</option>
+              <option value="Suisse">🇨🇭 Suisse</option>
+              <option value="Luxembourg">🇱🇺 Luxembourg</option>
+              <option value="Portugal">🇵🇹 Portugal</option>
+              <option value="Espagne">🇪🇸 Espagne</option>
+              <option value="Italie">🇮🇹 Italie</option>
+              <option value="Allemagne">🇩🇪 Allemagne</option>
+              <option value="Royaume-Uni">🇬🇧 Royaume-Uni</option>
+              <option value="Pays-Bas">🇳🇱 Pays-Bas</option>
+            </optgroup>
+            <optgroup label="Amérique">
+              <option value="Canada">🇨🇦 Canada</option>
+              <option value="États-Unis">🇺🇸 États-Unis</option>
+              <option value="Haïti">🇭🇹 Haïti</option>
+              <option value="Martinique">🇲🇶 Martinique</option>
+              <option value="Guadeloupe">🇬🇵 Guadeloupe</option>
+              <option value="Guyane">🇬🇫 Guyane</option>
+              <option value="Brésil">🇧🇷 Brésil</option>
+            </optgroup>
+            <optgroup label="Moyen-Orient &amp; Asie">
+              <option value="Liban">🇱🇧 Liban</option>
+              <option value="Émirats Arabes Unis">🇦🇪 Émirats Arabes Unis</option>
+              <option value="Qatar">🇶🇦 Qatar</option>
+              <option value="Arabie Saoudite">🇸🇦 Arabie Saoudite</option>
+              <option value="Inde">🇮🇳 Inde</option>
+              <option value="Chine">🇨🇳 Chine</option>
+              <option value="Japon">🇯🇵 Japon</option>
+            </optgroup>
+            <optgroup label="Autre">
+              <option value="Autre">🌍 Autre</option>
+            </optgroup>
           </select>
         </div>
       </div>

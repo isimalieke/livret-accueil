@@ -567,18 +567,21 @@ async function handleRegister(request, env, url) {
     if (existing)
       return json({ ok: false, error: `Un établissement "${nom}" existe déjà.` }, 409);
 
-    // 1 essai gratuit par adresse email
+    // 1 essai gratuit par adresse email (whitelist comptes de test)
+    const TEST_EMAILS = ['isima.lieke@gmail.com'];
     const emailLower = email.toLowerCase().trim();
-    const emailUsed  = await env.DB.prepare(
-      'SELECT u.hotel_slug FROM users u WHERE u.email = ? AND u.role = \'hotelier\' LIMIT 1'
-    ).bind(emailLower).first();
-    if (emailUsed)
-      return json({
-        ok:    false,
-        error: 'Cette adresse email est déjà associée à un espace Welkomeo. Connectez-vous à votre espace existant.',
-        code:  'TRIAL_ALREADY_USED',
-        slug:  emailUsed.hotel_slug,
-      }, 409);
+    if (!TEST_EMAILS.includes(emailLower)) {
+      const emailUsed = await env.DB.prepare(
+        'SELECT u.hotel_slug FROM users u WHERE u.email = ? AND u.role = \'hotelier\' LIMIT 1'
+      ).bind(emailLower).first();
+      if (emailUsed)
+        return json({
+          ok:    false,
+          error: 'Cette adresse email est déjà associée à un espace Welkomeo. Connectez-vous à votre espace existant.',
+          code:  'TRIAL_ALREADY_USED',
+          slug:  emailUsed.hotel_slug,
+        }, 409);
+    }
 
     const now               = new Date().toISOString();
     const passwordHash      = await hashPassword(password);

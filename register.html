@@ -212,6 +212,7 @@ body {
   </div>
   <div class="brand-rule"></div>
   <h1>Créez votre livret d'accueil.</h1>
+  <p style="margin:8px auto 0;max-width:420px;font-size:14px;color:#b0a090;letter-spacing:0.3px;line-height:1.5">Les informations essentielles de votre établissement, à portée de clic pour vos visiteurs.</p>
 </div>
 
 <!-- PROGRESS -->
@@ -219,7 +220,8 @@ body {
   <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:50%"></div></div>
   <div class="steps-label">
     <div class="step-dot active" id="dot-1">1 · Établissement</div>
-    <div class="step-dot" id="dot-2">2 · Votre compte</div>
+    <div class="step-dot" id="dot-0">2 · Votre formule</div>
+    <div class="step-dot" id="dot-2">3 · Votre compte</div>
   </div>
 </div>
 
@@ -253,6 +255,9 @@ body {
       </div>
     </div>
     <p style="font-size:12px;color:#888;text-align:center">Vous pourrez changer de formule à tout moment depuis votre espace admin.</p>
+    <div class="nav-btns" style="margin-top:16px">
+      <button class="btn-prev" onclick="goStep(1)" style="width:100%">← Retour</button>
+    </div>
   </div>
 
   <!-- ── STEP 1 : ÉTABLISSEMENT ── -->
@@ -410,7 +415,7 @@ body {
     </div>
 
     <div class="nav-btns">
-      <button class="btn-next" onclick="goStep(2)">Continuer →</button>
+      <button class="btn-next" id="btn-next-1" onclick="goNextFromEtab()">Continuer →</button>
     </div>
   </div>
 
@@ -496,7 +501,7 @@ body {
     </div>
 
     <div class="nav-btns" style="display:block">
-      <button class="btn-prev" onclick="goStep(1)" style="width:100%;margin-bottom:10px">← Retour</button>
+      <button class="btn-prev" onclick="goStep(0)" style="width:100%;margin-bottom:10px">← Retour</button>
     </div>
 
     <button class="btn-submit" onclick="submitForm()">
@@ -575,31 +580,39 @@ function applyPlan(plan) {
   document.getElementById('plan-badge').style.display = 'flex';
 }
 
+var planPreSelected = false;
+
 function selectPlan(plan) {
-  // Called from step-0 card click
+  // Called from step-0 (plan selection) — go to compte
   applyPlan(plan);
-  goStep(1);
+  goStep(2);
 }
 
 function changePlan(e) {
   e.preventDefault();
   document.getElementById('plan-badge').style.display = 'none';
+  planPreSelected = false;
   goStep(0);
 }
 
-// Init: read ?plan= from URL
+function goNextFromEtab() {
+  // From établissement: skip plan step if pre-selected from landing
+  if (planPreSelected) {
+    goStep(2);
+  } else {
+    goStep(0);
+  }
+}
+
+// Init: always start at step-1 (établissement)
 (function() {
   var params = new URLSearchParams(window.location.search);
   var plan = params.get('plan');
+  currentStep = 1;
+  document.getElementById('step-1').classList.add('active');
   if (plan && PLAN_INFO[plan]) {
-    // Pre-selected: start at step 1
-    currentStep = 1;
-    document.getElementById('step-1').classList.add('active');
     applyPlan(plan);
-  } else {
-    // No plan: start at step 0
-    currentStep = 0;
-    document.getElementById('step-0').classList.add('active');
+    planPreSelected = true;
   }
   updateProgress();
 })();
@@ -676,15 +689,22 @@ function validateStep(step) {
 }
 
 function updateProgress() {
-  var pct = { 0:20, 1:60, 2:100, 3:100 };
-  document.getElementById('progress-fill').style.width = (pct[currentStep] || 100) + '%';
-  for (var i = 1; i <= 2; i++) {
-    var dot = document.getElementById('dot-' + i);
-    if (!dot) continue;
-    dot.classList.remove('active','done');
-    if (i === currentStep) dot.classList.add('active');
-    else if (i < currentStep) dot.classList.add('done');
-  }
+  // Logical order: 1=Étab, 0=Plan, 2=Compte
+  var logicalStep = { 1: 1, 0: 2, 2: 3 };
+  var ls = logicalStep[currentStep] || 1;
+  var pct = { 1: 33, 2: 66, 3: 100 };
+  document.getElementById('progress-fill').style.width = (pct[ls] || 100) + '%';
+  // dot-1 = Établissement (logical 1)
+  // dot-0 = Formule (logical 2)
+  // dot-2 = Compte (logical 3)
+  var dots = [{id:'dot-1', l:1}, {id:'dot-0', l:2}, {id:'dot-2', l:3}];
+  dots.forEach(function(d) {
+    var el = document.getElementById(d.id);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (d.l === ls) el.classList.add('active');
+    else if (d.l < ls) el.classList.add('done');
+  });
 }
 
 async function submitForm() {

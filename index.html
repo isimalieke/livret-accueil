@@ -302,6 +302,47 @@ body.lang-en .re { display:block; }
 /* ══ APPAREILS GRID ══ */
 .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 @media(max-width:380px) { .grid2 { grid-template-columns:1fr; } }
+
+/* ── DESKTOP : contenu centré ── */
+@media(min-width:700px) {
+  :root { --hh: 58px; }
+
+  /* Topbar : limiter la largeur interne */
+  .topbar {
+    padding-left: calc(50% - 340px);
+    padding-right: calc(50% - 340px);
+  }
+
+  /* Contenu principal */
+  .screen.active,
+  .home-cover,
+  .grid-wrap,
+  .page-body,
+  .page-hdr {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* La photo de fond reste plein écran */
+  #global-photo-bg,
+  #skeleton-loader,
+  #review-nudge,
+  #host-fab,
+  .topbar { left:0; right:0; width:100%; max-width:none; }
+
+  /* Home cover : limiter la largeur mais garder la hauteur */
+  .home-cover {
+    border-radius: 0 0 16px 16px;
+    overflow: hidden;
+  }
+
+  /* Cards légèrement plus grandes sur desktop */
+  .card, .appl-card, .info-card, .gc { border-radius: 14px; }
+
+  /* Fab bouton contact — ancré à droite du contenu centré */
+  #host-fab { right: calc(50% - 358px); }
+}
 .gc { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow:var(--shadow-sm); }
 .gc-title { font-size:12px; color:var(--blue); margin-bottom:6px; letter-spacing:0.3px; font-weight:600; }
 .gc-text { font-size:12px; color:var(--text2); line-height:1.55; }

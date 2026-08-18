@@ -567,7 +567,7 @@ body.has-cover-photo .incident-home-ico   { background:rgba(255,255,255,0.18) !i
 .conv-tbl-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
 .conv-tbl-row:last-child { border-bottom:none; }
 .conv-tbl-cur { font-weight:600; color:var(--text); }
-.conv-tbl-val { color:var(--cover); font-weight:700; }
+.conv-tbl-val { color:var(--gold,#c9a84c); font-weight:700; }
 
 /* ══ ÉCRANS À FOND SOLIDE (photo masquée) ══ */
 #screen-incident {
@@ -583,7 +583,18 @@ body.has-cover-photo .incident-home-ico   { background:rgba(255,255,255,0.18) !i
   opacity:0; transition:opacity 1.2s ease;
   pointer-events:none;
 }
-body.has-cover-photo { background:transparent; }
+body.has-cover-photo {
+  background: transparent;
+  /* Réécriture des variables de couleur pour le thème sombre */
+  --text:    rgba(255,255,255,0.92);
+  --text2:   rgba(255,255,255,0.58);
+  --blue:    rgba(255,255,255,0.88);
+  --border:  rgba(255,255,255,0.14);
+  --card-bg: rgba(15,15,15,0.52);
+  --bg:      rgba(0,0,0,0.15);
+  --shadow:  0 2px 16px rgba(0,0,0,0.35);
+  --shadow-sm: 0 1px 8px rgba(0,0,0,0.25);
+}
 body.has-cover-photo .main,
 body.has-cover-photo .page-body,
 body.has-cover-photo .sub-list { background:transparent !important; }

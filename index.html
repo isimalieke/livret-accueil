@@ -1579,35 +1579,35 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
 
     <!-- ── Convertisseur intégré ── -->
     <div style="margin-top:20px">
-      <div class="card-lbl fr-o" style="padding:0 2px 10px;font-size:13px;font-weight:700;color:var(--text2)">💱 Convertisseur de devises</div>
-      <div class="card-lbl en-o" style="padding:0 2px 10px;font-size:13px;font-weight:700;color:var(--text2)">💱 Currency converter</div>
+      <div class="card-lbl" style="padding:0 2px 12px;font-size:13px;font-weight:700;color:var(--text2)">💱 <span class="fr-o">Convertisseur de devises</span><span class="en-o">Currency converter</span></div>
+
+      <!-- Sélecteur devise visiteur -->
+      <div class="conv-card" style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">
+          <span class="fr-o">Ma devise</span><span class="en-o">My currency</span>
+        </div>
+        <select id="conv-visitor-currency" class="conv-select" onchange="convertCurrency()" style="width:100%;font-size:15px;font-weight:600;padding:4px 0"></select>
+      </div>
+
+      <!-- Conversion principale -->
       <div class="conv-card">
-        <div class="conv-lbl fr-o">Montant</div>
-        <div class="conv-lbl en-o">Amount</div>
         <div class="conv-block">
-          <input type="number" id="conv-amount" class="conv-input" value="1000" min="0" step="any" oninput="convertCurrency()">
-          <div class="conv-select-wrap">
-            <select id="conv-from" class="conv-select" onchange="convertCurrency()"></select>
-          </div>
+          <input type="number" id="conv-amount" class="conv-input" value="100" min="0" step="any" oninput="convertCurrency()" style="width:50%">
+          <div style="font-size:15px;font-weight:600;color:var(--text2)" id="conv-from-label">EUR</div>
         </div>
-        <div class="conv-swap-wrap">
-          <button class="conv-swap" onclick="swapCurrencies()" title="Inverser">⇄</button>
-        </div>
-        <div class="conv-lbl fr-o">Montant</div>
-        <div class="conv-lbl en-o">Amount</div>
+        <div style="text-align:center;padding:8px 0;font-size:20px;color:var(--gold)">↓</div>
         <div class="conv-block conv-block-result">
-          <div class="conv-result-val" id="conv-result">—</div>
-          <div class="conv-select-wrap">
-            <select id="conv-to" class="conv-select" onchange="convertCurrency()"></select>
-          </div>
+          <div class="conv-result-val" id="conv-result" style="font-size:28px">—</div>
+          <div style="font-size:15px;font-weight:600;color:var(--gold)" id="conv-local-label">XOF</div>
         </div>
       </div>
       <div class="conv-rate-info" id="conv-rate-info"></div>
-      <div class="tip">💡 <span class="fr-o">La devise locale est le <strong>Franc CFA (XOF)</strong>, parité fixe avec l'Euro : <strong>1 EUR = 655,957 XOF</strong>. Taux des autres devises fournis en temps réel par open.er-api.com — à titre indicatif uniquement.</span><span class="en-o">Local currency is the <strong>CFA Franc (XOF)</strong>, fixed rate against the Euro: <strong>1 EUR = 655.957 XOF</strong>. Other rates provided in real time by open.er-api.com — for guidance only.</span></div>
+
+      <!-- Référence rapide — montants locaux typiques -->
       <div class="card" style="margin-top:12px">
-        <div class="card-lbl fr-o">Référence rapide</div>
-        <div class="card-lbl en-o">Quick reference</div>
-        <div id="conv-table"></div>
+        <div class="card-lbl fr-o">Référence rapide — prix du quotidien</div>
+        <div class="card-lbl en-o">Quick reference — everyday prices</div>
+        <div id="conv-table" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -2521,6 +2521,23 @@ function applyConfig() {
   r('footer-nom', h.nom);
   r('footer-contact', '📱 ' + tel(h.telephone) + ' &nbsp;|&nbsp; 📧 ' + h.email + '<br>' + h.adresse);
 
+  // Devise locale déduite du pays de l'hôtel
+  (function() {
+    var PAYS_DEVISE = {
+      'Sénégal':'XOF','Mali':'XOF','Côte d\'Ivoire':'XOF','Burkina Faso':'XOF',
+      'Niger':'XOF','Togo':'XOF','Bénin':'XOF','Guinée-Bissau':'XOF',
+      'Cameroun':'XAF','Tchad':'XAF','Congo':'XAF','Gabon':'XAF',
+      'Centrafrique':'XAF','Guinée équatoriale':'XAF',
+      'Maroc':'MAD','Tunisie':'TND','Algérie':'DZD',
+      'Ghana':'GHS','Nigeria':'NGN','Kenya':'KES','Afrique du Sud':'ZAR',
+      'Mauritanie':'MRU','Gambie':'GMD',
+      'France':'EUR','Belgique':'EUR','Suisse':'CHF',
+      'Royaume-Uni':'GBP','États-Unis':'USD','Canada':'CAD',
+    };
+    var pays = (h.pays || '').trim();
+    if (pays && PAYS_DEVISE[pays]) _localCurrency = PAYS_DEVISE[pays];
+  })();
+
   // Avis
   if (C.avis) {
     if (C.avis.google)      _avisUrls.google      = C.avis.google;
@@ -2565,59 +2582,91 @@ function applyConfig() {
 }
 
 // ── CONVERTISSEUR DE MONNAIE ──
-var _convRates = null;
-var _convBase = 'EUR';
-var _convUpdated = '';
+// ── CONVERTISSEUR DE DEVISES ──
+var _convRates   = null;
+var _convUpdated = null;
+var _localCurrency = 'XOF'; // mise à jour depuis CONFIG.hotel.pays
 
+// Devises visiteurs proposées
 var CONV_CURRENCIES = [
-  { code:'XOF', label:'XOF – Franc CFA (UEMOA)' },
-  { code:'XAF', label:'XAF – Franc CFA (CEMAC)' },
-  { code:'MAD', label:'MAD – Dirham marocain' },
-  { code:'TND', label:'TND – Dinar tunisien' },
-  { code:'DZD', label:'DZD – Dinar algérien' },
-  { code:'GHS', label:'GHS – Cedi ghanéen' },
-  { code:'NGN', label:'NGN – Naira nigérian' },
-  { code:'KES', label:'KES – Shilling kényan' },
-  { code:'ZAR', label:'ZAR – Rand sud-africain' },
-  { code:'EUR', label:'EUR – Euro' },
-  { code:'USD', label:'USD – Dollar US' },
-  { code:'GBP', label:'GBP – Livre sterling' },
-  { code:'CHF', label:'CHF – Franc suisse' },
-  { code:'CAD', label:'CAD – Dollar canadien' },
-  { code:'MRU', label:'MRU – Ouguiya mauritanien' },
-  { code:'GMD', label:'GMD – Dalasi gambien' },
+  { code:'EUR', label:'🇪🇺 EUR – Euro' },
+  { code:'USD', label:'🇺🇸 USD – Dollar américain' },
+  { code:'GBP', label:'🇬🇧 GBP – Livre sterling' },
+  { code:'CHF', label:'🇨🇭 CHF – Franc suisse' },
+  { code:'CAD', label:'🇨🇦 CAD – Dollar canadien' },
+  { code:'MAD', label:'🇲🇦 MAD – Dirham marocain' },
+  { code:'TND', label:'🇹🇳 TND – Dinar tunisien' },
+  { code:'DZD', label:'🇩🇿 DZD – Dinar algérien' },
+  { code:'NGN', label:'🇳🇬 NGN – Naira nigérian' },
+  { code:'GHS', label:'🇬🇭 GHS – Cedi ghanéen' },
+  { code:'KES', label:'🇰🇪 KES – Shilling kényan' },
+  { code:'ZAR', label:'🇿🇦 ZAR – Rand sud-africain' },
+  { code:'XOF', label:'🌍 XOF – Franc CFA (UEMOA)' },
+  { code:'XAF', label:'🌍 XAF – Franc CFA (CEMAC)' },
+  { code:'MRU', label:'🇲🇷 MRU – Ouguiya mauritanien' },
+  { code:'GMD', label:'🇬🇲 GMD – Dalasi gambien' },
 ];
 
+// Référence quotidienne par devise locale — libellés + montants typiques
+var CONV_REFS = {
+  XOF: [
+    { fr:'Eau minérale (1,5L)', en:'Mineral water (1.5L)',   amount:500 },
+    { fr:'Café / thé',         en:'Coffee / tea',            amount:800 },
+    { fr:'Repas local',        en:'Local meal',              amount:3000 },
+    { fr:'Taxi (course courte)',en:'Short taxi ride',         amount:2000 },
+    { fr:'Baguette de pain',   en:'Baguette',                amount:250 },
+    { fr:'Bière locale',       en:'Local beer',              amount:1500 },
+    { fr:'T-shirt marché',     en:'Market t-shirt',          amount:5000 },
+    { fr:'Restaurant (entrée)',en:'Restaurant (starter)',     amount:8000 },
+  ],
+  XAF: [
+    { fr:'Eau minérale (1,5L)', en:'Mineral water (1.5L)',   amount:500 },
+    { fr:'Café / thé',         en:'Coffee / tea',            amount:800 },
+    { fr:'Repas local',        en:'Local meal',              amount:2500 },
+    { fr:'Taxi (course courte)',en:'Short taxi ride',         amount:2000 },
+  ],
+  MAD: [
+    { fr:'Eau minérale',       en:'Mineral water',           amount:5 },
+    { fr:'Café',               en:'Coffee',                  amount:15 },
+    { fr:'Repas local',        en:'Local meal',              amount:60 },
+    { fr:'Taxi (course)',      en:'Taxi ride',               amount:30 },
+  ],
+  // Fallback générique
+  _default: [
+    { fr:'Montant moyen',      en:'Average amount',          amount:10 },
+    { fr:'Repas',              en:'Meal',                    amount:20 },
+    { fr:'Transport',          en:'Transport',               amount:5 },
+  ]
+};
+
 function initConverter() {
-  var from = document.getElementById('conv-from');
-  var to   = document.getElementById('conv-to');
-  if (!from || !to) return;
-  CONV_CURRENCIES.forEach(function(c) {
-    var o1 = document.createElement('option'); o1.value = c.code; o1.textContent = c.label; from.appendChild(o1);
-    var o2 = document.createElement('option'); o2.value = c.code; o2.textContent = c.label; to.appendChild(o2);
-  });
-  from.value = 'XOF';
-  to.value   = 'EUR';
+  var sel = document.getElementById('conv-visitor-currency');
+  if (!sel) return;
+  // Remplir sélecteur — exclure la devise locale
+  CONV_CURRENCIES.filter(function(c) { return c.code !== _localCurrency; })
+    .forEach(function(c) {
+      var o = document.createElement('option');
+      o.value = c.code; o.textContent = c.label;
+      sel.appendChild(o);
+    });
+  // Devise par défaut selon langue navigateur
+  var navLang = (navigator.language || 'fr').toLowerCase();
+  var defCur = navLang.startsWith('en') ? 'GBP' : navLang.startsWith('ar') ? 'MAD' : 'EUR';
+  if (defCur === _localCurrency) defCur = 'EUR';
+  sel.value = defCur;
   loadRates();
 }
 
 function loadRates() {
-  // Taux de change indicatifs statiques (fallback si API indisponible)
-  // XOF = 655.957 EUR (parité fixe depuis 1999)
   var fallback = { EUR:1, USD:1.08, GBP:0.855, CHF:0.97, CAD:1.47, XOF:655.957, XAF:655.957, MAD:10.72, TND:3.38, DZD:145.2, GHS:15.8, NGN:1680, KES:141, ZAR:20.1, MRU:43.2, GMD:73.5 };
   _convRates = fallback;
-  _convBase  = 'EUR';
-  _convUpdated = null; // null = fallback
   convertCurrency();
-  // Tentative de chargement live
   fetch('https://open.er-api.com/v6/latest/EUR')
     .then(function(r){ return r.json(); })
     .then(function(d){
       if (d && d.rates) {
-        _convRates  = d.rates;
-        _convRates['EUR'] = 1;
-        _convBase   = 'EUR';
-        _convUpdated = d.time_last_update_utc ? d.time_last_update_utc.slice(0,16).replace('T',' ') : null;
+        _convRates = d.rates; _convRates['EUR'] = 1;
+        _convUpdated = d.time_last_update_utc ? d.time_last_update_utc.slice(0,10) : null;
         convertCurrency();
       }
     }).catch(function(){});
@@ -2625,43 +2674,49 @@ function loadRates() {
 
 function convertCurrency() {
   if (!_convRates) return;
-  var amount = parseFloat(document.getElementById('conv-amount').value) || 0;
-  var from   = document.getElementById('conv-from').value;
-  var to     = document.getElementById('conv-to').value;
-  // Conversion via base EUR
-  var rFrom  = _convRates[from] || 1;
-  var rTo    = _convRates[to]   || 1;
-  var result = (amount / rFrom) * rTo;
-  var fmt    = result >= 100 ? result.toFixed(0) : result >= 10 ? result.toFixed(2) : result.toFixed(4);
-  document.getElementById('conv-result').textContent = fmt;
-  // Ligne de taux + source
-  var rate = (1 / rFrom * rTo);
-  var rateFmt = rate >= 1 ? rate.toFixed(4) : rate.toFixed(6);
-  var sourceEl = document.getElementById('conv-rate-info');
-  if (sourceEl) {
-    var srcLine = _convUpdated
-      ? '🟢 <strong>Taux en direct</strong> · Source : <a href="https://open.er-api.com" target="_blank" rel="noopener" style="color:var(--gold)">open.er-api.com</a> · Mis à jour : ' + _convUpdated + ' UTC'
-      : '🟡 <strong>Taux indicatifs</strong> · Source : Banque de France / BCE (parité fixe XOF) · <em>Connexion hors ligne</em>';
-    sourceEl.innerHTML = '1 ' + from + ' = ' + rateFmt + ' ' + to + '<br><span style="font-size:11px;color:var(--text2)">' + srcLine + '</span>';
-  }
-  // Tableau de référence : montants courants
-  var tbl = document.getElementById('conv-table');
-  if (!tbl) return;
-  var refs = [1, 5, 10, 20, 50, 100, 500, 1000, 5000, 10000];
-  tbl.innerHTML = refs.map(function(v) {
-    var val = ((v / rFrom) * rTo);
-    var fval = val >= 100 ? val.toFixed(0) : val.toFixed(2);
-    return '<div class="conv-tbl-row"><span class="conv-tbl-cur">' + v + ' ' + from + '</span><span class="conv-tbl-val">' + fval + ' ' + to + '</span></div>';
-  }).join('');
-}
+  var visitorCur = (document.getElementById('conv-visitor-currency') || {}).value || 'EUR';
+  var localCur   = _localCurrency;
+  var amount     = parseFloat((document.getElementById('conv-amount') || {}).value) || 0;
+  var lang       = document.body.classList.contains('lang-en') ? 'en' : 'fr';
 
-function swapCurrencies() {
-  var from = document.getElementById('conv-from');
-  var to   = document.getElementById('conv-to');
-  var tmp  = from.value;
-  from.value = to.value;
-  to.value   = tmp;
-  convertCurrency();
+  // Conversion visiteur → local
+  var rV = _convRates[visitorCur] || 1;
+  var rL = _convRates[localCur]   || 1;
+  var result = (amount / rV) * rL;
+  var fmt = result >= 100 ? Math.round(result).toLocaleString('fr') : result.toFixed(2);
+
+  var resEl = document.getElementById('conv-result');
+  if (resEl) resEl.textContent = fmt;
+
+  var fromLbl = document.getElementById('conv-from-label');
+  var toLbl   = document.getElementById('conv-local-label');
+  if (fromLbl) fromLbl.textContent = visitorCur;
+  if (toLbl)   toLbl.textContent   = localCur;
+
+  // Taux
+  var rate    = (1 / rV) * rL;
+  var rateFmt = rate >= 100 ? Math.round(rate) : rate >= 1 ? rate.toFixed(2) : rate.toFixed(4);
+  var srcEl   = document.getElementById('conv-rate-info');
+  if (srcEl) {
+    var srcLine = _convUpdated
+      ? '🟢 ' + (_convUpdated) + (lang==='fr' ? ' · Taux en direct' : ' · Live rate')
+      : '🟡 ' + (lang==='fr' ? 'Taux indicatifs' : 'Indicative rates');
+    srcEl.innerHTML = '<span style="font-size:12px;color:var(--text2)">1 ' + visitorCur + ' = ' + rateFmt + ' ' + localCur + ' &nbsp;·&nbsp; ' + srcLine + '</span>';
+  }
+
+  // Référence rapide — montants locaux typiques
+  var tbl  = document.getElementById('conv-table');
+  if (!tbl) return;
+  var refs = CONV_REFS[localCur] || CONV_REFS['_default'];
+  tbl.innerHTML = refs.map(function(r) {
+    var converted = (r.amount / rL) * rV;
+    var fconv = converted >= 10 ? converted.toFixed(2) : converted.toFixed(4);
+    var label = lang === 'en' ? r.en : r.fr;
+    return '<div class="conv-tbl-row">'
+      + '<span class="conv-tbl-cur">' + label + '<br><small style="font-weight:400;opacity:.7">' + r.amount.toLocaleString('fr') + ' ' + localCur + '</small></span>'
+      + '<span class="conv-tbl-val">' + fconv + ' ' + visitorCur + '</span>'
+      + '</div>';
+  }).join('');
 }
 
 // Initialiser le convertisseur quand on ouvre la page
@@ -2754,7 +2809,7 @@ document.addEventListener('DOMContentLoaded', function() {
   showPage = function(id) {
     orig(id);
     if (id === 'quartier') { setTimeout(loadNearby, 50); }
-    if (id === 'converter' && !_convInit) { _convInit = true; setTimeout(initConverter, 50); }
+    if (id === 'paiement' && !_convInit) { _convInit = true; setTimeout(initConverter, 50); }
     if (id === 'incident') {
       try {
         var room = sessionStorage.getItem('livret_guest_room') || '';

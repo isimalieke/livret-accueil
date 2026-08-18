@@ -1572,11 +1572,6 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
       <div class="card-lbl">🔵 PayPal</div>
       <div class="pay-info" id="pay-paypal-info"></div>
     </div>
-    <div id="pay-virement" style="display:none" class="card">
-      <div class="card-lbl">🏦 <span class="fr-o">Virement bancaire</span><span class="en-o">Bank transfer</span></div>
-      <div class="pay-info fr-o">Demandez les coordonnées bancaires à l'accueil.</div>
-      <div class="pay-info en-o">Ask for bank details at reception.</div>
-    </div>
     <div id="pay-none" style="display:none" class="tip">
       <span class="fr-o">Aucun moyen de paiement renseigné. Contactez l'accueil.</span>
       <span class="en-o">No payment method listed. Please contact reception.</span>
@@ -2512,14 +2507,6 @@ function applyConfig() {
     if (P.paypal_lien) {
       document.getElementById('pay-paypal').style.display = 'block';
       r('pay-paypal-info', '<a href="' + P.paypal_lien + '" target="_blank" rel="noopener" style="color:var(--gold)">' + P.paypal_lien + '</a>');
-      hasAny = true;
-    }
-    if (P.iban) {
-      document.getElementById('pay-virement').style.display = 'block';
-      hasAny = true;
-    } else if (!P.wave_numero && !P.orange_numero && !P.paypal_lien) {
-      // Afficher virement par défaut si rien d'autre n'est renseigné
-      document.getElementById('pay-virement').style.display = 'block';
       hasAny = true;
     }
     if (!hasAny) document.getElementById('pay-none').style.display = 'block';

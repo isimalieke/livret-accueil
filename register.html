@@ -304,11 +304,12 @@ body {
       <div class="field-row">
         <div class="field">
           <label>Ville <span class="required-mark">*</span></label>
-          <input type="text" id="f-ville" placeholder="ex : Dakar">
+          <input type="text" id="f-ville" placeholder="ex : Dakar" onblur="onCityBlur()">
+          <div id="detect-notif" style="display:none;font-size:12px;color:#15803d;margin-top:4px;padding:4px 8px;background:#f0fdf4;border-radius:6px"></div>
         </div>
         <div class="field">
           <label>Pays</label>
-          <select id="f-pays">
+          <select id="f-pays" onchange="onCountryChange()">
             <optgroup label="Afrique de l'Ouest">
               <option value="Sénégal" selected>🇸🇳 Sénégal</option>
               <option value="Côte d'Ivoire">🇨🇮 Côte d'Ivoire</option>
@@ -455,46 +456,15 @@ body {
       <div class="field">
         <label>Téléphone <span class="required-mark">*</span></label>
         <div style="display:flex;gap:6px">
-          <select id="f-tel-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer">
-            <option value="+221">🇸🇳 +221</option>
-            <option value="+33">🇫🇷 +33</option>
-            <option value="+32">🇧🇪 +32</option>
-            <option value="+41">🇨🇭 +41</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+49">🇩🇪 +49</option>
-            <option value="+34">🇪🇸 +34</option>
-            <option value="+39">🇮🇹 +39</option>
-            <option value="+31">🇳🇱 +31</option>
-            <option value="+225">🇨🇮 +225</option>
-            <option value="+212">🇲🇦 +212</option>
-            <option value="+223">🇲🇱 +223</option>
-            <option value="+224">🇬🇳 +224</option>
-            <option value="+237">🇨🇲 +237</option>
-          </select>
+          <select id="f-tel-code" onchange="onTelCodeChange()" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer"></select>
           <input type="tel" id="f-tel" placeholder="77 123 45 67" style="flex:1">
         </div>
+        <div id="tel-mismatch-warn" style="display:none;font-size:12px;color:#b45309;margin-top:4px;padding:4px 8px;background:#fffbeb;border-radius:6px;border:1px solid #fde68a"></div>
       </div>
       <div class="field">
         <label>WhatsApp <span style="font-weight:400;text-transform:none;letter-spacing:0">(si différent du téléphone)</span></label>
         <div style="display:flex;gap:6px">
-          <select id="f-wa-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer">
-            <option value="+221">🇸🇳 +221</option>
-            <option value="+33">🇫🇷 +33</option>
-            <option value="+32">🇧🇪 +32</option>
-            <option value="+41">🇨🇭 +41</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+49">🇩🇪 +49</option>
-            <option value="+34">🇪🇸 +34</option>
-            <option value="+39">🇮🇹 +39</option>
-            <option value="+31">🇳🇱 +31</option>
-            <option value="+225">🇨🇮 +225</option>
-            <option value="+212">🇲🇦 +212</option>
-            <option value="+223">🇲🇱 +223</option>
-            <option value="+224">🇬🇳 +224</option>
-            <option value="+237">🇨🇲 +237</option>
-          </select>
+          <select id="f-wa-code" style="width:130px;padding:11px 8px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text);outline:none;-webkit-appearance:none;cursor:pointer"></select>
           <input type="tel" id="f-wa-num" placeholder="Laisser vide si identique au téléphone" style="flex:1">
         </div>
         <div class="hint">Le WhatsApp reçoit les signalements de vos clients en temps réel.</div>
@@ -799,6 +769,310 @@ async function resendEmail() {
     msgEl.style.display = 'block';
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   COHÉRENCE VILLE / PAYS / INDICATIF
+   ═══════════════════════════════════════════════════════ */
+var COUNTRY_DATA = {
+  // Afrique de l'Ouest
+  'Sénégal':           { code:'+221', flag:'🇸🇳' },
+  "Côte d'Ivoire":     { code:'+225', flag:'🇨🇮' },
+  'Mali':              { code:'+223', flag:'🇲🇱' },
+  'Guinée':            { code:'+224', flag:'🇬🇳' },
+  'Burkina Faso':      { code:'+226', flag:'🇧🇫' },
+  'Niger':             { code:'+227', flag:'🇳🇪' },
+  'Bénin':             { code:'+229', flag:'🇧🇯' },
+  'Togo':              { code:'+228', flag:'🇹🇬' },
+  'Ghana':             { code:'+233', flag:'🇬🇭' },
+  'Nigeria':           { code:'+234', flag:'🇳🇬' },
+  'Mauritanie':        { code:'+222', flag:'🇲🇷' },
+  'Gambie':            { code:'+220', flag:'🇬🇲' },
+  'Guinée-Bissau':     { code:'+245', flag:'🇬🇼' },
+  'Sierra Leone':      { code:'+232', flag:'🇸🇱' },
+  'Liberia':           { code:'+231', flag:'🇱🇷' },
+  'Cap-Vert':          { code:'+238', flag:'🇨🇻' },
+  // Afrique Centrale
+  'Cameroun':          { code:'+237', flag:'🇨🇲' },
+  'Gabon':             { code:'+241', flag:'🇬🇦' },
+  'Congo':             { code:'+242', flag:'🇨🇬' },
+  'RD Congo':          { code:'+243', flag:'🇨🇩' },
+  'Tchad':             { code:'+235', flag:'🇹🇩' },
+  'République Centrafricaine': { code:'+236', flag:'🇨🇫' },
+  'Guinée Équatoriale':{ code:'+240', flag:'🇬🇶' },
+  'Burundi':           { code:'+257', flag:'🇧🇮' },
+  'Rwanda':            { code:'+250', flag:'🇷🇼' },
+  // Afrique de l'Est
+  'Éthiopie':          { code:'+251', flag:'🇪🇹' },
+  'Kenya':             { code:'+254', flag:'🇰🇪' },
+  'Tanzanie':          { code:'+255', flag:'🇹🇿' },
+  'Ouganda':           { code:'+256', flag:'🇺🇬' },
+  'Djibouti':          { code:'+253', flag:'🇩🇯' },
+  'Madagascar':        { code:'+261', flag:'🇲🇬' },
+  'Comores':           { code:'+269', flag:'🇰🇲' },
+  'Maurice':           { code:'+230', flag:'🇲🇺' },
+  'Seychelles':        { code:'+248', flag:'🇸🇨' },
+  'Mozambique':        { code:'+258', flag:'🇲🇿' },
+  'Zambie':            { code:'+260', flag:'🇿🇲' },
+  'Zimbabwe':          { code:'+263', flag:'🇿🇼' },
+  'Malawi':            { code:'+265', flag:'🇲🇼' },
+  // Afrique du Nord
+  'Maroc':             { code:'+212', flag:'🇲🇦' },
+  'Algérie':           { code:'+213', flag:'🇩🇿' },
+  'Tunisie':           { code:'+216', flag:'🇹🇳' },
+  'Libye':             { code:'+218', flag:'🇱🇾' },
+  'Égypte':            { code:'+20',  flag:'🇪🇬' },
+  'Soudan':            { code:'+249', flag:'🇸🇩' },
+  // Afrique Australe
+  'Afrique du Sud':    { code:'+27',  flag:'🇿🇦' },
+  'Namibie':           { code:'+264', flag:'🇳🇦' },
+  'Botswana':          { code:'+267', flag:'🇧🇼' },
+  'Angola':            { code:'+244', flag:'🇦🇴' },
+  'Lesotho':           { code:'+266', flag:'🇱🇸' },
+  'Eswatini':          { code:'+268', flag:'🇸🇿' },
+  // Europe
+  'France':            { code:'+33',  flag:'🇫🇷' },
+  'Belgique':          { code:'+32',  flag:'🇧🇪' },
+  'Suisse':            { code:'+41',  flag:'🇨🇭' },
+  'Luxembourg':        { code:'+352', flag:'🇱🇺' },
+  'Portugal':          { code:'+351', flag:'🇵🇹' },
+  'Espagne':           { code:'+34',  flag:'🇪🇸' },
+  'Italie':            { code:'+39',  flag:'🇮🇹' },
+  'Allemagne':         { code:'+49',  flag:'🇩🇪' },
+  'Royaume-Uni':       { code:'+44',  flag:'🇬🇧' },
+  'Pays-Bas':          { code:'+31',  flag:'🇳🇱' },
+  // Amérique
+  'Canada':            { code:'+1',   flag:'🇨🇦' },
+  'États-Unis':        { code:'+1',   flag:'🇺🇸' },
+  'Haïti':             { code:'+509', flag:'🇭🇹' },
+  'Martinique':        { code:'+596', flag:'🇲🇶' },
+  'Guadeloupe':        { code:'+590', flag:'🇬🇵' },
+  'Guyane':            { code:'+594', flag:'🇬🇫' },
+  'Brésil':            { code:'+55',  flag:'🇧🇷' },
+  // Moyen-Orient & Asie
+  'Liban':             { code:'+961', flag:'🇱🇧' },
+  'Émirats Arabes Unis':{ code:'+971', flag:'🇦🇪' },
+  'Qatar':             { code:'+974', flag:'🇶🇦' },
+  'Arabie Saoudite':   { code:'+966', flag:'🇸🇦' },
+  'Inde':              { code:'+91',  flag:'🇮🇳' },
+  'Chine':             { code:'+86',  flag:'🇨🇳' },
+  'Japon':             { code:'+81',  flag:'🇯🇵' },
+};
+
+// Villes (normalisées) → pays
+var CITY_COUNTRY = {
+  // Sénégal
+  'dakar':'Sénégal','thies':'Sénégal','saint-louis':'Sénégal','ziguinchor':'Sénégal',
+  'kaolack':'Sénégal','touba':'Sénégal','rufisque':'Sénégal','kolda':'Sénégal',
+  'tambacounda':'Sénégal','mbour':'Sénégal','louga':'Sénégal','diourbel':'Sénégal',
+  'fatick':'Sénégal','matam':'Sénégal','kedougou':'Sénégal','sedhiou':'Sénégal',
+  // Côte d'Ivoire
+  'abidjan':"Côte d'Ivoire",'yamoussoukro':"Côte d'Ivoire",'bouake':"Côte d'Ivoire",
+  'san pedro':"Côte d'Ivoire",'korhogo':"Côte d'Ivoire",'daloa':"Côte d'Ivoire",
+  'man':"Côte d'Ivoire",'gagnoa':"Côte d'Ivoire",
+  // Mali
+  'bamako':'Mali','sikasso':'Mali','mopti':'Mali','segou':'Mali','kayes':'Mali','gao':'Mali',
+  'tombouctou':'Mali','timbuktu':'Mali',
+  // Guinée
+  'conakry':'Guinée','kankan':'Guinée','kindia':'Guinée','labe':'Guinée','nzerekore':'Guinée',
+  // Burkina Faso
+  'ouagadougou':'Burkina Faso','bobo dioulasso':'Burkina Faso','koudougou':'Burkina Faso',
+  'banfora':'Burkina Faso','ouahigouya':'Burkina Faso',
+  // Niger
+  'niamey':'Niger','zinder':'Niger','maradi':'Niger','agadez':'Niger','tahoua':'Niger',
+  // Bénin
+  'cotonou':'Bénin','porto novo':'Bénin','parakou':'Bénin','abomey':'Bénin',
+  // Togo
+  'lome':'Togo','sokode':'Togo','kara':'Togo','atakpame':'Togo',
+  // Ghana
+  'accra':'Ghana','kumasi':'Ghana','tamale':'Ghana','tema':'Ghana','takoradi':'Ghana',
+  // Nigeria
+  'lagos':'Nigeria','abuja':'Nigeria','kano':'Nigeria','ibadan':'Nigeria',
+  'port harcourt':'Nigeria','benin city':'Nigeria','kaduna':'Nigeria','enugu':'Nigeria',
+  // Mauritanie
+  'nouakchott':'Mauritanie','nouadhibou':'Mauritanie',
+  // Gambie
+  'banjul':'Gambie','serekunda':'Gambie',
+  // Cameroun
+  'douala':'Cameroun','yaounde':'Cameroun','bamenda':'Cameroun','garoua':'Cameroun',
+  'maroua':'Cameroun','bafoussam':'Cameroun',
+  // Gabon
+  'libreville':'Gabon','port gentil':'Gabon','franceville':'Gabon',
+  // Congo
+  'brazzaville':'Congo','pointe noire':'Congo','dolisie':'Congo',
+  // RD Congo
+  'kinshasa':'RD Congo','lubumbashi':'RD Congo','mbuji mayi':'RD Congo',
+  'kananga':'RD Congo','kisangani':'RD Congo','bukavu':'RD Congo','goma':'RD Congo',
+  'matadi':'RD Congo','kolwezi':'RD Congo',
+  // Tchad
+  'ndjamena':'Tchad','n\'djamena':'Tchad','moundou':'Tchad','sarh':'Tchad',
+  // Maroc
+  'rabat':'Maroc','casablanca':'Maroc','marrakech':'Maroc','fes':'Maroc','fez':'Maroc',
+  'agadir':'Maroc','tanger':'Maroc','meknes':'Maroc','oujda':'Maroc','kenitra':'Maroc',
+  // Algérie
+  'alger':'Algérie','oran':'Algérie','constantine':'Algérie','annaba':'Algérie',
+  'blida':'Algérie','setif':'Algérie','batna':'Algérie','biskra':'Algérie',
+  // Tunisie
+  'tunis':'Tunisie','sfax':'Tunisie','sousse':'Tunisie','kairouan':'Tunisie','bizerte':'Tunisie',
+  // Égypte
+  'le caire':'Égypte','caire':'Égypte','cairo':'Égypte','alexandrie':'Égypte',
+  'alexandia':'Égypte','assouan':'Égypte','louxor':'Égypte','hurghada':'Égypte','gizeh':'Égypte',
+  // Afrique du Sud
+  'johannesburg':'Afrique du Sud','le cap':'Afrique du Sud','cape town':'Afrique du Sud',
+  'pretoria':'Afrique du Sud','durban':'Afrique du Sud',
+  // Kenya
+  'nairobi':'Kenya','mombasa':'Kenya','kisumu':'Kenya','nakuru':'Kenya',
+  // Tanzanie
+  'dar es salaam':'Tanzanie','zanzibar':'Tanzanie','arusha':'Tanzanie','dodoma':'Tanzanie',
+  // Ouganda
+  'kampala':'Ouganda','entebbe':'Ouganda','jinja':'Ouganda',
+  // Éthiopie
+  'addis abeba':'Éthiopie','addis-abeba':'Éthiopie','addis ababa':'Éthiopie',
+  // Rwanda
+  'kigali':'Rwanda','butare':'Rwanda','gisenyi':'Rwanda',
+  // Madagascar
+  'antananarivo':'Madagascar','toamasina':'Madagascar','antsirabe':'Madagascar',
+  // Maurice
+  'port louis':'Maurice','quatre bornes':'Maurice',
+  // Angola
+  'luanda':'Angola','huambo':'Angola','lobito':'Angola',
+  // Mozambique
+  'maputo':'Mozambique','beira':'Mozambique','nampula':'Mozambique',
+  // Zambie
+  'lusaka':'Zambie','ndola':'Zambie','kitwe':'Zambie',
+  // Zimbabwe
+  'harare':'Zimbabwe','bulawayo':'Zimbabwe',
+  // France
+  'paris':'France','lyon':'France','marseille':'France','toulouse':'France','nice':'France',
+  'nantes':'France','strasbourg':'France','montpellier':'France','bordeaux':'France',
+  'lille':'France','rennes':'France','reims':'France','le havre':'France',
+  'saint etienne':'France','toulon':'France','grenoble':'France',
+  // Belgique
+  'bruxelles':'Belgique','anvers':'Belgique','gand':'Belgique','liege':'Belgique',
+  // Suisse
+  'geneve':'Suisse','zurich':'Suisse','berne':'Suisse','bale':'Suisse','lausanne':'Suisse',
+  'lucerne':'Suisse',
+  // Portugal
+  'lisbonne':'Portugal','porto':'Portugal','braga':'Portugal','coimbra':'Portugal',
+  // Espagne
+  'madrid':'Espagne','barcelone':'Espagne','valence':'Espagne','seville':'Espagne',
+  // Italie
+  'rome':'Italie','milan':'Italie','naples':'Italie','turin':'Italie',
+  'florence':'Italie','venise':'Italie',
+  // Allemagne
+  'berlin':'Allemagne','munich':'Allemagne','hambourg':'Allemagne','cologne':'Allemagne',
+  'francfort':'Allemagne','frankfort':'Allemagne','stuttgart':'Allemagne',
+  // Royaume-Uni
+  'londres':'Royaume-Uni','london':'Royaume-Uni','manchester':'Royaume-Uni',
+  'birmingham':'Royaume-Uni','glasgow':'Royaume-Uni','edimbourg':'Royaume-Uni',
+  // Pays-Bas
+  'amsterdam':'Pays-Bas','rotterdam':'Pays-Bas','la haye':'Pays-Bas',
+  // Canada
+  'montreal':'Canada','toronto':'Canada','vancouver':'Canada','ottawa':'Canada',
+  'calgary':'Canada','quebec':'Canada',
+  // Haïti
+  'port au prince':'Haïti','cap haitien':'Haïti','gonaives':'Haïti',
+  // Brésil
+  'sao paulo':'Brésil','rio de janeiro':'Brésil','brasilia':'Brésil','salvador':'Brésil',
+  // Liban
+  'beyrouth':'Liban','tripoli liban':'Liban',
+  // Émirats
+  'dubai':'Émirats Arabes Unis','abu dhabi':'Émirats Arabes Unis','sharjah':'Émirats Arabes Unis',
+  // Qatar
+  'doha':'Qatar',
+  // Arabie Saoudite
+  'riyad':'Arabie Saoudite','djeddah':'Arabie Saoudite','jeddah':'Arabie Saoudite',
+  'la mecque':'Arabie Saoudite','medine':'Arabie Saoudite',
+  // Inde
+  'mumbai':'Inde','delhi':'Inde','bangalore':'Inde','kolkata':'Inde','chennai':'Inde',
+};
+
+// Normalise une chaîne : minuscules, sans accents
+function normalizeCity(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+}
+
+// Rempli les selects indicatifs depuis COUNTRY_DATA
+function initPhoneSelects() {
+  ['f-tel-code','f-wa-code'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    sel.innerHTML = '';
+    Object.keys(COUNTRY_DATA).forEach(function(pays) {
+      var d = COUNTRY_DATA[pays];
+      var opt = document.createElement('option');
+      opt.value = d.code;
+      opt.textContent = d.flag + ' ' + d.code;
+      // default: Sénégal
+      if (pays === 'Sénégal') opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function setPhoneCode(pays) {
+  var d = COUNTRY_DATA[pays];
+  if (!d) return;
+  ['f-tel-code','f-wa-code'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === d.code) { sel.selectedIndex = i; break; }
+    }
+  });
+}
+
+function onCityBlur() {
+  var raw = document.getElementById('f-ville').value.trim();
+  if (!raw) return;
+  var norm = normalizeCity(raw);
+  var pays = CITY_COUNTRY[norm];
+  if (!pays) return; // ville inconnue — ne rien faire
+
+  // Mettre à jour le select pays
+  var paysEl = document.getElementById('f-pays');
+  for (var i = 0; i < paysEl.options.length; i++) {
+    if (paysEl.options[i].value === pays) { paysEl.selectedIndex = i; break; }
+  }
+  // Mettre à jour les indicatifs
+  setPhoneCode(pays);
+  // Notification
+  var notif = document.getElementById('detect-notif');
+  notif.textContent = '✓ Pays détecté : ' + pays + ' — indicatif mis à jour automatiquement.';
+  notif.style.display = 'block';
+  // Masquer le warning d'incohérence
+  document.getElementById('tel-mismatch-warn').style.display = 'none';
+}
+
+function onCountryChange() {
+  var pays = document.getElementById('f-pays').value;
+  setPhoneCode(pays);
+  // Masquer notif ville et warning
+  document.getElementById('detect-notif').style.display = 'none';
+  document.getElementById('tel-mismatch-warn').style.display = 'none';
+}
+
+function onTelCodeChange() {
+  var pays  = document.getElementById('f-pays').value;
+  var code  = document.getElementById('f-tel-code').value;
+  var d     = COUNTRY_DATA[pays];
+  var warn  = document.getElementById('tel-mismatch-warn');
+  // Ignorer si pays sans code connu, ou si pays à +1 (Canada/USA ambigu)
+  if (!d || d.code === '+1') { warn.style.display = 'none'; return; }
+  if (d.code !== code) {
+    // Chercher le pays correspondant à cet indicatif
+    var codeCountry = '';
+    Object.keys(COUNTRY_DATA).forEach(function(c) {
+      if (COUNTRY_DATA[c].code === code && !codeCountry) codeCountry = c;
+    });
+    warn.textContent = '⚠️ L\'indicatif ' + code
+      + (codeCountry ? ' (' + codeCountry + ')' : '')
+      + ' ne correspond pas au pays sélectionné (' + pays + '). Vérifiez ou corrigez.';
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+// Initialisation
+initPhoneSelects();
 </script>
 
 </body>

@@ -793,6 +793,26 @@
 
     <div class="plans">
       <div class="plan">
+        <div class="plan-for">Appartement · Villa · Particulier</div>
+        <div class="plan-name">Particulier</div>
+        <div class="plan-size">1 logement</div>
+        <div class="plan-price-wrap">
+          <span class="plan-price" id="p-0">4 900</span>
+          <span class="plan-currency">FCFA / mois</span>
+        </div>
+        <p class="plan-annual" id="a-0" style="display:none">ou <strong>39 000 FCFA / an</strong> — 2 mois offerts</p>
+        <hr class="plan-sep">
+        <ul class="plan-features">
+          <li>Livret personnalisable complet</li>
+          <li>Bilingue français / anglais</li>
+          <li>QR code imprimable</li>
+          <li>Gestion des séjours</li>
+          <li>Gestion des incidents clients</li>
+          <li>Mises à jour en temps réel</li>
+        </ul>
+        <a href="/register?plan=particulier" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
+      </div>
+      <div class="plan">
         <div class="plan-for">Chambre d'hôtes · Maison</div>
         <div class="plan-name">Starter</div>
         <div class="plan-size">1 à 3 chambres</div>
@@ -800,7 +820,7 @@
           <span class="plan-price" id="p-1">9 900</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-1" style="display:none">ou <strong>45 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-1" style="display:none">ou <strong>99 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
           <li>Livret personnalisable complet</li>
@@ -960,7 +980,8 @@
     var lblM = document.getElementById('lbl-m'), lblA = document.getElementById('lbl-a');
     var eco = document.getElementById('eco');
     var prices = [
-      {m:'9 900', a:'8 250', id:'p-1', aid:'a-1'},
+      {m:'4 900',  a:'3 250',  id:'p-0', aid:'a-0'},
+      {m:'9 900',  a:'8 250',  id:'p-1', aid:'a-1'},
       {m:'24 900', a:'20 750', id:'p-2', aid:'a-2'},
       {m:'49 900', a:'41 580', id:'p-3', aid:'a-3'},
       {m:'99 900', a:'83 250', id:'p-4', aid:'a-4'}

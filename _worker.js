@@ -611,6 +611,7 @@ async function handleRegister(request, env, url) {
     const plan = chambres === '21+' ? 'premium'
                : chambres === '11-20' ? 'pro'
                : chambres === '4-10'  ? 'essentiel'
+               : chambres === '1'     ? 'particulier'
                : 'starter';
     const trialEndsAt = new Date(Date.now() + 15 * 86400000).toISOString();
 
@@ -749,8 +750,10 @@ async function handleConfig(request, env, slug) {
 // ═════════════════════════════════════════════
 
 const PAYDUNYA_PLANS = {
-  starter_monthly:   { amount: 9900,   label: 'Welkomeo Starter — Mensuel',   plan: 'starter',   period: 'monthly',  months: 1  },
-  starter_annual:    { amount: 99000,  label: 'Welkomeo Starter — Annuel',    plan: 'starter',   period: 'annual',   months: 12 },
+  particulier_monthly: { amount: 4900,   label: 'Welkomeo Particulier — Mensuel', plan: 'particulier', period: 'monthly',  months: 1  },
+  particulier_annual:  { amount: 39000,  label: 'Welkomeo Particulier — Annuel',  plan: 'particulier', period: 'annual',   months: 12 },
+  starter_monthly:     { amount: 9900,   label: 'Welkomeo Starter — Mensuel',     plan: 'starter',     period: 'monthly',  months: 1  },
+  starter_annual:      { amount: 99000,  label: 'Welkomeo Starter — Annuel',      plan: 'starter',     period: 'annual',   months: 12 },
   essentiel_monthly: { amount: 24900,  label: 'Welkomeo Essentiel — Mensuel', plan: 'essentiel', period: 'monthly',  months: 1  },
   essentiel_annual:  { amount: 249000, label: 'Welkomeo Essentiel — Annuel',  plan: 'essentiel', period: 'annual',   months: 12 },
   pro_monthly:       { amount: 49900,  label: 'Welkomeo Pro — Mensuel',       plan: 'pro',       period: 'monthly',  months: 1  },
@@ -905,7 +908,7 @@ async function handlePayCallback(request, env, slug) {
   try {
     const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(pendingSlug).first();
     if (hotel && hotel.email) {
-      const planLabel = { starter:'Starter', essentiel:'Essentiel', pro:'Pro', premium:'Premium' }[plan] || plan;
+      const planLabel = { particulier:'Particulier', starter:'Starter', essentiel:'Essentiel', pro:'Pro', premium:'Premium' }[plan] || plan;
       const periodLabel = period === 'annual' ? 'Annuel' : 'Mensuel';
       const dateStr = newEnds.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
       await resendEmail(env, hotel.email, '✅ Votre abonnement Welkomeo est actif',
@@ -1703,7 +1706,7 @@ async function runTrialReminders(env) {
     const expiresDate = h.subscription_ends_at ? h.subscription_ends_at.slice(0, 10) : '';
     const isLastDay   = expiresDate === d1str;
     const adminUrl    = `https://welkomeo.com/${h.slug}/admin`;
-    const planLabels  = { starter:'Starter (1–3 chambres)', essentiel:'Essentiel (4–10 chambres)', pro:'Pro (11–20 chambres)', premium:'Premium (21+ chambres)' };
+    const planLabels  = { particulier:'Particulier (1 logement)', starter:'Starter (1–3 chambres)', essentiel:'Essentiel (4–10 chambres)', pro:'Pro (11–20 chambres)', premium:'Premium (21+ chambres)' };
     const planLabel   = planLabels[h.plan] || h.plan;
 
     const subject = isLastDay
@@ -1719,6 +1722,7 @@ async function runTrialReminders(env) {
       + `<div class="intro">${intro}</div>`
       + `<div class="intro">Pour continuer à utiliser Welkomeo sans interruption, choisissez votre formule :</div>`
       + `<table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:13px">`
+      + `<tr><td style="padding:8px 12px;font-weight:700">Particulier</td><td style="padding:8px 12px">1 logement</td><td style="padding:8px 12px;font-weight:700;color:#053372">4 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">39 000 FCFA/an</td></tr>`
       + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Starter</td><td style="padding:8px 12px">1–3 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">9 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">99 000 FCFA/an</td></tr>`
       + `<tr><td style="padding:8px 12px;font-weight:700">Essentiel</td><td style="padding:8px 12px">4–10 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">24 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">249 000 FCFA/an</td></tr>`
       + `<tr style="background:#f1f5f9"><td style="padding:8px 12px;font-weight:700">Pro</td><td style="padding:8px 12px">11–20 chambres</td><td style="padding:8px 12px;font-weight:700;color:#053372">49 900 FCFA/mois</td><td style="padding:8px 12px;color:#15803d">499 000 FCFA/an</td></tr>`

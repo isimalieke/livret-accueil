@@ -72,6 +72,11 @@ export default {
       return fetchAsset(env, url.origin + '/register.html');
     }
 
+    // ── /login (global — retrouve le slug à partir de l'email) ──
+    if (path === '/login' && request.method === 'POST') {
+      return handleGlobalLogin(request, env);
+    }
+
     // ── Racine → landing page ──
     if (path === '/' || path === '') {
       return fetchAsset(env, url.origin + '/landing.html');
@@ -359,6 +364,58 @@ async function rlIncrement(env, key) {
 
 async function rlReset(env, key) {
   try { await env.CONFIG_KV.delete(key); } catch {}
+}
+
+// ═════════════════════════════════════════════
+// AUTH — LOGIN GLOBAL (depuis /register → j'ai déjà un compte)
+// ═════════════════════════════════════════════
+
+async function handleGlobalLogin(request, env) {
+  try {
+    const { email, password } = await request.json();
+    if (!email || !password) return json({ ok: false, error: 'Email et mot de passe requis' }, 400);
+
+    const emailLower = email.toLowerCase().trim();
+    const ip         = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const emailKey   = `rl:login:email:${emailLower}`;
+    const ipKey      = `rl:login:ip:${ip}`;
+
+    const [ipCheck, emailCheck] = await Promise.all([rlCheck(env, ipKey), rlCheck(env, emailKey)]);
+    if (ipCheck.blocked || emailCheck.blocked) {
+      const resetTs = Math.max(ipCheck.reset || 0, emailCheck.reset || 0);
+      const waitMin = Math.max(1, Math.ceil((resetTs - Math.floor(Date.now() / 1000)) / 60));
+      return json({ ok: false, error: `Trop de tentatives. Réessayez dans ${waitMin} minute(s).`, code: 'RATE_LIMITED' }, 429);
+    }
+
+    // Retrouver l'utilisateur par email (sans slug)
+    const user = await env.DB.prepare(
+      'SELECT * FROM users WHERE email = ? AND active = 1 AND role = \'hotelier\' LIMIT 1'
+    ).bind(emailLower).first();
+
+    if (!user || !(await verifyPassword(password, user.password_hash))) {
+      await Promise.all([rlIncrement(env, ipKey), rlIncrement(env, emailKey)]);
+      return json({ ok: false, error: 'Email ou mot de passe incorrect' }, 401);
+    }
+
+    if (user.email_verified === 0) {
+      return json({ ok: false, error: 'Votre adresse email n\'est pas encore vérifiée. Consultez votre boîte mail.', code: 'EMAIL_NOT_VERIFIED', slug: user.hotel_slug }, 403);
+    }
+
+    await Promise.all([rlReset(env, ipKey), rlReset(env, emailKey)]);
+
+    const slug  = user.hotel_slug;
+    const token = await signJWT({
+      sub:  user.id,
+      slug,
+      role: user.role,
+      nom:  user.nom,
+      exp:  Math.floor(Date.now() / 1000) + 86400 * 30,
+    }, env);
+
+    return json({ ok: true, token, slug, role: user.role, nom: user.nom });
+  } catch (e) {
+    return json({ ok: false, error: String(e) }, 500);
+  }
 }
 
 // ═════════════════════════════════════════════

@@ -711,6 +711,30 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
 .nearby-item-name { font-size:13px; font-weight:700; color:rgba(255,255,255,0.92); margin-bottom:2px; }
 .nearby-item-meta { font-size:11px; color:rgba(255,255,255,0.55); }
 .nearby-item-note { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }
+/* ── SKELETON LOADER ── */
+#skeleton-loader {
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(10,10,10,0.92);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:40px 24px; gap:16px;
+  transition:opacity .4s ease;
+}
+#skeleton-loader.hidden { opacity:0; pointer-events:none; }
+.sk-block {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.06) 75%);
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.4s infinite;
+  border-radius: 10px;
+}
+@keyframes sk-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.sk-circle { width:64px; height:64px; border-radius:50%; margin-bottom:8px; }
+.sk-title  { width:180px; height:22px; }
+.sk-sub    { width:110px; height:12px; opacity:0.6; }
+.sk-tiles  { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; max-width:340px; margin-top:16px; }
+.sk-tile   { height:68px; border-radius:14px; }
 </style>
 </head>
 <body class="lang-fr">
@@ -785,6 +809,19 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
 
 <!-- ── MAIN ── -->
 <main class="main">
+
+<!-- ── SKELETON LOADER ── -->
+<div id="skeleton-loader">
+  <div class="sk-block sk-circle"></div>
+  <div class="sk-block sk-title"></div>
+  <div class="sk-block sk-sub"></div>
+  <div class="sk-tiles">
+    <div class="sk-block sk-tile"></div>
+    <div class="sk-block sk-tile"></div>
+    <div class="sk-block sk-tile"></div>
+    <div class="sk-block sk-tile"></div>
+  </div>
+</div>
 
 <!-- ══ HOME ══ -->
 <div class="screen active" id="screen-home">
@@ -1733,6 +1770,20 @@ function showPage(id) {
   _showBackBtns(true);
   window.scrollTo(0, 0);
   if (id !== 'incident') resetIncident();
+  // Pré-remplir nom/tel de l'invité si mémorisés
+  if (id === 'incident') {
+    try {
+      var sNom  = localStorage.getItem('livret_guest_nom');
+      var sTel  = localStorage.getItem('livret_guest_tel');
+      var sDial = localStorage.getItem('livret_guest_dial');
+      var elNom = document.getElementById('inc-nom');
+      var elTel = document.getElementById('inc-tel');
+      var elDial= document.getElementById('inc-dialcode');
+      if (sNom && elNom && !elNom.value) elNom.value = sNom;
+      if (sTel && elTel && !elTel.value) elTel.value = sTel;
+      if (sDial && elDial) elDial.value = sDial;
+    } catch(e) {}
+  }
 }
 
 function goHome() {
@@ -1891,6 +1942,12 @@ async function sendIncident() {
       if (email && data.emailSent) {
         document.getElementById('inc-email-confirm').style.display = 'block';
       }
+      // Mémoriser nom et téléphone pour les prochaines soumissions
+      try {
+        if (nom) localStorage.setItem('livret_guest_nom', nom);
+        if (num) localStorage.setItem('livret_guest_tel', num);
+        if (dial) localStorage.setItem('livret_guest_dial', dial);
+      } catch(e) {}
       // Sauvegarder le ticket dans localStorage pour le retrouver plus tard
       saveTicketLocal(_slug, data.id, subject);
     } else {
@@ -1988,11 +2045,15 @@ function setLang(lang) {
   try { localStorage.setItem('livret_lang', lang); } catch(e) {}
 }
 
-// Restaurer la langue au chargement
+// Restaurer ou détecter la langue au chargement
 (function() {
   try {
     var saved = localStorage.getItem('livret_lang');
-    if (saved === 'en') setLang('en');
+    if (saved) { if (saved === 'en') setLang('en'); return; }
+    // Pas de préférence sauvegardée → détecter depuis le navigateur
+    var navLang = (navigator.language || navigator.userLanguage || 'fr').toLowerCase();
+    var isEn = navLang.startsWith('en');
+    if (isEn) setLang('en');
   } catch(e) {}
 })();
 
@@ -2431,6 +2492,14 @@ function applyConfig() {
   // Auth
   initAuth();
 
+  // Masquer le skeleton loader
+  (function() {
+    var sk = document.getElementById('skeleton-loader');
+    if (!sk) return;
+    sk.classList.add('hidden');
+    setTimeout(function() { sk.style.display = 'none'; }, 450);
+  })();
+
   // Démarrer le timer pop-up avis (5 min après chargement du livret)
   if (typeof window._startReviewNudgeTimer === 'function') window._startReviewNudgeTimer();
 }
@@ -2589,9 +2658,32 @@ document.addEventListener('DOMContentLoaded', function() {
     var roomParam = new URLSearchParams(window.location.search).get('room');
     if (roomParam) {
       sessionStorage.setItem('livret_guest_room', roomParam);
-      // Nettoyer l'URL sans recharger la page
       var cleanUrl = window.location.pathname;
       history.replaceState(null, '', cleanUrl);
+    }
+  } catch(e) {}
+
+  // Gérer les shortcuts PWA (?shortcut=wifi|contact|incident)
+  try {
+    var shortcut = new URLSearchParams(window.location.search).get('shortcut');
+    if (shortcut) {
+      history.replaceState(null, '', window.location.pathname);
+      // Attendre que la config soit chargée avant de naviguer
+      var _scMap = { wifi: 'wifi', contact: 'incident', incident: 'incident' };
+      var _scTarget = _scMap[shortcut];
+      if (_scTarget) {
+        var _scInterval = setInterval(function() {
+          if (typeof showPage === 'function' && typeof CONFIG !== 'undefined') {
+            clearInterval(_scInterval);
+            if (shortcut === 'contact') {
+              showPage('incident');
+            } else {
+              showCat('sejour');
+              setTimeout(function() { showPage(_scTarget); }, 100);
+            }
+          }
+        }, 200);
+      }
     }
   } catch(e) {}
 });

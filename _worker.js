@@ -92,6 +92,9 @@ export default {
     // ── /{slug}/config.js ──
     if (sub === 'config.js') return handleConfig(request, env, slug);
 
+    // ── /{slug}/stats ──
+    if (sub === 'stats' && request.method === 'GET') return handleStats(request, env, slug);
+
     // ── /{slug}/subscription ──
     if (sub === 'subscription' && request.method === 'GET')
       return handleGetSubscription(request, env, slug);
@@ -693,8 +696,14 @@ async function handleConfig(request, env, slug) {
       env.CONFIG_KV.get('hotel:' + slug + ':config'),
       env.CONFIG_KV.get('hotel:' + slug + ':cover_photo', { type: 'text' }),
     ]);
+
+    // Enregistrer la visite en arrière-plan (ne bloque pas la réponse)
+    const today = new Date().toISOString().slice(0, 10);
+    env.DB.prepare(
+      'INSERT INTO livret_visits (slug, visit_date, count) VALUES (?, ?, 1) ON CONFLICT(slug, visit_date) DO UPDATE SET count = count + 1'
+    ).bind(slug, today).run().catch(() => {});
+
     if (config) {
-      // Injecter l'URL de la photo de couverture si elle existe dans KV
       let patched = config;
       if (coverData) {
         patched = patched.replace(
@@ -2170,4 +2179,28 @@ function buildInitialConfig({ nom, ville, pays, adresse, telephone, whatsapp, em
   acces:   { actif: false, mot_de_passe: "" },
 };
 if (typeof applyConfig === 'function') applyConfig();`;
+}
+
+// ── ANALYTICS — statistiques de visites ──
+async function handleStats(request, env, slug) {
+  const jwt = request.headers.get('Authorization')?.replace('Bearer ', '') || '';
+  if (!jwt) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  try {
+    const payload = JSON.parse(atob(jwt.split('.')[1]));
+    if (payload.slug !== slug) return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+  } catch(e) {
+    return new Response(JSON.stringify({ error: 'Invalid token' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // 30 derniers jours
+  const rows = await env.DB.prepare(
+    'SELECT visit_date, count FROM livret_visits WHERE slug = ? AND visit_date >= date("now", "-30 days") ORDER BY visit_date DESC'
+  ).bind(slug).all();
+
+  const total7  = rows.results.filter(r => r.visit_date >= new Date(Date.now() - 7*86400000).toISOString().slice(0,10)).reduce((s,r) => s+r.count, 0);
+  const total30 = rows.results.reduce((s,r) => s+r.count, 0);
+
+  return new Response(JSON.stringify({ ok: true, total7, total30, days: rows.results }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
 }

@@ -118,3 +118,12 @@ CREATE INDEX IF NOT EXISTS idx_users_hotel      ON users(hotel_slug);
 CREATE INDEX IF NOT EXISTS idx_users_email      ON users(hotel_slug, email);
 CREATE INDEX IF NOT EXISTS idx_stays_hotel      ON stays(hotel_slug, checkout);
 CREATE INDEX IF NOT EXISTS idx_reco_hotel       ON recommendations(hotel_slug, category);
+
+-- Analytics de visites du livret
+CREATE TABLE IF NOT EXISTS livret_visits (
+  slug        TEXT NOT NULL,
+  visit_date  TEXT NOT NULL,  -- format YYYY-MM-DD
+  count       INTEGER DEFAULT 0,
+  PRIMARY KEY (slug, visit_date)
+);
+CREATE INDEX IF NOT EXISTS idx_visits_slug ON livret_visits(slug, visit_date DESC);

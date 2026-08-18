@@ -736,7 +736,10 @@ input, textarea, select {
         </div>
         <div style="flex:1;min-width:180px">
           <p style="font-size:12px;color:#6b7280;margin-bottom:10px">Imprimez et affichez ce QR code dans votre chambre ou dans votre confirmation de réservation. Vos voyageurs scannent et accèdent instantanément.</p>
-          <button onclick="downloadQrCode()" id="dl-qr-btn" style="padding:9px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;display:none">⬇️ Télécharger le QR code</button>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onclick="downloadQrCode()" id="dl-qr-btn" style="padding:9px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;display:none">⬇️ Télécharger le QR code</button>
+            <button onclick="sendWhatsApp()" style="padding:9px 14px;background:#25D366;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600">💬 Envoyer par WhatsApp</button>
+          </div>
         </div>
       </div>
     </div>
@@ -820,6 +823,16 @@ input, textarea, select {
   </div>
 
   <!-- ÉQUIPE — GESTIONNAIRES -->
+  <!-- STATISTIQUES -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this); loadStats()">
+      <h2>📊 Statistiques du livret</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div id="stats-body" style="text-align:center;color:#9ca3af;font-size:13px;padding:8px 0">Chargement…</div>
+    </div>
+  </div>
+
   <div class="section" id="equipe-section">
     <div class="section-head" onclick="toggle(this); loadGestionnaires()">
       <h2>👥 Équipe — Gestionnaires</h2>
@@ -1151,6 +1164,22 @@ function downloadQrCode() {
   a.download = 'livret-qr-' + (_slug || 'welkomeo') + '.png';
   a.target = '_blank';
   a.click();
+}
+function sendWhatsApp() {
+  function gv(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+  var nom      = gv('h-nom') || 'notre établissement';
+  var livretUrl= window.location.origin + '/' + (_slug || '');
+  var wifi     = gv('wifi-reseau');
+  var wifiPwd  = gv('wifi-mdp');
+  var checkin  = gv('ci-heure');
+  var checkout = gv('co-heure');
+  var msg = '🏨 Bienvenue chez ' + nom + ' !\n\n';
+  msg += '📱 Votre livret d\'accueil numérique :\n' + livretUrl + '\n\n';
+  if (wifi)    msg += '📶 WiFi : ' + wifi + (wifiPwd ? ' · Mot de passe : ' + wifiPwd : '') + '\n';
+  if (checkin) msg += '🕐 Check-in : à partir de ' + checkin + '\n';
+  if (checkout)msg += '🕙 Check-out : avant ' + checkout + '\n';
+  msg += '\nN\'hésitez pas à nous contacter pour tout besoin. Bon séjour ! 🙏';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener');
 }
 
 // ── NUMÉROS DE TÉLÉPHONE ──
@@ -2358,6 +2387,45 @@ function download(filename, content) {
 // ─────────────────────────────────────────────
 // ÉQUIPE — GESTIONNAIRES
 // ─────────────────────────────────────────────
+// ── STATISTIQUES ──
+var _statsLoaded = false;
+async function loadStats() {
+  if (_statsLoaded) return;
+  _statsLoaded = true;
+  var el = document.getElementById('stats-body');
+  if (!el) return;
+  try {
+    var r = await fetch('/' + _slug + '/stats', { headers: { 'Authorization': 'Bearer ' + _jwt } });
+    var d = await r.json();
+    if (!d.ok) { el.textContent = 'Données non disponibles.'; return; }
+    var bars = '';
+    var maxCount = Math.max(1, ...d.days.map(function(x){return x.count;}));
+    // Afficher les 14 derniers jours sous forme de mini-barres
+    var last14 = d.days.slice(0, 14).reverse();
+    last14.forEach(function(row) {
+      var pct = Math.round((row.count / maxCount) * 100);
+      var label = row.visit_date.slice(5); // MM-DD
+      bars += '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1">'
+        + '<div style="width:100%;background:#e0e7ff;border-radius:4px 4px 0 0;height:' + Math.max(4, pct * 0.6) + 'px;position:relative">'
+        + '<div style="position:absolute;bottom:0;left:0;right:0;background:var(--blue);border-radius:4px 4px 0 0;height:' + pct + '%" title="' + row.count + ' visite(s)"></div></div>'
+        + '<div style="font-size:9px;color:#9ca3af;transform:rotate(-45deg);transform-origin:center;white-space:nowrap">' + label + '</div>'
+        + '</div>';
+    });
+    el.innerHTML = '<div style="display:flex;gap:12px;margin-bottom:16px">'
+      + '<div style="flex:1;background:#f0f4ff;border-radius:10px;padding:14px;text-align:center">'
+      + '<div style="font-size:28px;font-weight:700;color:var(--blue)">' + d.total7 + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;margin-top:2px">visites · 7 derniers jours</div></div>'
+      + '<div style="flex:1;background:#f0f4ff;border-radius:10px;padding:14px;text-align:center">'
+      + '<div style="font-size:28px;font-weight:700;color:var(--blue)">' + d.total30 + '</div>'
+      + '<div style="font-size:11px;color:#6b7280;margin-top:2px">visites · 30 derniers jours</div></div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:flex-end;gap:2px;height:60px;padding:0 4px">' + bars + '</div>'
+      + '<div style="font-size:11px;color:#9ca3af;margin-top:10px;text-align:center">Une visite = un chargement du livret. Mis à jour en temps réel.</div>';
+  } catch(e) {
+    if (el) el.textContent = 'Erreur de chargement.';
+  }
+}
+
 var _gestionnairesLoaded = false;
 
 async function loadGestionnaires() {

@@ -28,5 +28,28 @@
     }
   ],
   "categories": ["travel", "lifestyle"],
-  "lang": "fr"
+  "lang": "fr",
+  "shortcuts": [
+    {
+      "name": "WiFi",
+      "short_name": "WiFi",
+      "description": "Accéder aux informations WiFi",
+      "url": "./index.html?shortcut=wifi",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contacter l'hôte",
+      "short_name": "Contact",
+      "description": "Appeler ou envoyer un message à l'hôte",
+      "url": "./index.html?shortcut=contact",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Signaler un problème",
+      "short_name": "Incident",
+      "description": "Envoyer une demande à l'équipe",
+      "url": "./index.html?shortcut=incident",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }

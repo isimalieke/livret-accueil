@@ -391,6 +391,89 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- VP. VIE PRATIQUE ══ -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this)">
+      <h2>🏠 Vie pratique</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="sub-label">⚡ Électricité</div>
+      <div class="field">
+        <label>Compteur électricité & disjoncteur</label>
+        <textarea id="vp-elec" rows="2" placeholder="ex : Le compteur est dans le couloir à droite en entrant. Le disjoncteur principal est dans le placard sous l'escalier."></textarea>
+      </div>
+      <div class="field">
+        <label>En cas de coupure de courant</label>
+        <textarea id="vp-courant" rows="2" placeholder="ex : Vérifiez d'abord si la coupure est générale dans le quartier. Sinon, réarmez le disjoncteur. Contactez-nous si le problème persiste."></textarea>
+      </div>
+      <div class="field">
+        <label>Groupe électrogène (si disponible)</label>
+        <textarea id="vp-generateur" rows="2" placeholder="ex : Le groupe électrogène est dans la cour. Il démarre automatiquement 30 secondes après une coupure."></textarea>
+      </div>
+
+      <div class="sub-label">💧 Eau</div>
+      <div class="field">
+        <label>Compteur eau & château d'eau</label>
+        <textarea id="vp-eau" rows="2" placeholder="ex : Le compteur est à l'entrée du jardin. Le château d'eau sur le toit alimente le logement. Capacité : 500 litres."></textarea>
+      </div>
+      <div class="field">
+        <label>Eau du robinet</label>
+        <select id="vp-eau-potable">
+          <option value="">— Sélectionner —</option>
+          <option value="potable">✅ Eau potable directement au robinet</option>
+          <option value="filtre">🔵 Eau filtrée disponible (filtre sous l'évier)</option>
+          <option value="non_potable">⚠️ Eau non potable — utiliser l'eau en bouteille</option>
+          <option value="bouteilles">🍶 Bouteilles d'eau fournies</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>En cas de coupure d'eau</label>
+        <textarea id="vp-coupure-eau" rows="2" placeholder="ex : Le château d'eau sur le toit peut assurer 6 à 8 heures d'autonomie. Contactez-nous si l'eau ne revient pas sous 2 heures."></textarea>
+      </div>
+      <div class="field">
+        <label>Chauffe-eau</label>
+        <textarea id="vp-chauffe-eau" rows="2" placeholder="ex : Chauffe-eau électrique. Allumez-le 20 minutes avant votre douche depuis l'interrupteur rouge dans la salle de bain. Éteignez-le après usage."></textarea>
+      </div>
+
+      <div class="sub-label">🗑️ Déchets</div>
+      <div class="field">
+        <label>Poubelles & collecte</label>
+        <textarea id="vp-poubelles" rows="3" placeholder="ex : Poubelles dans le placard sous l'évier. Jours de collecte : lundi et jeudi matin. Déposez les sacs dans le bac vert devant la porte d'entrée la veille au soir."></textarea>
+      </div>
+
+      <div class="sub-label">🔐 Sécurité & accès</div>
+      <div class="field">
+        <label>Alarme</label>
+        <textarea id="vp-alarme" rows="2" placeholder="ex : Code d'activation : 1234#. Activez en sortant, désactivez en entrant avec le même code. En cas de déclenchement accidentel, composez le code dans les 30 secondes."></textarea>
+      </div>
+      <div class="field">
+        <label>Coffre-fort</label>
+        <textarea id="vp-coffre" rows="2" placeholder="ex : Coffre dans le placard de la chambre principale. Code par défaut : 0000 (changez-le à votre arrivée). Capacité : passeport, bijoux, appareil photo."></textarea>
+      </div>
+      <div class="field">
+        <label>Codes d'accès (portail, bâtiment...)</label>
+        <textarea id="vp-acces" rows="2" placeholder="ex : Code portail : 4521. Code hall d'immeuble : A237. Ascenseur : accès libre."></textarea>
+      </div>
+
+      <div class="sub-label">🌍 Vie locale</div>
+      <div class="field">
+        <label>Transport local recommandé</label>
+        <textarea id="vp-transport" rows="2" placeholder="ex : Yango et InDriver fonctionnent bien à Dakar. Évitez les taxis sans compteur. Motos (Jakarta) pour les courtes distances."></textarea>
+      </div>
+      <div class="field">
+        <label>Réseau mobile recommandé</label>
+        <textarea id="vp-mobile" rows="2" placeholder="ex : Orange et Free (anciennement Tigo) offrent la meilleure couverture 4G à Dakar. Cartes SIM disponibles dans les boutiques Orange en ville."></textarea>
+      </div>
+      <div class="field">
+        <label>Moustiquaires & protection</label>
+        <textarea id="vp-moustiquaires" rows="2" placeholder="ex : Moustiquaires disponibles pour tous les lits (dans le placard de l'entrée). Répulsif anti-moustiques dans la salle de bain sous l'évier."></textarea>
+      </div>
+
+      <div class="hint">Ces informations apparaissent dans la section "Vie Pratique" du livret de vos voyageurs.</div>
+    </div>
+  </div>
+
   <!-- 5. PAIEMENT -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
@@ -1404,6 +1487,24 @@ function initForm() {
     });
   })();
 
+  // Vie pratique
+  if (C.viepratique) {
+    sv('vp-elec',         C.viepratique.elec         || '');
+    sv('vp-courant',      C.viepratique.courant      || '');
+    sv('vp-generateur',   C.viepratique.generateur   || '');
+    sv('vp-eau',          C.viepratique.eau          || '');
+    sv('vp-eau-potable',  C.viepratique.eau_potable  || '');
+    sv('vp-coupure-eau',  C.viepratique.coupure_eau  || '');
+    sv('vp-chauffe-eau',  C.viepratique.chauffe_eau  || '');
+    sv('vp-poubelles',    C.viepratique.poubelles    || '');
+    sv('vp-alarme',       C.viepratique.alarme       || '');
+    sv('vp-coffre',       C.viepratique.coffre       || '');
+    sv('vp-acces',        C.viepratique.acces        || '');
+    sv('vp-transport',    C.viepratique.transport    || '');
+    sv('vp-mobile',       C.viepratique.mobile       || '');
+    sv('vp-moustiquaires',C.viepratique.moustiquaires|| '');
+  }
+
   // Check-out
   sv('co-heure2', C.checkout.heure); sv('co-heure2-en', C.checkout.heure_en);
   sv('co-cles-fr', C.checkout.cles_fr); sv('co-cles-en', C.checkout.cles_en);
@@ -1586,6 +1687,24 @@ function buildConfigContent() {
 
   // Chambres
   js += '  chambres: ' + j(chambres) + ',\n\n';
+
+  // Vie pratique
+  js += '  viepratique: {\n';
+  js += '    elec:         ' + JSON.stringify(gv('vp-elec')) + ',\n';
+  js += '    courant:      ' + JSON.stringify(gv('vp-courant')) + ',\n';
+  js += '    generateur:   ' + JSON.stringify(gv('vp-generateur')) + ',\n';
+  js += '    eau:          ' + JSON.stringify(gv('vp-eau')) + ',\n';
+  js += '    eau_potable:  ' + JSON.stringify(gv('vp-eau-potable')) + ',\n';
+  js += '    coupure_eau:  ' + JSON.stringify(gv('vp-coupure-eau')) + ',\n';
+  js += '    chauffe_eau:  ' + JSON.stringify(gv('vp-chauffe-eau')) + ',\n';
+  js += '    poubelles:    ' + JSON.stringify(gv('vp-poubelles')) + ',\n';
+  js += '    alarme:       ' + JSON.stringify(gv('vp-alarme')) + ',\n';
+  js += '    coffre:       ' + JSON.stringify(gv('vp-coffre')) + ',\n';
+  js += '    acces:        ' + JSON.stringify(gv('vp-acces')) + ',\n';
+  js += '    transport:    ' + JSON.stringify(gv('vp-transport')) + ',\n';
+  js += '    mobile:       ' + JSON.stringify(gv('vp-mobile')) + ',\n';
+  js += '    moustiquaires:' + JSON.stringify(gv('vp-moustiquaires')) + ',\n';
+  js += '  },\n\n';
 
   // Checkout
   js += '  checkout: {\n';

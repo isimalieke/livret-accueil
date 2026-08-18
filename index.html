@@ -813,6 +813,11 @@ body.has-cover-photo #inc-dialcode {
       <div><div class="sli-label fr-o">WiFi &amp; Infos</div><div class="sli-label en-o">WiFi &amp; Info</div><div class="sli-sub fr-o">Réseau, horaires, règles</div><div class="sli-sub en-o">Network, hours, rules</div></div>
       <div class="sli-arrow">›</div>
     </div>
+    <div class="sub-list-item" onclick="showPage('viepratique')">
+      <div class="sli-ico">🏠</div>
+      <div><div class="sli-label fr-o">Vie pratique</div><div class="sli-label en-o">Practical living</div><div class="sli-sub fr-o">Énergie, eau, déchets, sécurité</div><div class="sli-sub en-o">Power, water, bins, security</div></div>
+      <div class="sli-arrow">›</div>
+    </div>
     <div class="sub-list-item" id="tile-appareils" onclick="showPage('appareils')">
       <div class="sli-ico">🔌</div>
       <div><div class="sli-label fr-o">Mode d'emploi</div><div class="sli-label en-o">Appliances</div><div class="sli-sub fr-o">Clim, TV, équipements</div><div class="sli-sub en-o">AC, TV, appliances</div></div>
@@ -989,6 +994,21 @@ body.has-cover-photo #inc-dialcode {
     </div>
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
+  </div>
+</div>
+
+<!-- ══ VIE PRATIQUE ══ -->
+<div class="screen" id="screen-viepratique">
+  <div class="page-hdr">
+    <div class="page-hdr-icon">🏠</div>
+    <div>
+      <div class="page-hdr-title fr-o">Vie Pratique</div>
+      <div class="page-hdr-title en-o">Practical Living</div>
+      <div class="page-hdr-sub">Énergie · Eau · Déchets · Sécurité</div>
+    </div>
+  </div>
+  <div class="page-body" id="vp-body">
+    <!-- rempli par applyConfig -->
   </div>
 </div>
 
@@ -2049,6 +2069,68 @@ function applyConfig() {
   r('regles-list', (C.pratique.regles || []).map(function(rg) {
     return '<div class="row"><span class="ri">' + rg.icon + '</span><div><div class="rf">' + rg.fr + '</div><div class="re">' + rg.en + '</div></div></div>';
   }).join(''));
+
+  // Vie pratique
+  (function() {
+    var vp = C.viepratique || {};
+    var body = document.getElementById('vp-body');
+    if (!body) return;
+
+    var eauPotableLabel = {
+      'potable':     '✅ Eau potable au robinet',
+      'filtre':      '🔵 Eau filtrée disponible (filtre sous l\'évier)',
+      'non_potable': '⚠️ Eau non potable — utilisez des bouteilles',
+      'bouteilles':  '🍶 Bouteilles d\'eau fournies',
+    };
+
+    function vpCard(icon, titleFr, titleEn, content) {
+      if (!content || !content.trim()) return '';
+      return '<div class="card">'
+        + '<div class="card-lbl"><span style="margin-right:6px">' + icon + '</span>'
+        + '<span class="fr-o">' + titleFr + '</span>'
+        + '<span class="en-o">' + titleEn + '</span>'
+        + '</div>'
+        + '<div class="row"><div style="padding:0 4px;font-size:14px;color:var(--text);line-height:1.6;white-space:pre-wrap">' + content + '</div></div>'
+        + '</div>';
+    }
+
+    var html = '';
+
+    // Énergie
+    var elecSection = vpCard('⚡','Compteur électricité & disjoncteur','Electricity meter & fuse box', vp.elec)
+      + vpCard('🔌','En cas de coupure de courant','Power cut — what to do', vp.courant)
+      + vpCard('🔋','Groupe électrogène','Generator', vp.generateur);
+    if (elecSection) html += '<div class="card-lbl" style="padding:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">⚡ Électricité</div>' + elecSection;
+
+    // Eau
+    var eauContent = (vp.eau_potable ? eauPotableLabel[vp.eau_potable] || vp.eau_potable : '');
+    var eauSection = vpCard('💧','Compteur eau & château d\'eau','Water meter & tank', vp.eau)
+      + (eauContent ? vpCard('🚰','Eau du robinet','Tap water', eauContent) : '')
+      + vpCard('🚿','En cas de coupure d\'eau','Water cut — what to do', vp.coupure_eau)
+      + vpCard('🔥','Chauffe-eau','Water heater', vp.chauffe_eau);
+    if (eauSection) html += '<div class="card-lbl" style="padding:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">💧 Eau</div>' + eauSection;
+
+    // Déchets
+    var dechets = vpCard('🗑️','Poubelles & collecte','Bins & collection', vp.poubelles);
+    if (dechets) html += '<div class="card-lbl" style="padding:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">🗑️ Déchets</div>' + dechets;
+
+    // Sécurité
+    var secuSection = vpCard('🔐','Alarme','Alarm system', vp.alarme)
+      + vpCard('🔒','Coffre-fort','Safe', vp.coffre)
+      + vpCard('🚪','Codes d\'accès','Access codes', vp.acces);
+    if (secuSection) html += '<div class="card-lbl" style="padding:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">🔐 Sécurité</div>' + secuSection;
+
+    // Vie locale
+    var localeSection = vpCard('🚗','Transport local','Local transport', vp.transport)
+      + vpCard('📱','Réseau mobile','Mobile network', vp.mobile)
+      + vpCard('🦟','Moustiquaires & protection','Mosquito nets & protection', vp.moustiquaires);
+    if (localeSection) html += '<div class="card-lbl" style="padding:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold);text-transform:uppercase">🌍 Vie locale</div>' + localeSection;
+
+    if (!html) html = '<div class="card"><div class="row"><div style="color:var(--text2);font-size:14px">Aucune information renseignée pour le moment.</div></div></div>';
+
+    html += '<div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>';
+    body.innerHTML = html;
+  })();
 
   // Appareils
   // Mode d'emploi — nouveau format dynamique (items[]) + rétro-compat ancien format

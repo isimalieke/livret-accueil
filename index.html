@@ -320,11 +320,23 @@ body.lang-en .wt-en { display:block; color:var(--text); font-style:normal; }
 
 /* ══ TIP ══ */
 .tip {
-  background:var(--gold-light); border:1px solid rgba(201,168,76,0.25);
-  border-radius:6px; padding:12px 14px; margin-top:8px;
-  font-size:13px; color:var(--text2); display:flex; gap:8px;
-  align-items:flex-start; line-height:1.6;
+  background: rgba(201,168,76,0.14);
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 10px; padding: 12px 14px; margin-top: 8px;
+  font-size: 13px; color: rgba(255,255,255,0.82); display: flex; gap: 8px;
+  align-items: flex-start; line-height: 1.6;
 }
+/* Bouton d'action dans les tips */
+.tip-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; padding: 9px 18px;
+  background: var(--gold, #c9a84c); color: #1a1208;
+  border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: inherit; text-decoration: none;
+  transition: opacity .2s;
+}
+.tip-btn:hover { opacity: .85; }
 
 /* ══ URGENCES ══ */
 .emergency {
@@ -1142,7 +1154,10 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
   </div>
   <div class="page-body">
     <div id="appareils-list"></div>
-    <div class="tip">💡 <span class="fr-o">En cas de problème, contactez-nous immédiatement.</span><span class="en-o">If any issue, contact us immediately.</span></div>
+    <div class="tip" style="flex-direction:column">
+      <div style="display:flex;gap:8px;align-items:flex-start">💡 <span class="fr-o">En cas de problème, n'hésitez pas à nous contacter.</span><span class="en-o">If any issue, don't hesitate to reach out.</span></div>
+      <button class="tip-btn" onclick="showPage('incident')">📩 <span class="fr-o">Nous contacter</span><span class="en-o">Contact us</span></button>
+    </div>
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
 
   </div>
@@ -1169,7 +1184,10 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
       <div class="card-lbl fr-o">🛎️ Disponibles sur demande</div>
       <div class="card-lbl en-o">🛎️ Available on request</div>
       <div id="services-demande"></div>
-      <div class="tip" style="margin-top:10px">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
+      <div class="tip" style="margin-top:10px;flex-direction:column">
+        <div style="display:flex;gap:8px;align-items:flex-start">💡 <span class="fr-o">Contactez-nous la veille pour organiser ces services.</span><span class="en-o">Contact us the day before to arrange these services.</span></div>
+        <button class="tip-btn" onclick="showPage('incident')">📩 <span class="fr-o">Faire une demande</span><span class="en-o">Make a request</span></button>
+      </div>
     </div>
   <div class="back-row-bottom"><button class="back-btn-inline" onclick="goHome()"><span class="fr-o">← Retour</span><span class="en-o">← Back</span></button></div>
   </div>
@@ -1582,7 +1600,10 @@ body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35
     <div class="co-step"><div class="co-num">2</div><div><div class="co-txt fr-o">Éteignez lumières et climatisation</div><div class="co-txt en-o">Turn off lights and AC</div></div></div>
     <div class="co-step"><div class="co-num">3</div><div><div class="co-txt fr-o">Fermez toutes les fenêtres</div><div class="co-txt en-o">Close all windows</div></div></div>
     <div class="co-step"><div class="co-num">4</div><div><div class="co-txt fr-o" id="co-cles-fr">Déposez les clés à la réception</div><div class="co-txt en-o" id="co-cles-en">Leave keys at reception</div></div></div>
-    <div class="tip">🧳 <span class="fr-o">Besoin de laisser vos bagages ? Contactez-nous !</span><span class="en-o">Need to store luggage? Contact us!</span></div>
+    <div class="tip" style="flex-direction:column">
+      <div style="display:flex;gap:8px;align-items:flex-start">🧳 <span class="fr-o">Besoin de laisser vos bagages avant le départ ?</span><span class="en-o">Need to store your luggage before departure?</span></div>
+      <button class="tip-btn" onclick="showPage('incident')">📩 <span class="fr-o">Nous contacter</span><span class="en-o">Contact us</span></button>
+    </div>
     <div class="footer">
       <div class="ft-title fr-o">Merci pour votre confiance.</div>
       <div class="ft-title en-o">Thank you for your stay.</div>

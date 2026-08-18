@@ -718,6 +718,30 @@ input, textarea, select {
   <!-- ══ GESTION ══ -->
   <div class="section-group">Gestion</div>
 
+  <!-- PARTAGER LE LIVRET -->
+  <div class="section">
+    <div class="section-head" onclick="toggle(this); initQrCode()">
+      <h2>📲 Partager le livret</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px">Partagez l'adresse de votre livret avec vos voyageurs ou affichez le QR code dans la chambre.</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <input id="livret-url-display" readonly style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#f9fafb;color:var(--text);font-family:monospace" value="">
+        <button onclick="copyLivretUrl()" style="padding:10px 14px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;font-family:inherit" id="copy-url-btn">📋 Copier</button>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <img id="qr-code-img" src="" alt="QR Code livret" style="width:160px;height:160px;border-radius:10px;border:1px solid var(--border);display:none">
+          <div id="qr-placeholder" style="width:160px;height:160px;border-radius:10px;border:2px dashed #d1d5db;display:flex;align-items:center;justify-content:center;font-size:12px;color:#9ca3af">QR code</div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <p style="font-size:12px;color:#6b7280;margin-bottom:10px">Imprimez et affichez ce QR code dans votre chambre ou dans votre confirmation de réservation. Vos voyageurs scannent et accèdent instantanément.</p>
+          <button onclick="downloadQrCode()" id="dl-qr-btn" style="padding:9px 14px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;display:none">⬇️ Télécharger le QR code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ACCÈS VOYAGEUR -->
   <div class="section">
     <div class="section-head" onclick="toggle(this)">
@@ -1093,6 +1117,40 @@ function logout() {
 function toggle(head) {
   head.classList.toggle('open');
   head.nextElementSibling.classList.toggle('open');
+}
+
+// ── QR CODE & PARTAGE ──
+var _qrInited = false;
+function initQrCode() {
+  if (_qrInited) return;
+  _qrInited = true;
+  var livretUrl = window.location.origin + '/' + (_slug || '');
+  var urlInput  = document.getElementById('livret-url-display');
+  if (urlInput) urlInput.value = livretUrl;
+  var img  = document.getElementById('qr-code-img');
+  var ph   = document.getElementById('qr-placeholder');
+  var dlBtn= document.getElementById('dl-qr-btn');
+  if (!img) return;
+  var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data=' + encodeURIComponent(livretUrl);
+  img.onload = function() { img.style.display = 'block'; if(ph) ph.style.display = 'none'; if(dlBtn) dlBtn.style.display = 'inline-block'; };
+  img.src = qrSrc;
+}
+function copyLivretUrl() {
+  var val = document.getElementById('livret-url-display');
+  if (!val) return;
+  navigator.clipboard.writeText(val.value).then(function() {
+    var btn = document.getElementById('copy-url-btn');
+    if (btn) { btn.textContent = '✅ Copié !'; setTimeout(function(){ btn.textContent = '📋 Copier'; }, 2000); }
+  });
+}
+function downloadQrCode() {
+  var livretUrl = window.location.origin + '/' + (_slug || '');
+  var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=20&data=' + encodeURIComponent(livretUrl);
+  var a = document.createElement('a');
+  a.href = qrSrc;
+  a.download = 'livret-qr-' + (_slug || 'welkomeo') + '.png';
+  a.target = '_blank';
+  a.click();
 }
 
 // ── NUMÉROS DE TÉLÉPHONE ──

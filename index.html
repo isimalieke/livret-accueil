@@ -111,8 +111,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,s
 .appl-desc { font-size:13px; color:var(--text2); line-height:1.55; margin-bottom:10px; white-space:pre-line; }
 .appl-btns { display:flex; gap:8px; flex-wrap:wrap; }
 .appl-btn { display:inline-flex; align-items:center; gap:5px; padding:7px 13px; border-radius:50px; font-size:12px; font-weight:600; text-decoration:none; border:none; cursor:pointer; }
-.appl-btn-doc { background:#eef2ff; color:var(--blue); border:1px solid #c7d2fe; }
-.appl-btn-vid { background:#fff5f0; color:#c2410c; border:1px solid #fed7aa; }
+.appl-btn-doc { background:rgba(255,255,255,0.13); color:rgba(255,255,255,0.88); border:1px solid rgba(255,255,255,0.18); }
+.appl-btn-vid { background:rgba(201,168,76,0.18); color:var(--gold,#c9a84c); border:1px solid rgba(201,168,76,0.35); }
 .appl-btn:hover { opacity:0.85; }
 
 .hotel-name { color:#fff; font-size:16px; letter-spacing:1.5px; font-family:'Cormorant Garamond','Playfair Display',Georgia,serif; font-weight:400; text-transform:uppercase; }
@@ -592,46 +592,88 @@ body.has-cover-photo .screen { min-height:100vh; }
 /* Accueil : fond = photo floutée (couleurs adaptées à chaque hôtel) */
 body.has-cover-photo .grid-wrap { background: transparent !important; }
 
-/* Cartes flottantes sur la photo */
-body.has-cover-photo .card,
-body.has-cover-photo .appl-card,
-body.has-cover-photo .conv-card,
-body.has-cover-photo .conv-block,
-body.has-cover-photo .conv-block-result {
-  background:rgba(255,255,255,0.91) !important;
+/* ══════════════════════════════════════════
+   THÈME VERRE SOMBRE — fond photo activé
+   Toutes les surfaces deviennent du verre
+   ══════════════════════════════════════════ */
+
+/* Photo de fond plus sombre pour le contraste */
+body.has-cover-photo #global-photo-bg {
+  filter: brightness(0.38) saturate(0.85) !important;
 }
 
-/* Vignettes de navigation — translucides */
+/* — Cartes et conteneurs principaux → verre sombre — */
+body.has-cover-photo .card,
+body.has-cover-photo .appl-card,
+body.has-cover-photo .info-card,
+body.has-cover-photo .gc,
+body.has-cover-photo .conseil-card,
+body.has-cover-photo .ticket-follow,
+body.has-cover-photo .welcome-body,
+body.has-cover-photo .conv-card,
+body.has-cover-photo .conv-block,
+body.has-cover-photo .conv-block-result,
+body.has-cover-photo .tile,
+body.has-cover-photo [class*="-card"],
+body.has-cover-photo [class*="-box"] {
+  background: rgba(15,15,15,0.52) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: rgba(255,255,255,0.13) !important;
+  color: rgba(255,255,255,0.92) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.28) !important;
+}
+
+/* Icônes de tiles — fond légèrement plus clair */
+body.has-cover-photo .tile-ico { background: rgba(255,255,255,0.12) !important; }
+body.has-cover-photo .ti-b,
+body.has-cover-photo .ti-g,
+body.has-cover-photo .ti-a,
+body.has-cover-photo .ti-c,
+body.has-cover-photo .ti-p,
+body.has-cover-photo .ti-t,
+body.has-cover-photo .ti-r,
+body.has-cover-photo .ti-gr { background: rgba(255,255,255,0.14) !important; }
+body.has-cover-photo .tile-label { color: rgba(255,255,255,0.9) !important; }
+
+/* Textes secondaires */
+body.has-cover-photo .card-lbl,
+body.has-cover-photo .ic-lbl,
+body.has-cover-photo .page-hdr-sub,
+body.has-cover-photo .appl-desc,
+body.has-cover-photo .appl-card p,
+body.has-cover-photo .counsel-sub { color: rgba(255,255,255,0.55) !important; }
+
+/* Icônes d'appareils et logos */
+body.has-cover-photo .appl-ico { background: rgba(255,255,255,0.1) !important; }
+
+/* Ligne dorée de séparation */
+body.has-cover-photo .card-hl { background: rgba(201,168,76,0.18) !important; border-color: rgba(201,168,76,0.3) !important; }
+
+/* — Vignettes de navigation → verre sombre — */
 body.has-cover-photo .sub-list-item,
 body.has-cover-photo .cat-tile {
-  background: rgba(0,0,0,0.38) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255,255,255,0.18) !important;
+  background: rgba(15,15,15,0.48) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
   border-left: none !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
 }
 body.has-cover-photo .sub-list-item .sli-label,
 body.has-cover-photo .cat-tile .cat-tile-label { color:#fff !important; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
 body.has-cover-photo .sub-list-item .sli-sub,
-body.has-cover-photo .cat-tile .cat-tile-sub   { color:rgba(255,255,255,0.72) !important; }
+body.has-cover-photo .cat-tile .cat-tile-sub   { color:rgba(255,255,255,0.62) !important; }
 body.has-cover-photo .sub-list-item .sli-arrow,
-body.has-cover-photo .cat-tile .cat-tile-arr   { color:rgba(255,255,255,0.55) !important; }
+body.has-cover-photo .cat-tile .cat-tile-arr   { color:rgba(255,255,255,0.45) !important; }
 body.has-cover-photo .sub-list-item .sli-ico,
-body.has-cover-photo .cat-tile .cat-tile-ico   { background:rgba(255,255,255,0.18) !important; }
-body.has-cover-photo .tip-box,
-body.has-cover-photo .wifi-box,
-body.has-cover-photo .paiement-box,
-body.has-cover-photo [class*="-card"],
-body.has-cover-photo [class*="-box"] {
-  background:rgba(255,255,255,0.88) !important;
-}
+body.has-cover-photo .cat-tile .cat-tile-ico   { background:rgba(255,255,255,0.14) !important; }
 
-/* Formulaire incident sur fond photo — labels dorés, selects blancs */
+/* — Formulaires → verre clair sur fond sombre — */
 body.has-cover-photo .field label,
 body.has-cover-photo .field label.fr-t,
 body.has-cover-photo .field label.en-t {
-  color: var(--gold);
+  color: var(--gold) !important;
   text-transform: uppercase;
   letter-spacing: 2px;
   font-size: 9px;
@@ -639,28 +681,35 @@ body.has-cover-photo .field label.en-t {
 }
 body.has-cover-photo .field select,
 body.has-cover-photo .field input,
-body.has-cover-photo .field textarea {
-  background: #ffffff !important;
-}
+body.has-cover-photo .field textarea,
 body.has-cover-photo #inc-dialcode {
-  background: #ffffff !important;
+  background: rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: #fff !important;
 }
-/* ── AUTOUR DE MOI ── */
+body.has-cover-photo .field select option { background: #1a1a1a; color: #fff; }
+body.has-cover-photo .field input::placeholder,
+body.has-cover-photo .field textarea::placeholder { color: rgba(255,255,255,0.35) !important; }
+
+/* — Autour de moi — */
 .nearby-cat-btn { cursor:pointer; transition:background .15s; }
-.nearby-cat-btn.active { background:#1a1a1a !important; border-radius:14px 14px 0 0 !important; }
+.nearby-cat-btn.active { background:rgba(201,168,76,0.22) !important; border-radius:14px 14px 0 0 !important; border-bottom:none !important; }
 .nearby-cat-btn.active .sli-label,
 .nearby-cat-btn.active .sli-sub { color:#fff !important; }
 .nearby-cat-btn.active .sli-ico { background:rgba(255,255,255,0.12) !important; }
 .nearby-cat-btn.active .nearby-chevron { color:rgba(255,255,255,0.6) !important; }
 .nearby-cat-panel {
-  background:#fff;
-  border-radius:0 0 14px 14px;
-  margin-bottom:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.08);
-  overflow:hidden;
+  background: rgba(15,15,15,0.62);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 0 0 14px 14px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-top: none;
+  overflow: hidden;
 }
-.nearby-item-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
-.nearby-item-meta { font-size:11px; color:var(--text2); }
+.nearby-item-name { font-size:13px; font-weight:700; color:rgba(255,255,255,0.92); margin-bottom:2px; }
+.nearby-item-meta { font-size:11px; color:rgba(255,255,255,0.55); }
 .nearby-item-note { font-size:11px; color:var(--gold); font-style:italic; margin-top:2px; }
 </style>
 </head>
@@ -675,6 +724,27 @@ body.has-cover-photo #inc-dialcode {
   <div id="host-fab-panel" style="display:none;position:absolute;bottom:62px;right:0;background:rgba(20,20,20,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:14px 16px;min-width:230px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
     <div id="host-fab-nom" style="font-size:13px;font-weight:600;color:#fff;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1)"></div>
     <div id="host-fab-links"></div>
+  </div>
+</div>
+
+<!-- ── POP-UP AVIS ── -->
+<div id="review-nudge" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:490;padding:0 12px 12px">
+  <div style="max-width:480px;margin:0 auto;background:rgba(15,15,15,0.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.16);border-radius:16px;padding:16px 18px;box-shadow:0 -4px 32px rgba(0,0,0,0.4);display:flex;align-items:center;gap:14px">
+    <div style="font-size:28px;line-height:1">⭐</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:3px" id="nudge-title-fr">Votre séjour se passe bien ?</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:3px;display:none" id="nudge-title-en">Enjoying your stay?</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6)" id="nudge-sub-fr">Un avis prend 30 secondes et aide beaucoup.</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);display:none" id="nudge-sub-en">A quick review takes 30 seconds and means a lot.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+      <button onclick="nudgeGoAvis()" style="padding:8px 14px;background:var(--gold,#c9a84c);color:#1a1208;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">
+        <span class="fr-o">Laisser un avis</span><span class="en-o">Leave a review</span>
+      </button>
+      <button onclick="nudgeDismiss()" style="padding:6px 14px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit">
+        <span class="fr-o">Plus tard</span><span class="en-o">Later</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1710,6 +1780,35 @@ function openAvis(platform) {
   window.open(url, '_blank', 'noopener');
 }
 
+// ── POP-UP AVIS ──
+(function() {
+  // Déclenche la pop-up 5 min après le premier accès, une fois par session de livret
+  var DELAY = 5 * 60 * 1000; // 5 minutes
+  var SK = 'review_nudge_done_' + (window._livretSlug || location.pathname.split('/')[1] || 'x');
+  function showNudge() {
+    // Ne pas afficher si l'hôtelier est en mode admin, ou si déjà vu ce séjour
+    if (localStorage.getItem(SK)) return;
+    // Ne montrer que si au moins un lien d'avis est défini
+    var hasAvis = Object.keys(_avisUrls || {}).some(function(k) { return _avisUrls[k]; });
+    if (!hasAvis) return;
+    var el = document.getElementById('review-nudge');
+    if (el) el.style.display = 'block';
+  }
+  window._startReviewNudgeTimer = function() {
+    if (!localStorage.getItem(SK)) setTimeout(showNudge, DELAY);
+  };
+})();
+function nudgeGoAvis() {
+  nudgeDismiss();
+  showPage('avis');
+}
+function nudgeDismiss() {
+  var el = document.getElementById('review-nudge');
+  if (el) el.style.display = 'none';
+  var SK = 'review_nudge_done_' + (window._livretSlug || location.pathname.split('/')[1] || 'x');
+  localStorage.setItem(SK, '1');
+}
+
 // ── INCIDENT ──
 function photoSelected(input) {
   var el = document.getElementById('inc-photo-name');
@@ -2331,6 +2430,9 @@ function applyConfig() {
 
   // Auth
   initAuth();
+
+  // Démarrer le timer pop-up avis (5 min après chargement du livret)
+  if (typeof window._startReviewNudgeTimer === 'function') window._startReviewNudgeTimer();
 }
 
 // ── CONVERTISSEUR DE MONNAIE ──

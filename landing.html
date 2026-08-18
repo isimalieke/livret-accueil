@@ -532,14 +532,17 @@
 <!-- Panel "Mon espace" -->
 <div class="login-panel" id="login-panel">
   <div class="login-panel-inner">
-    <p>Entrez l'identifiant de votre établissement pour accéder à votre espace admin.</p>
+    <p>Connectez-vous avec votre adresse e-mail et votre mot de passe.</p>
     <div class="login-panel-row">
-      <input class="login-panel-input" id="login-slug-input" type="text"
-        placeholder="ex : villa-belle-vue" autocomplete="off" autocapitalize="none"
-        onkeydown="if(event.key==='Enter')goToAdmin()">
-      <button class="login-panel-btn" onclick="goToAdmin()">Accéder →</button>
+      <input class="login-panel-input" id="login-email-input" type="email"
+        placeholder="Adresse e-mail" autocomplete="email" autocapitalize="none"
+        onkeydown="if(event.key==='Enter')document.getElementById('login-pwd-input').focus()">
+      <input class="login-panel-input" id="login-pwd-input" type="password"
+        placeholder="Mot de passe" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLandingLogin()" style="max-width:180px">
+      <button class="login-panel-btn" onclick="doLandingLogin()">Accéder →</button>
     </div>
-    <div id="login-slug-err" style="font-size:12px;color:#c00;margin-top:8px;display:none">Veuillez entrer un identifiant.</div>
+    <div id="login-landing-err" style="font-size:12px;color:#c00;margin-top:8px;display:none"></div>
   </div>
 </div>
 
@@ -956,15 +959,37 @@
     _loginPanelOpen = !_loginPanelOpen;
     document.getElementById('login-panel').classList.toggle('open', _loginPanelOpen);
     document.getElementById('nav-login-btn').textContent = _loginPanelOpen ? 'Fermer ✕' : 'Mon espace';
-    if (_loginPanelOpen) setTimeout(function(){ document.getElementById('login-slug-input').focus(); }, 50);
+    if (_loginPanelOpen) setTimeout(function(){ document.getElementById('login-email-input').focus(); }, 50);
   }
-  function goToAdmin() {
-    var val = document.getElementById('login-slug-input').value.trim()
-      .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    var err = document.getElementById('login-slug-err');
-    if (!val) { err.style.display = 'block'; return; }
+  async function doLandingLogin() {
+    var email = document.getElementById('login-email-input').value.trim();
+    var pwd   = document.getElementById('login-pwd-input').value;
+    var err   = document.getElementById('login-landing-err');
     err.style.display = 'none';
-    window.location.href = '/' + val + '/admin';
+    if (!email || !pwd) { err.textContent = 'Veuillez renseigner e-mail et mot de passe.'; err.style.display = 'block'; return; }
+    var btn = document.querySelector('#login-panel .login-panel-btn');
+    btn.textContent = '…'; btn.disabled = true;
+    try {
+      var r = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: pwd })
+      });
+      var data = await r.json();
+      if (data.ok) {
+        localStorage.setItem('livret_slug', data.slug);
+        localStorage.setItem('livret_token_' + data.slug, data.token);
+        window.location.href = '/' + data.slug + '/admin';
+      } else {
+        err.textContent = data.error || 'Identifiants incorrects.';
+        err.style.display = 'block';
+        btn.textContent = 'Accéder →'; btn.disabled = false;
+      }
+    } catch(e) {
+      err.textContent = 'Erreur de connexion. Réessayez.';
+      err.style.display = 'block';
+      btn.textContent = 'Accéder →'; btn.disabled = false;
+    }
   }
   // Fermer le panel en cliquant en dehors
   document.addEventListener('click', function(e) {

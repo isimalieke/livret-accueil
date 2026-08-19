@@ -77,6 +77,11 @@ export default {
       return handleGlobalLogin(request, env);
     }
 
+    // ── /forgot-password (global — depuis landing page) ──
+    if (path === '/forgot-password' && request.method === 'POST') {
+      return handleGlobalForgotPassword(request, env, url);
+    }
+
     // ── Racine → landing page ──
     if (path === '/' || path === '') {
       return fetchAsset(env, url.origin + '/landing.html');
@@ -418,6 +423,38 @@ async function handleGlobalLogin(request, env) {
     return json({ ok: true, token, slug, role: user.role, nom: user.nom });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
+  }
+}
+
+// ═════════════════════════════════════════════
+// AUTH — FORGOT PASSWORD GLOBAL (depuis landing)
+// ═════════════════════════════════════════════
+
+async function handleGlobalForgotPassword(request, env, url) {
+  try {
+    const { email } = await request.json();
+    // Toujours répondre ok (anti-énumération)
+    const ok = json({ ok: true });
+    if (!email) return ok;
+    const emailLower = email.toLowerCase().trim();
+    const user = await env.DB.prepare(
+      'SELECT * FROM users WHERE email = ? AND active = 1 AND role = \'hotelier\' LIMIT 1'
+    ).bind(emailLower).first();
+    if (!user) return ok;
+    // Générer un token de reset
+    const token = hex(crypto.getRandomValues(new Uint8Array(32)));
+    const expiry = new Date(Date.now() + 3600000).toISOString(); // 1h
+    await env.DB.prepare(
+      'UPDATE users SET verification_token = ? WHERE id = ?'
+    ).bind(`reset:${token}:${expiry}`, user.id).run();
+    // Envoyer l'email avec le lien de reset
+    if (env.BREVO_API_KEY) {
+      const resetUrl = `${url.origin}/${user.hotel_slug}/auth/reset?token=${token}`;
+      await sendPasswordResetEmail(env, user, resetUrl);
+    }
+    return ok;
+  } catch(e) {
+    return json({ ok: true }); // toujours ok
   }
 }
 

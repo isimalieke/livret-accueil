@@ -575,10 +575,9 @@ async function sendReply(id) {
     if (data.ok) {
       ta.value = '';
       ta.style.height = '';
-      // Recharger le panel
+      ta.disabled = false;
+      // Recharger uniquement le détail — ne pas fermer le ticket
       await reloadDetail(id);
-      // Rafraîchir la liste pour avoir les statuts à jour
-      await loadTickets();
     } else {
       alert('Erreur : ' + (data.error || 'Envoi impossible'));
       ta.disabled = false;

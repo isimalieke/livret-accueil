@@ -1050,7 +1050,7 @@
       var data = await r.json();
       if (data.ok) {
         localStorage.setItem('livret_slug', data.slug);
-        localStorage.setItem('livret_token_' + data.slug, data.token);
+        localStorage.setItem('livret_jwt_' + data.slug, data.token);
         window.location.href = '/' + data.slug + '/admin';
       } else {
         err.textContent = data.error || 'Identifiants incorrects.';

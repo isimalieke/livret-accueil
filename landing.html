@@ -555,9 +555,15 @@
       <input class="login-panel-input" id="login-email-input" type="email"
         placeholder="Adresse e-mail" autocomplete="email" autocapitalize="none"
         onkeydown="if(event.key==='Enter')document.getElementById('login-pwd-input').focus()">
-      <input class="login-panel-input" id="login-pwd-input" type="password"
-        placeholder="Mot de passe" autocomplete="current-password"
-        onkeydown="if(event.key==='Enter')doLandingLogin()" style="max-width:180px">
+      <div style="position:relative;max-width:180px;flex:0 0 180px">
+        <input class="login-panel-input" id="login-pwd-input" type="password"
+          placeholder="Mot de passe" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLandingLogin()"
+          style="width:100%;padding-right:38px;box-sizing:border-box">
+        <button type="button" onclick="togglePwd()" id="toggle-pwd-btn"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;font-size:15px;color:#999;line-height:1"
+          title="Voir le mot de passe">👁</button>
+      </div>
       <button class="login-panel-btn" onclick="doLandingLogin()">Accéder →</button>
     </div>
     <div id="login-landing-err" style="font-size:12px;color:#c00;margin-top:8px;display:none"></div>
@@ -971,6 +977,14 @@
     window.addEventListener('scroll', check, { passive: true });
     check();
   })();
+
+  function togglePwd() {
+    var inp = document.getElementById('login-pwd-input');
+    var btn = document.getElementById('toggle-pwd-btn');
+    var show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+  }
 
   var _loginPanelOpen = false;
   function toggleLoginPanel() {

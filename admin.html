@@ -215,7 +215,7 @@ input, textarea, select {
       <div style="font-size:9px;color:#C9A84C;letter-spacing:4px;text-transform:uppercase">Livret d'accueil digital</div>
     </div>
     <div style="width:32px;height:1px;background:rgba(201,168,76,0.4);margin:0 auto 20px"></div>
-    <div class="login-title">Administration</div>
+    <div class="login-title">Connexion</div>
     <input type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('pwd-input').focus()">
     <div style="position:relative;margin-bottom:12px">
       <input type="password" id="pwd-input" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPwd()" style="width:100%;padding:10px 40px 10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;margin-bottom:0">
@@ -1056,6 +1056,7 @@ async function checkPwd() {
   var email = (document.getElementById('email-input').value || '').trim();
   var pwd   = document.getElementById('pwd-input').value;
   if (!email || !pwd) {
+    document.getElementById('login-error').textContent = 'Veuillez saisir votre email et mot de passe.';
     document.getElementById('login-error').style.display = 'block';
     return;
   }

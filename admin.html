@@ -201,6 +201,17 @@ input, textarea, select {
 .reco-edit-btn { background:none; border:none; color:#C9A84C; font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0; }
 .reco-edit-btn:hover { color:#a07830; }
 
+/* ══ TOAST ══ */
+#toast {
+  position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-80px);
+  z-index:9999; padding:11px 20px; border-radius:10px; font-size:13px; font-weight:600;
+  box-shadow:0 4px 16px rgba(0,0,0,.18); transition:transform .25s ease, opacity .25s ease;
+  opacity:0; pointer-events:none; white-space:nowrap; max-width:90vw;
+}
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+#toast.success { background:#16a34a; color:#fff; }
+#toast.error   { background:#dc2626; color:#fff; }
+
 /* ══ MOBILE BOTTOM NAV ══ */
 #mobile-nav { display:none; }
 
@@ -1003,6 +1014,9 @@ input, textarea, select {
     <div class="success-msg" id="dl-msg" style="display:none"></div>
     <div class="success-msg" id="online-msg" style="display:none"></div>
   </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
 
   <!-- BOTTOM NAV MOBILE -->
   <nav id="mobile-nav">
@@ -1986,9 +2000,11 @@ async function saveSectionOnline(btn) {
   if (ok) {
     btn.textContent = '✅ Enregistré !';
     btn.classList.add('saved');
+    showToast('✅ Section enregistrée en ligne !');
   } else {
     btn.textContent = '❌ Erreur';
     btn.classList.add('err');
+    showToast('❌ Échec de l\'enregistrement.', true);
   }
   setTimeout(function() {
     btn.textContent = orig;
@@ -2014,17 +2030,26 @@ async function saveOnline(silent) {
     });
     var data = await resp.json();
     if (data.ok) {
-      if (!silent) showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
-      if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+      if (!silent) {
+        showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
+        showToast('✅ Livret enregistré en ligne !');
+        btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne';
+      }
       return true;
     } else {
-      if (!silent) showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);
-      if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+      if (!silent) {
+        showMsg('online-msg', '❌ Erreur : ' + (data.error || resp.status), true);
+        showToast('❌ Erreur : ' + (data.error || resp.status), true);
+        btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne';
+      }
       return false;
     }
   } catch(e) {
-    if (!silent) showMsg('online-msg', '❌ Impossible de contacter le serveur.', true);
-    if (!silent) { btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne'; }
+    if (!silent) {
+      showMsg('online-msg', '❌ Impossible de contacter le serveur.', true);
+      showToast('❌ Impossible de contacter le serveur.', true);
+      btn.disabled = false; btn.textContent = '☁️ Enregistrer en ligne';
+    }
     return false;
   }
 }
@@ -2487,13 +2512,26 @@ async function shareGuestLinkEmail() {
   }
 }
 
-function showMsg(id, text, isError) {
-  var el = document.getElementById(id);
+var _toastTimer = null;
+function showToast(text, isError) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  clearTimeout(_toastTimer);
   el.textContent = text;
-  el.style.display = 'block';
-  el.style.background = isError ? '#fdecea' : '#e8f5e9';
-  el.style.color      = isError ? '#b71c1c' : '#2e7d32';
-  setTimeout(function(){ el.style.display = 'none'; }, 7000);
+  el.className = isError ? 'error' : 'success';
+  el.classList.add('show');
+  _toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+
+function showMsg(id, text, isErrorOrColor) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var isErr = isErrorOrColor === true || isErrorOrColor === 'red';
+  el.textContent = text;
+  el.style.background = isErr ? '#fdecea' : '#e8f5e9';
+  el.style.color      = isErr ? '#b71c1c' : '#2e7d32';
+  el.style.display    = el.tagName === 'SPAN' ? 'inline' : 'block';
+  setTimeout(function(){ el.style.display = 'none'; }, 5000);
 }
 
 function download(filename, content) {
@@ -2638,14 +2676,7 @@ async function revokeGestionnaire(id) {
   }
 }
 
-function showMsg(id, text, color) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = text;
-  el.style.color = color || 'green';
-  el.style.display = 'inline';
-  setTimeout(function() { el.style.display = 'none'; }, 4000);
-}
+// showMsg défini plus haut (version unifiée)
 
 function esc(s) {
   if (!s) return '';

@@ -1129,16 +1129,21 @@ var _slug = (function() {
   return null;
 })();
 
-// ── Auto-login après vérification email ──
+// ── Auto-login (vérification email ou lien notification) ──
+var _pendingTicketOpen = null;
 (function() {
   var params = new URLSearchParams(window.location.search);
   var authtoken = params.get('authtoken');
   var verified  = params.get('verified');
+  var ticket    = params.get('ticket');
   if (authtoken && _slug) {
+    // Stocker le token avant la déclaration var _jwt (ligne suivante) pour qu'il soit lu
     localStorage.setItem('livret_jwt_' + _slug, authtoken);
-    // Nettoyer l'URL sans recharger
-    window.history.replaceState({}, '', window.location.pathname + (verified ? '?verified=1' : ''));
   }
+  if (ticket) _pendingTicketOpen = ticket;
+  // Nettoyer l'URL
+  var clean = window.location.pathname + (verified ? '?verified=1' : '');
+  window.history.replaceState({}, '', clean);
 })();
 
 // ── JWT ──
@@ -3021,6 +3026,16 @@ function renderTickets() {
       activeRow.classList.add('tkt-row-active');
       activeRow.after(document.getElementById('ticket-detail'));
     }
+  }
+  // Auto-ouvrir un ticket depuis un lien de notification (ex: WhatsApp)
+  if (_pendingTicketOpen) {
+    var pending = _pendingTicketOpen;
+    _pendingTicketOpen = null;
+    switchTab('tickets');
+    // Développer la section tickets si elle est fermée
+    var head = document.querySelector('#tickets-section .section-head');
+    if (head && !head.classList.contains('open')) head.click();
+    openTicket(pending);
   }
 }
 

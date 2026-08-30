@@ -829,7 +829,7 @@ async function handlePayCreate(request, env, slug, url) {
   if (!planInfo) return json({ ok: false, error: 'Plan invalide : ' + planKey }, 400);
 
   // Récupérer les infos de l'hôtel
-  const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(slug).first();
+  const hotel = await env.DB.prepare('SELECT nom FROM hotels WHERE slug = ?').bind(slug).first();
   if (!hotel) return json({ ok: false, error: 'Hôtel non trouvé' }, 404);
 
   const origin    = url.origin;
@@ -945,19 +945,23 @@ async function handlePayCallback(request, env, slug) {
   newEnds.setMonth(newEnds.getMonth() + months);
 
   await env.DB.prepare(
-    'UPDATE hotels SET subscription_status = ?, subscription_plan = ?, subscription_ends_at = ? WHERE slug = ?'
+    'UPDATE hotels SET subscription_status = ?, plan = ?, subscription_ends_at = ? WHERE slug = ?'
   ).bind('active', plan, newEnds.toISOString(), pendingSlug).run();
 
   console.log('[PayDunya] abonnement activé :', pendingSlug, plan, period, '->', newEnds.toISOString());
 
   // Notifier l'hôtelier par email
   try {
-    const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(pendingSlug).first();
-    if (hotel && hotel.email) {
+    // L'email est dans la table users (pas hotels)
+    const hotel = await env.DB.prepare('SELECT nom FROM hotels WHERE slug = ?').bind(pendingSlug).first();
+    const hotelier = await env.DB.prepare(
+      "SELECT email FROM users WHERE hotel_slug = ? AND role = 'hotelier' AND active = 1 LIMIT 1"
+    ).bind(pendingSlug).first();
+    if (hotel && hotelier && hotelier.email) {
       const planLabel = { hote:'Hôte', hotel:'Hôtel', groupe:'Groupe' }[plan] || plan;
       const periodLabel = period === 'annual' ? 'Annuel' : 'Mensuel';
       const dateStr = newEnds.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-      await resendEmail(env, hotel.email, '✅ Votre abonnement Welkomeo est actif',
+      await resendEmail(env, hotelier.email, '✅ Votre abonnement Welkomeo est actif',
         `<p>Bonjour,</p>
         <p>Votre abonnement <strong>Welkomeo ${planLabel} ${periodLabel}</strong> a été activé avec succès.</p>
         <p>Valide jusqu'au : <strong>${dateStr}</strong></p>
@@ -1057,8 +1061,26 @@ async function handleCreateTicket(request, env, slug) {
       const r = await sendTicketConfirmationToGuest(env, ticketForEmail, hotelNom, slug);
       emailSent = r && r.status === 200;
     }
+    // L'email de notification sera envoyé après génération du lien auto-login (ci-dessous)
+    // Générer un lien de connexion directe pour l'hôtelier (JWT 24h)
+    let adminLink = `https://welkomeo.com/${slug}/admin`;
+    try {
+      const hotelierUser = await env.DB.prepare(
+        "SELECT id, role, nom FROM users WHERE hotel_slug = ? AND role = 'hotelier' AND active = 1 LIMIT 1"
+      ).bind(slug).first();
+      if (hotelierUser && env.JWT_SECRET) {
+        const notifJwt = await signJWT({
+          sub: hotelierUser.id, slug,
+          role: hotelierUser.role, nom: hotelierUser.nom,
+          exp: Math.floor(Date.now() / 1000) + 86400, // 24h
+        }, env);
+        adminLink = `https://welkomeo.com/${slug}/admin?authtoken=${encodeURIComponent(notifJwt)}&ticket=${id}`;
+      }
+    } catch(e) { /* lien de base si erreur JWT */ }
+
+    // Email de notification hôtelier (avec lien auto-login)
     if (hotelEmail && env.BREVO_API_KEY) {
-      await sendTicketNotificationToHotel(env, ticketForEmail, hotelNom, hotelEmail, message, slug);
+      await sendTicketNotificationToHotel(env, ticketForEmail, hotelNom, hotelEmail, message, slug, adminLink);
     }
 
     // Notification WhatsApp hôtelier
@@ -1067,7 +1089,7 @@ async function handleCreateTicket(request, env, slug) {
       const wa = JSON.parse(waRaw);
       if (wa.phone && wa.apikey) {
         const room = ticketForEmail.guestRoom ? ` · Chambre ${ticketForEmail.guestRoom}` : '';
-        const waText = `🚨 *Nouveau ticket — ${hotelNom}*\n\nClient : ${name}${room}\nSujet : ${subject}\nMessage : ${message}\n\n👉 https://welkomeo.com/${slug}/admin`;
+        const waText = `🚨 *Nouveau ticket — ${hotelNom}*\n\nClient : ${name}${room}\nSujet : ${subject}\nMessage : ${message}\n\n👉 ${adminLink}`;
         await sendWhatsAppNotification(wa.phone, wa.apikey, waText).catch(() => {});
       }
     }
@@ -1890,13 +1912,13 @@ async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {
   return resendEmail(env, ticket.guestEmail, `Ticket #${ticket.id} créé — ${ticket.subject}`, html, `${hotelNom} <noreply@welkomeo.com>`);
 }
 
-async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, newMessage, slug) {
-  const adminUrl = `https://welkomeo.com/${slug}/gestion`;
+async function sendTicketNotificationToHotel(env, ticket, hotelNom, hotelEmail, newMessage, slug, adminUrl) {
+  const url = adminUrl || `https://welkomeo.com/${slug}/admin`;
   const html = emailBase(hotelNom, '#dc2626', '⚠️', 'Nouveau signalement reçu')
     + `<div class="greeting">Nouveau message sur le ticket #${ticket.id}</div>`
     + `<div class="intro"><strong>De :</strong> ${ticket.guestName}${ticket.guestPhone ? ' · ' + ticket.guestPhone : ''}<br><strong>Objet :</strong> ${ticket.subject}</div>`
     + `<div class="msg-box">${newMessage}</div>`
-    + `<a class="cta" href="${adminUrl}">Répondre depuis la gestion →</a>`
+    + `<a class="cta" href="${url}">Répondre depuis l'admin →</a>`
     + emailFooter(hotelNom);
   return resendEmail(env, hotelEmail, `⚠️ Ticket #${ticket.id} — ${ticket.subject}`, html, `Welkomeo <noreply@welkomeo.com>`);
 }

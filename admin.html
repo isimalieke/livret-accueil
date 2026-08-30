@@ -2697,6 +2697,13 @@ function updateTicketCounts() {
     var el = document.getElementById('cnt-' + k);
     if (el) el.textContent = counts[k];
   });
+  // Badge mobile nav
+  var badge = document.getElementById('mnav-badge');
+  if (badge) {
+    var pending = counts.received + counts.in_progress;
+    badge.textContent = pending > 99 ? '99+' : pending;
+    badge.style.display = pending > 0 ? 'block' : 'none';
+  }
 }
 
 function filterTickets(f) {

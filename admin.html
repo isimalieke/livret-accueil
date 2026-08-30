@@ -270,6 +270,42 @@ input, textarea, select {
   /* Tickets pills wrappables */
   .tkt-hdr-pill { font-size:10px !important; padding:4px 8px !important; }
 }
+
+/* ── Modale de bienvenue ── */
+#welcome-modal {
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:rgba(5,30,70,0.82); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center; padding:24px;
+}
+#welcome-modal.open { display:flex; }
+.wm-card {
+  background:#fff; border-radius:16px; padding:40px 32px 36px;
+  max-width:420px; width:100%; text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,0.25);
+  animation:wm-in .35s cubic-bezier(.22,.9,.36,1) both;
+}
+@keyframes wm-in {
+  from { opacity:0; transform:translateY(24px) scale(.97); }
+  to   { opacity:1; transform:none; }
+}
+.wm-icon { font-size:48px; margin-bottom:16px; }
+.wm-title {
+  font-size:22px; font-weight:700; color:#0f172a; margin-bottom:10px; line-height:1.25;
+}
+.wm-sub {
+  font-size:14px; color:#64748b; line-height:1.65; margin-bottom:32px;
+}
+.wm-btn {
+  display:block; width:100%; padding:15px; border-radius:10px;
+  background:#053372; color:#fff; border:none; cursor:pointer;
+  font-size:15px; font-weight:600; font-family:inherit;
+  transition:background .2s, transform .15s;
+}
+.wm-btn:hover { background:#031f47; transform:translateY(-1px); }
+.wm-skip {
+  margin-top:14px; font-size:12px; color:#94a3b8; cursor:pointer;
+  text-decoration:underline; background:none; border:none; font-family:inherit;
+}
 </style>
 </head>
 <body>
@@ -1182,11 +1218,12 @@ async function loadSubscriptionBanner() {
     loadSubscriptionBanner();
     loadGuestStay();
     loadStays();
-    // Afficher la bannière de confirmation d'email si redirection depuis verify-email
+    // Modale de bienvenue si redirection depuis verify-email
     var vp = new URLSearchParams(window.location.search);
     if (vp.get('verified') === '1') {
-      var vb = document.getElementById('verified-banner');
-      if (vb) { vb.style.display = 'flex'; window.history.replaceState({}, '', window.location.pathname); }
+      window.history.replaceState({}, '', window.location.pathname);
+      var wm = document.getElementById('welcome-modal');
+      if (wm) wm.classList.add('open');
     }
     // Paiement réussi
     if (vp.get('payment') === 'success') {
@@ -1196,6 +1233,13 @@ async function loadSubscriptionBanner() {
     }
   }
 })();
+
+// ── MODALE BIENVENUE ──
+function closeWelcomeModal(goToLivret) {
+  var wm = document.getElementById('welcome-modal');
+  if (wm) wm.classList.remove('open');
+  if (goToLivret) switchTab('livret');
+}
 
 // ── MOBILE TAB NAVIGATION ──
 var _activeTab = 'tickets';
@@ -3204,5 +3248,21 @@ async function startPayment() {
   }
 }
 </script>
+
+<!-- ── Modale de bienvenue (s'affiche une seule fois après vérification email) ── -->
+<div id="welcome-modal" role="dialog" aria-modal="true">
+  <div class="wm-card">
+    <div class="wm-icon">🎉</div>
+    <div class="wm-title">Bienvenue sur Welkomeo !</div>
+    <p class="wm-sub">
+      Votre espace est prêt.<br>
+      Configurez votre livret en 5 minutes — logo, infos, WiFi, photo de couverture —
+      et envoyez le lien à vos premiers invités.
+    </p>
+    <button class="wm-btn" onclick="closeWelcomeModal(true)">Configurer mon livret →</button>
+    <button class="wm-skip" onclick="closeWelcomeModal(false)">Je le ferai plus tard</button>
+  </div>
+</div>
+
 </body>
 </html>

@@ -320,9 +320,15 @@ input, textarea, select {
   </div>
 
   <!-- ══ BANDEAU PREMIERS PAS ══ -->
-  <div id="onboarding-banner" style="display:none;margin:12px 0 4px;background:#fffbeb;border:1px solid #f59e0b;border-radius:10px;padding:12px 16px;font-size:13px;color:#92400e;line-height:1.5">
-    <strong>📋 Première configuration</strong> — Les champs affichés en grisé sont des <em>exemples</em>. Remplacez-les par vos vraies informations avant d'enregistrer. Les données exemples ne seront jamais visibles par vos voyageurs tant que vous ne les enregistrez pas.
-    <button onclick="document.getElementById('onboarding-banner').style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#92400e;margin-top:-2px">✕</button>
+  <div id="onboarding-banner" style="display:none;margin:12px 0 8px;background:#fffbeb;border:1px solid #f59e0b;border-radius:12px;padding:14px 16px;font-size:13px;color:#78350f">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-weight:700;font-size:14px">🚀 Premiers pas — <span id="ob-count">0/5</span> étapes</div>
+      <button onclick="dismissOnboarding()" style="background:none;border:none;cursor:pointer;font-size:16px;color:#92400e;padding:0;line-height:1" title="Masquer">✕</button>
+    </div>
+    <div style="background:#f59e0b22;border-radius:6px;height:6px;margin-bottom:12px;overflow:hidden">
+      <div id="ob-bar" style="background:#f59e0b;height:6px;border-radius:6px;transition:width .4s ease;width:0%"></div>
+    </div>
+    <div id="ob-steps" style="display:flex;flex-direction:column;gap:6px"></div>
   </div>
 
   <div id="tab-livret" class="tab-group">
@@ -330,7 +336,7 @@ input, textarea, select {
   <div class="section-group">Identité de l'établissement</div>
 
   <!-- 1. ÉTABLISSEMENT -->
-  <div class="section">
+  <div class="section" id="section-etablissement">
     <div class="section-head open" onclick="toggle(this)">
       <h2>🏨 Établissement</h2><span class="chevron">▼</span>
     </div>
@@ -379,7 +385,7 @@ input, textarea, select {
   </div>
 
   <!-- 2. BIENVENUE -->
-  <div class="section">
+  <div class="section" id="section-bienvenue">
     <div class="section-head" onclick="toggle(this)">
       <h2>👋 Message de bienvenue</h2><span class="chevron">▼</span>
     </div>
@@ -414,7 +420,7 @@ input, textarea, select {
   <div class="section-group">Votre séjour</div>
 
   <!-- 3a. WIFI -->
-  <div class="section">
+  <div class="section" id="section-wifi">
     <div class="section-head" onclick="toggle(this)">
       <h2>📶 WiFi</h2><span class="chevron">▼</span>
     </div>
@@ -817,7 +823,7 @@ input, textarea, select {
   </div>
 
   <!-- ACCÈS VOYAGEUR -->
-  <div class="section">
+  <div class="section" id="section-acces">
     <div class="section-head" onclick="toggle(this)">
       <h2>🔐 Accès voyageur</h2><span class="chevron">▼</span>
     </div>
@@ -1529,6 +1535,118 @@ function ambassadeTpl(d) {
        + '<td><button class="btn-del" onclick="delRow(this)">×</button></td>';
 }
 
+// ── ONBOARDING CHECKLIST ──
+function initOnboarding(C) {
+  var slug = _slug || '';
+  if (localStorage.getItem('welkomeo_ob_done_' + slug)) return; // définitivement masqué
+
+  var h = C.hotel || {};
+  var pr = C.pratique || {};
+  var bv = C.bienvenue || {};
+
+  var EXAMPLE_STRINGS = ['Teranga', 'Manguiers'];
+  function isExample(s) {
+    if (!s || !s.trim()) return true;
+    return EXAMPLE_STRINGS.some(function(e) { return s.indexOf(e) !== -1; });
+  }
+
+  var steps = [
+    {
+      label: 'Infos établissement',
+      icon: '🏨',
+      done: !isExample(h.nom) && !!h.nom,
+      sectionId: 'section-etablissement',
+      tab: 'livret',
+      hint: 'Renseignez le nom et l\'adresse réels de votre établissement.'
+    },
+    {
+      label: 'Photo de couverture',
+      icon: '📸',
+      done: !!(h.cover_photo && h.cover_photo.length > 0),
+      sectionId: 'section-etablissement',
+      tab: 'livret',
+      hint: 'Ajoutez une photo de votre hébergement (section Établissement).'
+    },
+    {
+      label: 'Message de bienvenue',
+      icon: '👋',
+      done: !isExample(bv.texte_fr),
+      sectionId: 'section-bienvenue',
+      tab: 'livret',
+      hint: 'Personnalisez votre message d\'accueil en français.'
+    },
+    {
+      label: 'WiFi configuré',
+      icon: '📶',
+      done: !isExample(pr.wifi_reseau),
+      sectionId: 'section-wifi',
+      tab: 'livret',
+      hint: 'Indiquez le nom du réseau et le mot de passe WiFi réels.'
+    },
+    {
+      label: 'Premier enregistrement',
+      icon: '☁️',
+      done: !!localStorage.getItem('welkomeo_saved_' + slug),
+      sectionId: null,
+      tab: null,
+      hint: 'Cliquez "Enregistrer en ligne" pour publier votre livret.'
+    }
+  ];
+
+  var done = steps.filter(function(s) { return s.done; }).length;
+
+  // Si tout est fait, masquer définitivement
+  if (done === steps.length) {
+    localStorage.setItem('welkomeo_ob_done_' + slug, '1');
+    return;
+  }
+
+  var banner = document.getElementById('onboarding-banner');
+  if (!banner) return;
+
+  document.getElementById('ob-count').textContent = done + '/5';
+  document.getElementById('ob-bar').style.width = (done / steps.length * 100) + '%';
+
+  var stepsHtml = steps.map(function(s) {
+    var clickAttr = '';
+    if (!s.done && s.sectionId) {
+      clickAttr = ' onclick="obGoTo(\'' + s.sectionId + '\',\'' + (s.tab || 'livret') + '\')" style="cursor:pointer"';
+    }
+    return '<div' + clickAttr + ' style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:' + (s.done ? '#d1fae522' : '#fff8') + ';border:1px solid ' + (s.done ? '#6ee7b7' : '#fcd34d') + '">'
+      + '<span style="font-size:16px;flex-shrink:0">' + (s.done ? '✅' : '⭕') + '</span>'
+      + '<span style="flex:1;font-size:12px;font-weight:' + (s.done ? '400' : '600') + ';color:' + (s.done ? '#065f46' : '#78350f') + '">'
+      + s.icon + ' ' + s.label
+      + (s.done ? '' : '<div style="font-size:11px;font-weight:400;color:#92400e;margin-top:1px">' + s.hint + '</div>')
+      + '</span>'
+      + (!s.done && s.sectionId ? '<span style="font-size:11px;color:#d97706;font-weight:600">→</span>' : '')
+      + '</div>';
+  }).join('');
+
+  document.getElementById('ob-steps').innerHTML = stepsHtml;
+  banner.style.display = 'block';
+}
+
+function obGoTo(sectionId, tab) {
+  // Sur mobile, switcher l'onglet livret
+  if (window.innerWidth <= 700 && tab) switchTab(tab);
+  var el = document.getElementById(sectionId);
+  if (!el) return;
+  // Ouvrir la section si fermée
+  var head = el.querySelector('.section-head');
+  var body = el.querySelector('.section-body');
+  if (head && body && !body.classList.contains('open')) {
+    body.classList.add('open'); body.style.display = 'block';
+    head.classList.add('open');
+  }
+  setTimeout(function() { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+}
+
+function dismissOnboarding() {
+  var banner = document.getElementById('onboarding-banner');
+  if (banner) banner.style.display = 'none';
+  if (_slug) localStorage.setItem('welkomeo_ob_done_' + _slug, '1');
+}
+
 // ── INIT DEPUIS CONFIG EXISTANT ──
 function sv(id, val) { var el = document.getElementById(id); if(el && val !== undefined) el.value = val; }
 
@@ -1536,11 +1654,8 @@ function initForm() {
   if (typeof CONFIG === 'undefined') return;
   var C = CONFIG; var h = C.hotel;
 
-  // Bandeau premiers pas : affiché si le nom de l'hôtel n'est pas encore renseigné
-  if (!h.nom || !h.nom.trim()) {
-    var banner = document.getElementById('onboarding-banner');
-    if (banner) banner.style.display = 'block';
-  }
+  // Checklist premiers pas
+  initOnboarding(C);
 
   // Établissement
   sv('h-nom', h.nom); sv('h-nom-court', h.nom_court);
@@ -2030,6 +2145,7 @@ async function saveOnline(silent) {
     });
     var data = await resp.json();
     if (data.ok) {
+      if (_slug) localStorage.setItem('welkomeo_saved_' + _slug, '1');
       if (!silent) {
         showMsg('online-msg', '✅ Livret mis à jour en ligne — actif immédiatement pour les voyageurs.');
         showToast('✅ Livret enregistré en ligne !');

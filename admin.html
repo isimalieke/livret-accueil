@@ -950,6 +950,39 @@ input, textarea, select {
     </div>
   </div>
 
+  <!-- NOTIFICATIONS WHATSAPP -->
+  <div class="section" id="wa-section">
+    <div class="section-head" onclick="toggle(this); loadWASettings()">
+      <h2>📲 Notifications WhatsApp</h2><span class="chevron">▼</span>
+    </div>
+    <div class="section-body" id="wa-body">
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px;line-height:1.6">
+        Recevez un message WhatsApp dès qu'un client soumet un ticket.<br>
+        Fonctionne via <strong>CallMeBot</strong> (gratuit). Configuration en 2 minutes :
+      </p>
+      <ol style="font-size:13px;color:#374151;line-height:2;padding-left:18px;margin-bottom:20px">
+        <li>Enregistrez le contact <strong>+34 644 59 72 87</strong> dans votre téléphone (nom : CallMeBot).</li>
+        <li>Envoyez-lui le message WhatsApp : <strong>I allow callmebot to send me messages</strong></li>
+        <li>Vous recevrez votre <strong>clé API</strong> en réponse.</li>
+      </ol>
+      <div class="row3">
+        <div class="field" style="margin-bottom:10px">
+          <label>Votre numéro WhatsApp <span style="color:#9ca3af;font-weight:400">(avec indicatif, sans +)</span></label>
+          <input type="tel" id="wa-phone" placeholder="221781234567" style="font-family:monospace">
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Clé API CallMeBot</label>
+          <input type="text" id="wa-apikey" placeholder="123456" style="font-family:monospace">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <button onclick="saveWASettings(false)" style="background:var(--blue);color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;cursor:pointer;font-weight:600">Enregistrer</button>
+        <button onclick="saveWASettings(true)" style="background:#25D366;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;cursor:pointer;font-weight:600">Enregistrer & tester</button>
+      </div>
+      <div id="wa-msg" style="font-size:13px;margin-top:10px;display:none"></div>
+    </div>
+  </div>
+
   </div><!-- /tab-plus -->
 
   <div id="tab-tickets" class="tab-group">
@@ -2666,6 +2699,52 @@ function download(filename, content) {
 // ─────────────────────────────────────────────
 // ÉQUIPE — GESTIONNAIRES
 // ─────────────────────────────────────────────
+// ── WHATSAPP NOTIFICATIONS ──
+var _waLoaded = false;
+async function loadWASettings() {
+  if (_waLoaded) return;
+  if (!document.getElementById('wa-body').classList.contains('open')) return;
+  _waLoaded = true;
+  try {
+    var r = await fetch('/' + _slug + '/whatsapp-settings', {
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    var d = await r.json();
+    if (d.ok) {
+      document.getElementById('wa-phone').value  = d.settings.phone  || '';
+      document.getElementById('wa-apikey').value = d.settings.apikey || '';
+    }
+  } catch(e) {}
+}
+
+async function saveWASettings(withTest) {
+  var phone  = document.getElementById('wa-phone').value.trim();
+  var apikey = document.getElementById('wa-apikey').value.trim();
+  var msg    = document.getElementById('wa-msg');
+  msg.style.display = 'none';
+  try {
+    var r = await fetch('/' + _slug + '/whatsapp-settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+      body: JSON.stringify({ phone: phone, apikey: apikey, test: withTest })
+    });
+    var d = await r.json();
+    if (d.ok) {
+      msg.style.color = '#15803d';
+      msg.textContent = d.testSent
+        ? '✅ Paramètres enregistrés. Message de test envoyé sur WhatsApp !'
+        : '✅ Paramètres enregistrés.';
+    } else {
+      msg.style.color = '#c00';
+      msg.textContent = d.error || 'Erreur.';
+    }
+  } catch(e) {
+    msg.style.color = '#c00';
+    msg.textContent = 'Erreur réseau.';
+  }
+  msg.style.display = 'block';
+}
+
 // ── STATISTIQUES ──
 var _statsLoaded = false;
 async function loadStats() {

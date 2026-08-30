@@ -183,6 +183,12 @@ export default {
       return handleSendGuestLink(request, env, slug, url);
     }
 
+    // ── /{slug}/whatsapp-settings ──
+    if (sub === 'whatsapp-settings') {
+      if (request.method === 'GET')  return handleGetWASettings(request, env, slug);
+      if (request.method === 'POST') return handleSaveWASettings(request, env, slug);
+    }
+
     // ── /{slug}/guest-stay (legacy KV — conservé pour compat) ──
     if (sub === 'guest-stay' && request.method === 'GET') {
       return handleGetGuestStay(request, env, slug);
@@ -1055,6 +1061,17 @@ async function handleCreateTicket(request, env, slug) {
       await sendTicketNotificationToHotel(env, ticketForEmail, hotelNom, hotelEmail, message, slug);
     }
 
+    // Notification WhatsApp hôtelier
+    const waRaw = await env.CONFIG_KV.get('hotel:' + slug + ':wa_settings');
+    if (waRaw) {
+      const wa = JSON.parse(waRaw);
+      if (wa.phone && wa.apikey) {
+        const room = ticketForEmail.guestRoom ? ` · Chambre ${ticketForEmail.guestRoom}` : '';
+        const waText = `🚨 *Nouveau ticket — ${hotelNom}*\n\nClient : ${name}${room}\nSujet : ${subject}\nMessage : ${message}\n\n👉 https://welkomeo.com/${slug}/admin`;
+        await sendWhatsAppNotification(wa.phone, wa.apikey, waText).catch(() => {});
+      }
+    }
+
     return json({ ok: true, id, ticketUrl: '/' + slug + '/ticket/' + id, emailSent });
   } catch (e) {
     return json({ ok: false, error: String(e) }, 500);
@@ -1827,6 +1844,39 @@ async function resendEmail(env, to, subject, html, from) {
     }
     return { status: r.status };
   } catch (e) { return { error: String(e) }; }
+}
+
+// ── WhatsApp (CallMeBot) ──────────────────────────────────────────────────────
+
+async function sendWhatsAppNotification(phone, apikey, text) {
+  const url = 'https://api.callmebot.com/whatsapp.php?phone='
+    + encodeURIComponent(phone)
+    + '&text=' + encodeURIComponent(text)
+    + '&apikey=' + encodeURIComponent(apikey);
+  return fetch(url, { method: 'GET' });
+}
+
+async function handleGetWASettings(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier', 'gestionnaire']);
+  if (!auth.ok) return auth.response;
+  const raw = await env.CONFIG_KV.get('hotel:' + slug + ':wa_settings');
+  const settings = raw ? JSON.parse(raw) : { phone: '', apikey: '' };
+  return json({ ok: true, settings });
+}
+
+async function handleSaveWASettings(request, env, slug) {
+  const auth = await requireAuth(request, env, slug, ['hotelier', 'gestionnaire']);
+  if (!auth.ok) return auth.response;
+  const { phone, apikey, test } = await request.json();
+  const clean = { phone: (phone || '').trim(), apikey: (apikey || '').trim() };
+  await env.CONFIG_KV.put('hotel:' + slug + ':wa_settings', JSON.stringify(clean));
+  if (test && clean.phone && clean.apikey) {
+    const msg = '✅ Welkomeo connecté ! Vous recevrez les alertes de nouveaux tickets ici.';
+    const r = await sendWhatsAppNotification(clean.phone, clean.apikey, msg).catch(() => null);
+    const ok = r && r.ok;
+    return json({ ok: true, saved: true, testSent: ok });
+  }
+  return json({ ok: true, saved: true });
 }
 
 async function sendTicketConfirmationToGuest(env, ticket, hotelNom, slug) {

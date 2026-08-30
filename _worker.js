@@ -796,16 +796,12 @@ async function handleConfig(request, env, slug) {
 // ═════════════════════════════════════════════
 
 const PAYDUNYA_PLANS = {
-  particulier_monthly: { amount: 4900,   label: 'Welkomeo Particulier — Mensuel', plan: 'particulier', period: 'monthly',  months: 1  },
-  particulier_annual:  { amount: 39000,  label: 'Welkomeo Particulier — Annuel',  plan: 'particulier', period: 'annual',   months: 12 },
-  starter_monthly:     { amount: 9900,   label: 'Welkomeo Starter — Mensuel',     plan: 'starter',     period: 'monthly',  months: 1  },
-  starter_annual:      { amount: 99000,  label: 'Welkomeo Starter — Annuel',      plan: 'starter',     period: 'annual',   months: 12 },
-  essentiel_monthly: { amount: 24900,  label: 'Welkomeo Essentiel — Mensuel', plan: 'essentiel', period: 'monthly',  months: 1  },
-  essentiel_annual:  { amount: 249000, label: 'Welkomeo Essentiel — Annuel',  plan: 'essentiel', period: 'annual',   months: 12 },
-  pro_monthly:       { amount: 49900,  label: 'Welkomeo Pro — Mensuel',       plan: 'pro',       period: 'monthly',  months: 1  },
-  pro_annual:        { amount: 499000, label: 'Welkomeo Pro — Annuel',        plan: 'pro',       period: 'annual',   months: 12 },
-  premium_monthly:   { amount: 99900,  label: 'Welkomeo Premium — Mensuel',   plan: 'premium',   period: 'monthly',  months: 1  },
-  premium_annual:    { amount: 999000, label: 'Welkomeo Premium — Annuel',    plan: 'premium',   period: 'annual',   months: 12 },
+  hote_monthly:   { amount: 7500,   label: 'Welkomeo Hôte — Mensuel',   plan: 'hote',   period: 'monthly', months: 1  },
+  hote_annual:    { amount: 75000,  label: 'Welkomeo Hôte — Annuel',    plan: 'hote',   period: 'annual',  months: 12 },
+  hotel_monthly:  { amount: 15000,  label: 'Welkomeo Hôtel — Mensuel',  plan: 'hotel',  period: 'monthly', months: 1  },
+  hotel_annual:   { amount: 150000, label: 'Welkomeo Hôtel — Annuel',   plan: 'hotel',  period: 'annual',  months: 12 },
+  groupe_monthly: { amount: 29900,  label: 'Welkomeo Groupe — Mensuel', plan: 'groupe', period: 'monthly', months: 1  },
+  groupe_annual:  { amount: 299000, label: 'Welkomeo Groupe — Annuel',  plan: 'groupe', period: 'annual',  months: 12 },
 };
 
 async function handlePayCreate(request, env, slug, url) {
@@ -954,7 +950,7 @@ async function handlePayCallback(request, env, slug) {
   try {
     const hotel = await env.DB.prepare('SELECT nom, email FROM hotels WHERE slug = ?').bind(pendingSlug).first();
     if (hotel && hotel.email) {
-      const planLabel = { particulier:'Particulier', starter:'Starter', essentiel:'Essentiel', pro:'Pro', premium:'Premium' }[plan] || plan;
+      const planLabel = { hote:'Hôte', hotel:'Hôtel', groupe:'Groupe' }[plan] || plan;
       const periodLabel = period === 'annual' ? 'Annuel' : 'Mensuel';
       const dateStr = newEnds.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
       await resendEmail(env, hotel.email, '✅ Votre abonnement Welkomeo est actif',

@@ -1074,7 +1074,7 @@ var _slug = (function() {
 
 // ── JWT ──
 var _jwt = _slug ? (localStorage.getItem('livret_jwt_' + _slug) || '') : '';
-var _currentPlan = 'essentiel'; // mis à jour après fetch /subscription
+var _currentPlan = 'hotel'; // mis à jour après fetch /subscription
 
 // ── ENDPOINT CONFIG ──
 var _configEndpoint = _slug ? ('/' + _slug + '/config.js') : '/config.js';
@@ -1107,8 +1107,8 @@ async function loadSubscriptionBanner() {
     var banner = document.getElementById('sub-banner');
     var ico    = document.getElementById('sub-ico');
     var txt    = document.getElementById('sub-txt');
-    _currentPlan = d.plan || 'essentiel';
-    var planLabels = { starter:'Starter', essentiel:'Essentiel', pro:'Pro', premium:'Premium' };
+    _currentPlan = d.plan || 'hotel';
+    var planLabels = { hote:'Hôte', hotel:'Hôtel', groupe:'Groupe' };
     var planLabel = planLabels[d.plan] || d.plan;
 
     var payBtn = document.getElementById('sub-pay-btn');
@@ -1154,6 +1154,12 @@ async function loadSubscriptionBanner() {
     if (vp.get('verified') === '1') {
       var vb = document.getElementById('verified-banner');
       if (vb) { vb.style.display = 'flex'; window.history.replaceState({}, '', window.location.pathname); }
+    }
+    // Paiement réussi
+    if (vp.get('payment') === 'success') {
+      window.history.replaceState({}, '', window.location.pathname);
+      showToast('🎉 Paiement confirmé ! Votre abonnement est actif.');
+      setTimeout(function() { loadSubscriptionBanner(); }, 1500);
     }
   }
 })();
@@ -1505,8 +1511,8 @@ function urgenceTpl(d) {
 }
 function cliniqueTpl(d) { return ficheTpl(Object.assign({icon:'🏥'}, d)); // alias compat
 }
-var PLAN_ROOM_LIMITS = { starter:3, essentiel:10, pro:20, premium:Infinity };
-var PLAN_UPGRADE_LABEL = { starter:'Starter (max 3)', essentiel:'Essentiel (max 10)', pro:'Pro (max 20)' };
+var PLAN_ROOM_LIMITS = { hote:1, hotel:5, groupe:Infinity };
+var PLAN_UPGRADE_LABEL = { hote:'Hôte (1 établissement)', hotel:'Hôtel (max 5)' };
 
 function addChambreWithLimit() {
   var limit = PLAN_ROOM_LIMITS[_currentPlan] || Infinity;
@@ -3022,33 +3028,26 @@ window.applyConfig = function() { initForm(); };
     </div>
 
     <div class="pay-plans">
-      <div class="pay-plan-card" id="plan-starter" onclick="setPayPlan('starter')">
-        <div class="plan-name">Starter</div>
-        <div class="plan-desc">1 – 3 chambres</div>
-        <div class="plan-price" id="price-starter">9 900</div>
+      <div class="pay-plan-card" id="plan-hote" onclick="setPayPlan('hote')">
+        <div class="plan-name">🏠 Hôte</div>
+        <div class="plan-desc">1 établissement</div>
+        <div class="plan-price" id="price-hote">7 500</div>
         <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-starter"></div>
+        <div class="plan-saving" id="saving-hote"></div>
       </div>
-      <div class="pay-plan-card selected" id="plan-essentiel" onclick="setPayPlan('essentiel')">
-        <div class="plan-name">Essentiel</div>
-        <div class="plan-desc">4 – 10 chambres</div>
-        <div class="plan-price" id="price-essentiel">24 900</div>
+      <div class="pay-plan-card selected" id="plan-hotel" onclick="setPayPlan('hotel')">
+        <div class="plan-name">🏨 Hôtel</div>
+        <div class="plan-desc">Jusqu'à 5 établissements</div>
+        <div class="plan-price" id="price-hotel">15 000</div>
         <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-essentiel"></div>
+        <div class="plan-saving" id="saving-hotel"></div>
       </div>
-      <div class="pay-plan-card" id="plan-pro" onclick="setPayPlan('pro')">
-        <div class="plan-name">Pro</div>
-        <div class="plan-desc">11 – 20 chambres</div>
-        <div class="plan-price" id="price-pro">49 900</div>
+      <div class="pay-plan-card" id="plan-groupe" onclick="setPayPlan('groupe')">
+        <div class="plan-name">🏢 Groupe</div>
+        <div class="plan-desc">Établissements illimités</div>
+        <div class="plan-price" id="price-groupe">29 900</div>
         <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-pro"></div>
-      </div>
-      <div class="pay-plan-card" id="plan-premium" onclick="setPayPlan('premium')">
-        <div class="plan-name">Premium</div>
-        <div class="plan-desc">21 chambres et +</div>
-        <div class="plan-price" id="price-premium">99 900</div>
-        <div class="plan-period">FCFA / mois</div>
-        <div class="plan-saving" id="saving-premium"></div>
+        <div class="plan-saving" id="saving-groupe"></div>
       </div>
     </div>
 
@@ -3059,13 +3058,11 @@ window.applyConfig = function() { initForm(); };
 
 <script>
 var _payPeriod = 'monthly';
-var _payPlan   = 'essentiel';
+var _payPlan   = 'hotel';
 var PAY_PRICES  = {
-  particulier: { monthly: 4900,   annual: 39000   },
-  starter:     { monthly: 9900,   annual: 99000   },
-  essentiel:   { monthly: 24900,  annual: 249000  },
-  pro:         { monthly: 49900,  annual: 499000  },
-  premium:     { monthly: 99900,  annual: 999000  },
+  hote:   { monthly: 7500,   annual: 75000   },
+  hotel:  { monthly: 15000,  annual: 150000  },
+  groupe: { monthly: 29900,  annual: 299000  },
 };
 
 function openPayModal() {
@@ -3084,12 +3081,12 @@ function setPayPeriod(p) {
 }
 function setPayPlan(p) {
   _payPlan = p;
-  ['starter','essentiel','pro','premium'].forEach(function(n) {
+  ['hote','hotel','groupe'].forEach(function(n) {
     document.getElementById('plan-' + n).classList.toggle('selected', p === n);
   });
 }
 function updatePayUI() {
-  ['starter','essentiel','pro','premium'].forEach(function(p) {
+  ['hote','hotel','groupe'].forEach(function(p) {
     var monthly = PAY_PRICES[p].monthly;
     var annual  = PAY_PRICES[p].annual;
     if (_payPeriod === 'monthly') {
@@ -3108,14 +3105,14 @@ async function startPayment() {
   btn.textContent = '⏳ Connexion à PayDunya…';
   msg.textContent = '';
   try {
-    var r = await fetch('/' + _slug + '/pay/initiate', {
+    var r = await fetch('/' + _slug + '/pay/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
       body: JSON.stringify({ plan: _payPlan, period: _payPeriod }),
     });
     var d = await r.json();
-    if (d.ok && d.invoice && d.invoice.url) {
-      window.location.href = d.invoice.url;
+    if (d.ok && d.redirect_url) {
+      window.location.href = d.redirect_url;
     } else {
       msg.textContent = '❌ ' + (d.error || 'Erreur lors de la création du paiement.');
       btn.disabled = false;

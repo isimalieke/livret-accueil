@@ -18,9 +18,9 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: system-ui, sans-serif; background: var(--gray); color: var(--text); font-size:14px; min-height:100vh; }
 
-.page { max-width:700px; margin:0 auto; padding:32px 16px 60px; }
+.page { max-width:860px; margin:0 auto; padding:32px 16px 60px; }
 
-.header { text-align:center; margin-bottom:32px; }
+.header { text-align:center; margin-bottom:28px; }
 .header .logo { font-size:36px; margin-bottom:8px; }
 .header h1 { font-size:22px; font-weight:700; color:var(--blue); }
 .header p { color:var(--muted); font-size:14px; margin-top:6px; }
@@ -39,22 +39,24 @@ input:checked + .tgl-slider { background:var(--blue); }
 input:checked + .tgl-slider:before { transform:translateX(24px); }
 
 /* Plans */
-.plans { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-@media(max-width:480px){ .plans { grid-template-columns:1fr; } }
+.plans { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+@media(max-width:600px){ .plans { grid-template-columns:1fr; } }
+@media(min-width:601px) and (max-width:800px){ .plans { grid-template-columns:1fr 1fr; } }
 
-.plan-card { background:white; border-radius:14px; border:2px solid var(--border); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,.05); transition:border-color .2s, box-shadow .2s; }
+.plan-card { background:white; border-radius:14px; border:2px solid var(--border); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,.05); transition:border-color .2s, box-shadow .2s; display:flex; flex-direction:column; }
 .plan-card:hover { border-color:var(--gold); box-shadow:0 4px 16px rgba(0,0,0,.09); }
 .plan-card.recommended { border-color:var(--blue); }
 .plan-badge { display:inline-block; background:var(--blue); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; margin-bottom:10px; letter-spacing:.5px; }
-.plan-name { font-size:18px; font-weight:700; color:var(--blue); }
+.plan-name { font-size:20px; font-weight:700; color:var(--blue); }
 .plan-sub { font-size:12px; color:var(--muted); margin-top:2px; margin-bottom:14px; }
-.plan-price { font-size:28px; font-weight:800; color:var(--text); }
+.plan-price { font-size:26px; font-weight:800; color:var(--text); }
 .plan-price span { font-size:13px; font-weight:400; color:var(--muted); }
-.plan-features { margin:14px 0 20px; }
+.plan-features { margin:14px 0 20px; flex:1; }
 .plan-features li { list-style:none; padding:4px 0; font-size:13px; display:flex; align-items:baseline; gap:6px; }
 .plan-features li::before { content:"✓"; color:#2e7d32; font-weight:700; flex-shrink:0; }
-.btn-pay { display:block; width:100%; padding:12px; background:var(--blue); color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; text-align:center; transition:background .15s; }
-.btn-pay:hover { background:#0A4090; }
+.btn-pay { display:block; width:100%; padding:12px; background:var(--blue); color:white; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; text-align:center; transition:background .15s; margin-top:auto; }
+.btn-pay:hover { background:#333; }
+.btn-pay:disabled { opacity:.6; cursor:not-allowed; }
 .plan-card.recommended .btn-pay { background:var(--gold); color:#3b2800; }
 .plan-card.recommended .btn-pay:hover { background:#b8932a; }
 
@@ -78,7 +80,7 @@ input:checked + .tgl-slider:before { transform:translateX(24px); }
   </div>
 
   <div class="toggle-wrap">
-    <span class="toggle-label" id="lbl-mensuel">Mensuel</span>
+    <span class="toggle-label active" id="lbl-mensuel">Mensuel</span>
     <label class="tgl">
       <input type="checkbox" id="tgl-annual" onchange="switchPeriod(this)">
       <span class="tgl-slider"></span>
@@ -87,35 +89,53 @@ input:checked + .tgl-slider:before { transform:translateX(24px); }
   </div>
 
   <div class="plans">
-    <!-- Small -->
-    <div class="plan-card" id="card-small">
-      <div class="plan-name">Small</div>
-      <div class="plan-sub">1 logement</div>
-      <div class="plan-price" id="price-small">7 500 F <span>/ mois</span></div>
+    <!-- Hôte -->
+    <div class="plan-card" id="card-hote">
+      <div class="plan-name">🏠 Hôte</div>
+      <div class="plan-sub">1 établissement</div>
+      <div class="plan-price" id="price-hote">7 500 F <span>/ mois</span></div>
       <ul class="plan-features">
-        <li>1 livret d'accueil en ligne</li>
+        <li>1 livret d'accueil numérique</li>
         <li>Toutes les sections</li>
-        <li>Ticket d'incident</li>
-        <li>Rappel check-out automatique</li>
+        <li>Tickets d'incident</li>
+        <li>Accès voyageur sécurisé</li>
         <li>Support email</li>
       </ul>
-      <button class="btn-pay" onclick="pay('small')">Payer maintenant</button>
+      <button class="btn-pay" id="btn-hote" onclick="pay('hote')">Payer maintenant</button>
     </div>
 
-    <!-- Large -->
-    <div class="plan-card recommended" id="card-large">
+    <!-- Hôtel -->
+    <div class="plan-card recommended" id="card-hotel">
       <div class="plan-badge">RECOMMANDÉ</div>
-      <div class="plan-name">Large</div>
-      <div class="plan-sub">Jusqu'à 5 logements</div>
-      <div class="plan-price" id="price-large">15 000 F <span>/ mois</span></div>
+      <div class="plan-name">🏨 Hôtel</div>
+      <div class="plan-sub">Jusqu'à 5 établissements</div>
+      <div class="plan-price" id="price-hotel">15 000 F <span>/ mois</span></div>
       <ul class="plan-features">
         <li>5 livrets indépendants</li>
         <li>Toutes les sections</li>
-        <li>Ticket d'incident</li>
-        <li>Rappel check-out automatique</li>
+        <li>Tickets d'incident</li>
+        <li>Accès voyageur sécurisé</li>
+        <li>Multi-gestionnaires</li>
         <li>Support prioritaire</li>
       </ul>
-      <button class="btn-pay" onclick="pay('large')">Payer maintenant</button>
+      <button class="btn-pay" id="btn-hotel" onclick="pay('hotel')">Payer maintenant</button>
+    </div>
+
+    <!-- Groupe -->
+    <div class="plan-card" id="card-groupe">
+      <div class="plan-name">🏢 Groupe</div>
+      <div class="plan-sub">Établissements illimités</div>
+      <div class="plan-price" id="price-groupe">29 900 F <span>/ mois</span></div>
+      <ul class="plan-features">
+        <li>Livrets illimités</li>
+        <li>Toutes les sections</li>
+        <li>Tickets d'incident</li>
+        <li>Accès voyageur sécurisé</li>
+        <li>Multi-gestionnaires</li>
+        <li>Tableau de bord centralisé</li>
+        <li>Support dédié</li>
+      </ul>
+      <button class="btn-pay" id="btn-groupe" onclick="pay('groupe')">Payer maintenant</button>
     </div>
   </div>
 
@@ -136,12 +156,13 @@ var _jwt  = '';
 var _annual = false;
 
 var PRICES = {
-  small:  { monthly: 7500,  annual: 75000  },
-  large:  { monthly: 15000, annual: 150000 }
+  hote:   { monthly: 7500,   annual: 75000  },
+  hotel:  { monthly: 15000,  annual: 150000 },
+  groupe: { monthly: 29900,  annual: 299000 }
 };
 
 function formatF(n) {
-  return n.toLocaleString('fr-FR').replace(/ /g, ' ') + ' F';
+  return n.toLocaleString('fr-FR') + ' F';
 }
 
 function switchPeriod(tgl) {
@@ -149,7 +170,7 @@ function switchPeriod(tgl) {
   document.getElementById('lbl-mensuel').className = 'toggle-label' + (_annual ? ' inactive' : ' active');
   document.getElementById('lbl-annuel').className  = 'toggle-label' + (_annual ? ' active'   : ' inactive');
 
-  ['small','large'].forEach(function(plan) {
+  ['hote','hotel','groupe'].forEach(function(plan) {
     var p = _annual ? PRICES[plan].annual : PRICES[plan].monthly;
     var suffix = _annual ? '/ an' : '/ mois';
     document.getElementById('price-' + plan).innerHTML = formatF(p) + ' <span>' + suffix + '</span>';
@@ -170,14 +191,12 @@ async function pay(plan) {
     return;
   }
 
-  var endpoint = '/' + _slug + '/pay/create';
   var period = _annual ? 'annual' : 'monthly';
-
   var btns = document.querySelectorAll('.btn-pay');
   btns.forEach(function(b){ b.disabled = true; b.textContent = '⏳ Redirection…'; });
 
   try {
-    var resp = await fetch(endpoint, {
+    var resp = await fetch('/' + _slug + '/pay/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
       body: JSON.stringify({ plan: plan, period: period })
@@ -195,22 +214,21 @@ async function pay(plan) {
   }
 }
 
-// Initialisation : récupérer slug + jwt depuis URL et sessionStorage
+// Initialisation
 (function init() {
-  // Récupérer le slug depuis le path (/{slug}/paiement)
   var parts = window.location.pathname.split('/').filter(Boolean);
   _slug = parts[0] || '';
   _jwt  = sessionStorage.getItem('welkomeo_jwt') || localStorage.getItem('welkomeo_jwt_' + _slug) || '';
 
   document.getElementById('back-link').href = '/' + _slug + '/admin';
 
-  // Activer le label mensuel par défaut
-  document.getElementById('lbl-mensuel').classList.add('active');
-
-  // Vérifier si annual suggéré dans l'URL
   if (window.location.search.includes('annual')) {
     document.getElementById('tgl-annual').checked = true;
     switchPeriod(document.getElementById('tgl-annual'));
+  }
+
+  if (window.location.search.includes('cancelled=1')) {
+    showMsg('Paiement annulé. Vous pouvez réessayer quand vous voulez.', true);
   }
 })();
 </script>

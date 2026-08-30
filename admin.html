@@ -200,6 +200,65 @@ input, textarea, select {
 .reco-del:hover { color:#e74c3c; }
 .reco-edit-btn { background:none; border:none; color:#C9A84C; font-size:16px; cursor:pointer; padding:2px 4px; flex-shrink:0; }
 .reco-edit-btn:hover { color:#a07830; }
+
+/* ══ MOBILE BOTTOM NAV ══ */
+#mobile-nav { display:none; }
+
+@media (max-width:700px) {
+  /* Bottom nav */
+  #mobile-nav {
+    display:flex; position:fixed; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid #e2e8f0;
+    z-index:200; padding-bottom:env(safe-area-inset-bottom);
+    box-shadow:0 -2px 12px rgba(0,0,0,.08);
+  }
+  .mnav-btn {
+    flex:1; display:flex; flex-direction:column; align-items:center;
+    gap:2px; padding:8px 4px 6px; background:none; border:none;
+    font-size:10px; color:#64748b; cursor:pointer; position:relative;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mnav-btn.active { color:var(--blue); }
+  .mnav-ico { font-size:20px; line-height:1; }
+  .mnav-lbl { font-size:10px; font-weight:500; }
+  .mnav-badge {
+    position:absolute; top:4px; right:calc(50% - 18px);
+    background:#ef4444; color:#fff; border-radius:10px;
+    font-size:9px; font-weight:700; padding:1px 5px; min-width:16px; text-align:center;
+  }
+
+  /* Admin panel padding for nav */
+  #admin-panel { padding-bottom:80px !important; }
+
+  /* Tab groups — masquer les inactifs */
+  .tab-group { display:none; }
+  .tab-group.active { display:block; }
+
+  /* Toujours visible : bannières + actions */
+  #verified-banner, #sub-banner, #onboarding-banner, #admin-actions { display:flex !important; }
+  #admin-actions { display:block !important; margin-top:16px; }
+
+  /* Admin header compact */
+  .admin-header { border-radius:0 !important; margin:0 -16px 16px !important;
+    flex-direction:row; align-items:center; padding:10px 16px !important; }
+  .admin-header h1 { font-size:14px !important; }
+  .admin-header span { display:none; }
+  .btn-logout { padding:4px 10px !important; font-size:11px !important; }
+
+  /* Login plein écran mobile */
+  .login-box { width:90vw !important; max-width:360px; padding:28px 20px !important; }
+
+  /* Boutons touch-friendly */
+  button, .btn { min-height:44px; }
+  .login-panel-btn { min-height:44px; }
+
+  /* Section-head plus grand */
+  .section-head { padding:14px 14px !important; }
+  .section-head h2 { font-size:14px !important; }
+
+  /* Tickets pills wrappables */
+  .tkt-hdr-pill { font-size:10px !important; padding:4px 8px !important; }
+}
 </style>
 </head>
 <body>
@@ -255,6 +314,7 @@ input, textarea, select {
     <button onclick="document.getElementById('onboarding-banner').style.display='none'" style="float:right;background:none;border:none;cursor:pointer;font-size:16px;color:#92400e;margin-top:-2px">✕</button>
   </div>
 
+  <div id="tab-livret" class="tab-group">
   <!-- ══ IDENTITÉ ══ -->
   <div class="section-group">Identité de l'établissement</div>
 
@@ -769,6 +829,9 @@ input, textarea, select {
     </div>
   </div>
 
+  </div><!-- /tab-livret -->
+
+  <div id="tab-sejours" class="tab-group">
   <!-- SÉJOURS EN COURS -->
   <div class="section" id="sejour-section">
     <div class="section-head" onclick="toggle(this); loadStays()">
@@ -822,6 +885,9 @@ input, textarea, select {
     </div>
   </div>
 
+  </div><!-- /tab-sejours -->
+
+  <div id="tab-plus" class="tab-group">
   <!-- ÉQUIPE — GESTIONNAIRES -->
   <!-- STATISTIQUES -->
   <div class="section">
@@ -867,6 +933,9 @@ input, textarea, select {
     </div>
   </div>
 
+  </div><!-- /tab-plus -->
+
+  <div id="tab-tickets" class="tab-group">
   <!-- TICKETS D'INCIDENT -->
   <div class="section" id="tickets-section">
     <div class="section-head" onclick="toggle(this); loadTicketsIfNeeded()">
@@ -921,8 +990,10 @@ input, textarea, select {
     </div>
   </div>
 
+  </div><!-- /tab-tickets -->
+
   <!-- ACTIONS -->
-  <div style="background:white; border-radius:10px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+  <div id="admin-actions" style="background:white; border-radius:10px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
     <div style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
       <button style="background:transparent; border:1px solid var(--blue); color:var(--blue); padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer;" onclick="window.open('index.html','_blank')">👁 Prévisualiser</button>
       <button style="background:transparent; border:1px solid #16a34a; color:#15803d; padding:10px 18px; border-radius:8px; font-size:14px; cursor:pointer;" onclick="openCarte()">🖨️ Carte imprimable</button>
@@ -932,6 +1003,27 @@ input, textarea, select {
     <div class="success-msg" id="dl-msg" style="display:none"></div>
     <div class="success-msg" id="online-msg" style="display:none"></div>
   </div>
+
+  <!-- BOTTOM NAV MOBILE -->
+  <nav id="mobile-nav">
+    <button class="mnav-btn" id="mnav-tickets" onclick="switchTab('tickets')">
+      <span class="mnav-ico">🎫</span>
+      <span class="mnav-lbl">Incidents</span>
+      <span class="mnav-badge" id="mnav-badge" style="display:none">0</span>
+    </button>
+    <button class="mnav-btn" id="mnav-sejours" onclick="switchTab('sejours')">
+      <span class="mnav-ico">👥</span>
+      <span class="mnav-lbl">Séjours</span>
+    </button>
+    <button class="mnav-btn" id="mnav-livret" onclick="switchTab('livret')">
+      <span class="mnav-ico">✏️</span>
+      <span class="mnav-lbl">Livret</span>
+    </button>
+    <button class="mnav-btn" id="mnav-plus" onclick="switchTab('plus')">
+      <span class="mnav-ico">📊</span>
+      <span class="mnav-lbl">Plus</span>
+    </button>
+  </nav>
 
 </div>
 
@@ -1032,6 +1124,7 @@ async function loadSubscriptionBanner() {
     // Tenter de charger les données (le serveur validera le token)
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-panel').style.display = 'block';
+    initMobileNav();
     initForm();
     loadSubscriptionBanner();
     loadGuestStay();
@@ -1044,6 +1137,31 @@ async function loadSubscriptionBanner() {
     }
   }
 })();
+
+// ── MOBILE TAB NAVIGATION ──
+var _activeTab = 'tickets';
+function switchTab(tab) {
+  _activeTab = tab;
+  ['livret','sejours','plus','tickets'].forEach(function(t) {
+    var el = document.getElementById('tab-' + t);
+    if (el) el.classList.toggle('active', t === tab);
+  });
+  document.querySelectorAll('.mnav-btn').forEach(function(b) { b.classList.remove('active'); });
+  var btn = document.getElementById('mnav-' + tab);
+  if (btn) btn.classList.add('active');
+  var actions = document.getElementById('admin-actions');
+  if (actions && window.innerWidth <= 700) {
+    actions.style.display = (tab === 'livret') ? 'block' : 'none';
+  }
+  if (tab === 'sejours') loadStays();
+  if (tab === 'tickets') loadTicketsIfNeeded();
+  if (tab === 'plus')    loadStats();
+  window.scrollTo(0, 0);
+}
+function initMobileNav() {
+  if (window.innerWidth > 700) return;
+  switchTab('tickets');
+}
 
 function togglePwd(inputId, btnId) {
   var inp = document.getElementById(inputId);

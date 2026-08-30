@@ -427,7 +427,7 @@
     .trial-sub { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 300; }
     .btn-trial { display: inline-flex; align-items: center; gap: 8px; background: var(--gold); color: #1a1000; padding: 13px 26px; border-radius: 4px; font-size: 13px; font-weight: 500; white-space: nowrap; transition: background .2s; }
     .btn-trial:hover { background: var(--gold2); }
-    .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .plan {
       background: var(--white); border: 1px solid var(--cream3);
       border-radius: 4px; padding: 36px 30px; position: relative;
@@ -833,14 +833,14 @@
 
     <div class="plans">
       <div class="plan">
-        <div class="plan-for">Appartement · Villa · Particulier</div>
-        <div class="plan-name">Particulier</div>
-        <div class="plan-size">1 logement</div>
+        <div class="plan-for">Villa · Appartement · Particulier</div>
+        <div class="plan-name">Hôte</div>
+        <div class="plan-size">1 établissement</div>
         <div class="plan-price-wrap">
-          <span class="plan-price" id="p-0">4 900</span>
+          <span class="plan-price" id="p-0">7 500</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-0" style="display:none">ou <strong>39 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-0" style="display:none">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
           <li>Livret personnalisable complet</li>
@@ -850,82 +850,46 @@
           <li>Gestion des incidents clients</li>
           <li>Mises à jour en temps réel</li>
         </ul>
-        <a href="/register?plan=particulier" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
-      </div>
-      <div class="plan">
-        <div class="plan-for">Chambre d'hôtes · Maison</div>
-        <div class="plan-name">Starter</div>
-        <div class="plan-size">1 à 3 chambres</div>
-        <div class="plan-price-wrap">
-          <span class="plan-price" id="p-1">9 900</span>
-          <span class="plan-currency">FCFA / mois</span>
-        </div>
-        <p class="plan-annual" id="a-1" style="display:none">ou <strong>99 000 FCFA / an</strong> — 2 mois offerts</p>
-        <hr class="plan-sep">
-        <ul class="plan-features">
-          <li>Livret personnalisable complet</li>
-          <li>Bilingue français / anglais</li>
-          <li>QR code imprimable</li>
-          <li>Gestion des séjours</li>
-          <li>Gestion des incidents clients</li>
-          <li>Mises à jour en temps réel</li>
-        </ul>
-        <a href="/register?plan=starter" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
-      </div>
-      <div class="plan">
-        <div class="plan-for">Petit hôtel · Gîte</div>
-        <div class="plan-name">Essentiel</div>
-        <div class="plan-size">4 à 10 chambres</div>
-        <div class="plan-price-wrap">
-          <span class="plan-price" id="p-2">24 900</span>
-          <span class="plan-currency">FCFA / mois</span>
-        </div>
-        <p class="plan-annual" id="a-2" style="display:none">ou <strong>75 000 FCFA / an</strong> — 2 mois offerts</p>
-        <hr class="plan-sep">
-        <ul class="plan-features">
-          <li>Tout le plan Starter</li>
-          <li>Gestion multi-chambres</li>
-          <li>Vue planning des séjours</li>
-          <li>Notifications incidents en temps réel</li>
-        </ul>
-        <a href="/register?plan=essentiel" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
+        <a href="/register?plan=hote" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
       </div>
       <div class="plan featured">
         <div class="plan-badge">Le plus choisi</div>
-        <div class="plan-for" style="margin-top:22px">Hôtel · Lodge</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-size">11 à 20 chambres</div>
+        <div class="plan-for" style="margin-top:22px">Hôtel · Lodge · Gîte</div>
+        <div class="plan-name">Hôtel</div>
+        <div class="plan-size">Jusqu'à 5 établissements</div>
         <div class="plan-price-wrap">
-          <span class="plan-price" id="p-3">49 900</span>
+          <span class="plan-price" id="p-1">15 000</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-3" style="display:none">ou <strong>110 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-1" style="display:none">ou <strong>150 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
-          <li>Tout le plan Essentiel</li>
+          <li>Tout le plan Hôte</li>
+          <li>Gestion multi-établissements (≤ 5)</li>
+          <li>Vue planning des séjours</li>
+          <li>Notifications incidents en temps réel</li>
           <li>Support prioritaire</li>
-          <li>Accompagnement à la configuration</li>
-          <li>Nouvelles fonctionnalités en avant-première</li>
         </ul>
-        <a href="/register?plan=pro" class="plan-cta plan-cta-filled">Essayer gratuitement</a>
+        <a href="/register?plan=hotel" class="plan-cta plan-cta-filled">Essayer gratuitement</a>
       </div>
       <div class="plan">
-        <div class="plan-for">Grand hôtel · Resort</div>
-        <div class="plan-name">Premium</div>
-        <div class="plan-size">21 chambres et plus</div>
+        <div class="plan-for">Groupe · Résidence · Resort</div>
+        <div class="plan-name">Groupe</div>
+        <div class="plan-size">Établissements illimités</div>
         <div class="plan-price-wrap">
-          <span class="plan-price" id="p-4">99 900</span>
+          <span class="plan-price" id="p-2">29 900</span>
           <span class="plan-currency">FCFA / mois</span>
         </div>
-        <p class="plan-annual" id="a-4" style="display:none">ou <strong>165 000 FCFA / an</strong> — 2 mois offerts</p>
+        <p class="plan-annual" id="a-2" style="display:none">ou <strong>299 000 FCFA / an</strong> — 2 mois offerts</p>
         <hr class="plan-sep">
         <ul class="plan-features">
-          <li>Tout le plan Pro</li>
+          <li>Tout le plan Hôtel</li>
+          <li>Établissements illimités</li>
           <li>Support dédié</li>
           <li>Formation de votre équipe</li>
-          <li>SLA garanti</li>
+          <li>Accompagnement à la configuration</li>
         </ul>
-        <a href="/register?plan=premium" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
+        <a href="/register?plan=groupe" class="plan-cta plan-cta-outline">Essayer gratuitement</a>
       </div>
     </div>
   </div>
@@ -1077,11 +1041,9 @@
     var lblM = document.getElementById('lbl-m'), lblA = document.getElementById('lbl-a');
     var eco = document.getElementById('eco');
     var prices = [
-      {m:'4 900',  a:'3 250',  id:'p-0', aid:'a-0'},
-      {m:'9 900',  a:'8 250',  id:'p-1', aid:'a-1'},
-      {m:'24 900', a:'20 750', id:'p-2', aid:'a-2'},
-      {m:'49 900', a:'41 580', id:'p-3', aid:'a-3'},
-      {m:'99 900', a:'83 250', id:'p-4', aid:'a-4'}
+      {m:'7 500',  a:'6 250',  id:'p-0', aid:'a-0'},
+      {m:'15 000', a:'12 500', id:'p-1', aid:'a-1'},
+      {m:'29 900', a:'24 920', id:'p-2', aid:'a-2'}
     ];
     tog.addEventListener('change', function() {
       var annual = tog.checked;

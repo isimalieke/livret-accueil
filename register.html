@@ -270,18 +270,18 @@ body {
     <div class="step-sub">15 jours d'essai gratuit — sans carte bancaire.</div>
     <div class="plan-select-grid" style="grid-template-columns:1fr;gap:12px">
       <div class="plan-select-card" id="ps-hote" onclick="selectPlan('hote')">
-        <div class="ps-name">🏠 Hôte</div>
+        <div class="ps-name">Hôte</div>
         <div class="ps-rooms">1 établissement (villa, appartement…)</div>
         <span class="ps-price">7 500</span> <span class="ps-period">FCFA / mois</span>
       </div>
       <div class="plan-select-card" id="ps-hotel" onclick="selectPlan('hotel')">
         <div class="ps-badge">Le plus choisi</div>
-        <div class="ps-name">🏨 Hôtel</div>
+        <div class="ps-name">Hôtel</div>
         <div class="ps-rooms">Jusqu'à 5 établissements</div>
         <span class="ps-price">15 000</span> <span class="ps-period">FCFA / mois</span>
       </div>
       <div class="plan-select-card" id="ps-groupe" onclick="selectPlan('groupe')">
-        <div class="ps-name">🏢 Groupe</div>
+        <div class="ps-name">Groupe</div>
         <div class="ps-rooms">Établissements illimités</div>
         <span class="ps-price">29 900</span> <span class="ps-period">FCFA / mois</span>
       </div>
@@ -567,18 +567,27 @@ function applyPlan(plan) {
 
 var selectedPlan = null;
 
-function selectPlan(plan) {
+function selectPlan(plan, autoNext) {
   applyPlan(plan);
   selectedPlan = plan;
   ['hote','hotel','groupe'].forEach(function(p) {
     var el = document.getElementById('ps-' + p);
     if (el) el.classList.toggle('selected', p === plan);
   });
+  // Si on est sur l'étape de sélection, avancer automatiquement
+  if (autoNext !== false && currentStep === 0) {
+    goStep(1);
+  }
 }
 
 function changePlan(e) {
   e.preventDefault();
+  selectedPlan = null;
   document.getElementById('plan-badge').style.display = 'none';
+  ['hote','hotel','groupe'].forEach(function(p) {
+    var el = document.getElementById('ps-' + p);
+    if (el) el.classList.remove('selected');
+  });
   goStep(0);
 }
 
@@ -594,14 +603,20 @@ function submitFromPlan() {
   submitForm();
 }
 
-// Init: always start at step-1 (établissement)
+// Init: step-0 (choix plan) sauf si ?plan= fourni dans l'URL
 (function() {
   var params = new URLSearchParams(window.location.search);
   var plan = params.get('plan');
-  currentStep = 1;
-  document.getElementById('step-1').classList.add('active');
-  // Présélectionner Hôtel par défaut
-  selectPlan(plan && PLAN_INFO[plan] ? plan : 'hotel');
+  if (plan && PLAN_INFO[plan]) {
+    // Lien direct depuis la landing (ex: /register?plan=hotel) → pré-sélectionner et passer à step-1
+    currentStep = 0; // selectPlan vérifiera currentStep === 0 et appellera goStep(1)
+    document.getElementById('step-0').classList.add('active');
+    selectPlan(plan); // auto-avance vers step-1
+  } else {
+    // Arrivée sans plan → montrer step-0, aucun plan sélectionné
+    currentStep = 0;
+    document.getElementById('step-0').classList.add('active');
+  }
   updateProgress();
 })();
 

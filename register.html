@@ -267,36 +267,26 @@ body {
   <!-- ── STEP 0 : CHOIX DU PLAN ── -->
   <div class="step-panel" id="step-0">
     <div class="step-title">Choisissez votre formule</div>
-    <div class="step-sub">15 jours d'essai gratuit sur toutes les formules — sans carte bancaire.</div>
-    <div class="plan-select-grid">
-      <div class="plan-select-card" id="ps-particulier" onclick="selectPlan('particulier')">
-        <div class="ps-name">Particulier</div>
-        <div class="ps-rooms">1 logement (appart, villa…)</div>
-        <span class="ps-price">4 900</span> <span class="ps-period">FCFA / mois</span>
+    <div class="step-sub">15 jours d'essai gratuit — sans carte bancaire.</div>
+    <div class="plan-select-grid" style="grid-template-columns:1fr;gap:12px">
+      <div class="plan-select-card" id="ps-hote" onclick="selectPlan('hote')">
+        <div class="ps-name">🏠 Hôte</div>
+        <div class="ps-rooms">1 établissement (villa, appartement…)</div>
+        <span class="ps-price">7 500</span> <span class="ps-period">FCFA / mois</span>
       </div>
-      <div class="plan-select-card" id="ps-starter" onclick="selectPlan('starter')">
-        <div class="ps-name">Starter</div>
-        <div class="ps-rooms">1 à 3 chambres</div>
-        <span class="ps-price">9 900</span> <span class="ps-period">FCFA / mois</span>
-      </div>
-      <div class="plan-select-card" id="ps-essentiel" onclick="selectPlan('essentiel')">
-        <div class="ps-name">Essentiel</div>
-        <div class="ps-rooms">4 à 10 chambres</div>
-        <span class="ps-price">24 900</span> <span class="ps-period">FCFA / mois</span>
-      </div>
-      <div class="plan-select-card" id="ps-pro" onclick="selectPlan('pro')">
+      <div class="plan-select-card" id="ps-hotel" onclick="selectPlan('hotel')">
         <div class="ps-badge">Le plus choisi</div>
-        <div class="ps-name">Pro</div>
-        <div class="ps-rooms">11 à 20 chambres</div>
-        <span class="ps-price">49 900</span> <span class="ps-period">FCFA / mois</span>
+        <div class="ps-name">🏨 Hôtel</div>
+        <div class="ps-rooms">Jusqu'à 5 établissements</div>
+        <span class="ps-price">15 000</span> <span class="ps-period">FCFA / mois</span>
       </div>
-      <div class="plan-select-card" id="ps-premium" onclick="selectPlan('premium')">
-        <div class="ps-name">Premium</div>
-        <div class="ps-rooms">21 chambres et plus</div>
-        <span class="ps-price">99 900</span> <span class="ps-period">FCFA / mois</span>
+      <div class="plan-select-card" id="ps-groupe" onclick="selectPlan('groupe')">
+        <div class="ps-name">🏢 Groupe</div>
+        <div class="ps-rooms">Établissements illimités</div>
+        <span class="ps-price">29 900</span> <span class="ps-period">FCFA / mois</span>
       </div>
     </div>
-    <p style="font-size:12px;color:#888;text-align:center">Vous pourrez changer de formule à tout moment depuis votre espace admin.</p>
+    <p style="font-size:12px;color:#888;text-align:center;margin-top:12px">Vous pourrez changer de formule à tout moment depuis votre espace admin.</p>
 
     <div class="nav-btns" style="margin-top:16px;display:flex;gap:10px">
       <button class="btn-prev" onclick="goStep(2)" style="width:48%">← Précédent</button>
@@ -451,16 +441,6 @@ body {
           </select>
         </div>
       </div>
-      <div class="field">
-        <label>Nombre de chambres / logements</label>
-        <select id="f-chambres">
-          <option value="1">1 logement (appart, villa…) — Particulier</option>
-          <option value="1-3">1 à 3 chambres — Starter</option>
-          <option value="4-10" selected>4 à 10 chambres — Essentiel</option>
-          <option value="11-20">11 à 20 chambres — Pro</option>
-          <option value="21+">21 chambres et plus — Premium</option>
-        </select>
-      </div>
     </div>
 
     <div class="nav-btns">
@@ -572,23 +552,15 @@ var currentStep = 1;
 var logoBase64 = '';
 
 var PLAN_INFO = {
-  particulier: { label:'Particulier', rooms:'1 logement (appart, villa…)', chambres:'1'    },
-  starter:     { label:'Starter',     rooms:'1 à 3 chambres',              chambres:'1-3'  },
-  essentiel:   { label:'Essentiel',   rooms:'4 à 10 chambres',             chambres:'4-10' },
-  pro:         { label:'Pro',         rooms:'11 à 20 chambres',            chambres:'11-20'},
-  premium:     { label:'Premium',     rooms:'21 chambres et plus',         chambres:'21+'  },
+  hote:   { label:'Hôte',   rooms:'1 établissement (villa, appartement…)' },
+  hotel:  { label:'Hôtel',  rooms:"Jusqu'à 5 établissements"              },
+  groupe: { label:'Groupe', rooms:'Établissements illimités'               },
 };
 
 function applyPlan(plan) {
   var info = PLAN_INFO[plan];
   if (!info) return;
-  // Pre-fill chambres dropdown
-  var sel = document.getElementById('f-chambres');
-  for (var i = 0; i < sel.options.length; i++) {
-    if (sel.options[i].value === info.chambres) { sel.selectedIndex = i; break; }
-  }
-  // Show badge
-  document.getElementById('pib-name').textContent = 'Plan ' + info.label;
+  document.getElementById('pib-name').textContent = info.label;
   document.getElementById('pib-rooms').textContent = info.rooms;
   document.getElementById('plan-badge').style.display = 'flex';
 }
@@ -598,8 +570,7 @@ var selectedPlan = null;
 function selectPlan(plan) {
   applyPlan(plan);
   selectedPlan = plan;
-  // Visual highlight
-  ['particulier','starter','essentiel','pro','premium'].forEach(function(p) {
+  ['hote','hotel','groupe'].forEach(function(p) {
     var el = document.getElementById('ps-' + p);
     if (el) el.classList.toggle('selected', p === plan);
   });
@@ -629,9 +600,8 @@ function submitFromPlan() {
   var plan = params.get('plan');
   currentStep = 1;
   document.getElementById('step-1').classList.add('active');
-  if (plan && PLAN_INFO[plan]) {
-    selectPlan(plan);
-  }
+  // Présélectionner Hôtel par défaut
+  selectPlan(plan && PLAN_INFO[plan] ? plan : 'hotel');
   updateProgress();
 })();
 
@@ -751,7 +721,7 @@ async function submitForm() {
         nom, adresse, ville, pays, email, password,
         telephone: tel, whatsapp: whatsapp,
         hote_nom: responsable,
-        chambres: document.getElementById('f-chambres').value,
+        plan: selectedPlan || 'hote',
       }),
     });
 
@@ -857,7 +827,7 @@ async function doLogin() {
 
     if (data.ok) {
       localStorage.setItem('livret_slug', data.slug);
-      localStorage.setItem('livret_token_' + data.slug, data.token);
+      localStorage.setItem('livret_jwt_' + data.slug, data.token);
       window.location.href = '/' + data.slug + '/admin';
     } else if (data.code === 'EMAIL_NOT_VERIFIED') {
       errEl.textContent = 'Email non vérifié. Consultez votre boîte mail.';

@@ -644,15 +644,13 @@ async function handleRegister(request, env, url) {
     const data = await request.json();
     const {
       nom, email, password, ville, pays, adresse, telephone, whatsapp,
-      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout, chambres,
+      hote_nom, wifi_reseau, wifi_mdp, bienvenue_fr, checkin, checkout,
+      plan: planRaw,
     } = data;
 
-    // Déterminer le plan selon la taille de l'établissement
-    const plan = chambres === '21+' ? 'premium'
-               : chambres === '11-20' ? 'pro'
-               : chambres === '4-10'  ? 'essentiel'
-               : chambres === '1'     ? 'particulier'
-               : 'starter';
+    // Plan choisi directement par l'utilisateur
+    const VALID_PLANS = ['hote', 'hotel', 'groupe'];
+    const plan = VALID_PLANS.includes(planRaw) ? planRaw : 'hote';
     const trialEndsAt = new Date(Date.now() + 15 * 86400000).toISOString();
 
     if (!nom || !email || !password)
@@ -689,10 +687,10 @@ async function handleRegister(request, env, url) {
     // Créer l'hôtel avec abonnement trial
     await env.DB.prepare(
       `INSERT INTO hotels (slug, nom, ville, pays, adresse, telephone, whatsapp, created_at,
-        plan, subscription_status, subscription_ends_at, chambres)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
+        plan, subscription_status, subscription_ends_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?)`
     ).bind(slug, nom, ville||'', pays||'', adresse||'', telephone||'', whatsapp||'', now,
-           plan, 'trial', trialEndsAt, chambres||'1-5').run();
+           plan, 'trial', trialEndsAt).run();
 
     // Créer l'utilisateur hôtelier (email non vérifié)
     await env.DB.prepare(
